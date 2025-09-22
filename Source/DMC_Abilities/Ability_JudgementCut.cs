@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -93,7 +94,7 @@ namespace DMCAbilities
             // Determine number of slashes
             int slashCount = DetermineSlashCount();
             
-            // Create slashes
+            // Create all slashes at the target location (DMC 5 style)
             for (int i = 0; i < slashCount; i++)
             {
                 IntVec3 slashPos = GetSlashPosition(i, slashCount);
@@ -114,27 +115,9 @@ namespace DMCAbilities
 
         private IntVec3 GetSlashPosition(int slashIndex, int totalSlashes)
         {
-            if (totalSlashes == 1)
-                return targetPosition;
-
-            // For multiple slashes, spread them around the target
-            Vector3 basePos = targetPosition.ToVector3();
-            float angle = (360f / totalSlashes) * slashIndex;
-            float distance = Rand.Range(0.5f, 1.5f);
-            
-            Vector3 offset = new Vector3(
-                Mathf.Cos(angle * Mathf.Deg2Rad) * distance,
-                0f,
-                Mathf.Sin(angle * Mathf.Deg2Rad) * distance
-            );
-
-            IntVec3 slashPos = (basePos + offset).ToIntVec3();
-            
-            // Ensure position is valid
-            if (!slashPos.InBounds(CasterPawn.Map))
-                slashPos = targetPosition;
-                
-            return slashPos;
+            // In DMC 5, all Judgement Cuts hit the same target location
+            // This ensures maximum damage concentration like Vergil's technique
+            return targetPosition;
         }
 
         private void CreateJudgementSlash(IntVec3 position)
@@ -153,7 +136,7 @@ namespace DMCAbilities
                 instigator: CasterPawn,
                 damAmount: 0, // We'll apply custom damage
                 armorPenetration: 0f,
-                explosionSound: null,
+                explosionSound: SoundDefOf.Pawn_Melee_Punch_HitPawn, // Use a valid sound
                 weapon: null,
                 projectile: null,
                 intendedTarget: null,
@@ -191,7 +174,7 @@ namespace DMCAbilities
                         targetPawn.TakeDamage(damageInfo.Value);
                         
                         // Create impact effect on each target
-                        FleckMaker.Static(targetPawn.Position, map, FleckDefOf.MicroSparks, 1f);
+                        FleckMaker.Static(targetPawn.Position, map, FleckDefOf.PsycastAreaEffect, 0.5f);
                     }
                 }
             }
@@ -201,6 +184,15 @@ namespace DMCAbilities
         {
             needLOSToCenter = false;
             return 2f; // Show the damage radius
+        }
+
+        public override void DrawHighlight(LocalTargetInfo target)
+        {
+            // Draw the damage area highlight
+            if (target.IsValid)
+            {
+                GenDraw.DrawFieldEdges(GenRadial.RadialCellsAround(target.Cell, 2f, true).ToList());
+            }
         }
 
         public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)

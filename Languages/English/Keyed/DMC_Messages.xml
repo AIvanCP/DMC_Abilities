@@ -2,7 +2,7 @@
 <LanguageData>
 
   <!-- Error Messages -->
-  <DMC_NoMeleeWeapon>No melee weapon equipped</DMC_NoMeleeWeapon>
+  <DMC_NoMeleeWeapon>Must have a melee weapon equipped (not ranged)</DMC_NoMeleeWeapon>
   <DMC_NoValidTeleportPosition>Cannot find valid teleport position</DMC_NoValidTeleportPosition>
   <DMC_MustTargetPawn>Must target a living creature</DMC_MustTargetPawn>
   <DMC_CannotTargetSelf>Cannot target yourself</DMC_CannotTargetSelf>

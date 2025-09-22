@@ -64,7 +64,28 @@ namespace DMCAbilities
             if (pawn?.equipment?.Primary == null)
                 return false;
 
-            return GetMeleeVerb(pawn.equipment.Primary) != null;
+            ThingWithComps weapon = pawn.equipment.Primary;
+            
+            // Check if weapon is ranged (has ranged verbs) - if so, reject
+            if (IsRangedWeapon(weapon))
+                return false;
+
+            return GetMeleeVerb(weapon) != null;
+        }
+
+        /// <summary>
+        /// Checks if a weapon is primarily ranged
+        /// </summary>
+        private static bool IsRangedWeapon(ThingWithComps weapon)
+        {
+            if (weapon?.GetComp<CompEquippable>()?.AllVerbs == null)
+                return false;
+
+            // If weapon has any ranged verbs with range > 2, consider it ranged
+            var rangedVerbs = weapon.GetComp<CompEquippable>().AllVerbs
+                .Where(v => v.verbProps != null && v.verbProps.range > 2f && !v.verbProps.IsMeleeAttack);
+
+            return rangedVerbs.Any();
         }
 
         /// <summary>

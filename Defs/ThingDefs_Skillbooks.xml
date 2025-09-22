@@ -52,7 +52,7 @@ The Stinger is a devastating melee ability that allows the user to instantly tel
     <label>skillbook: judgement cut</label>
     <description>An ancient tome containing the forbidden knowledge of the Judgement Cut - a technique that allows the user to slice through dimensional space itself. This is said to be one of the most powerful melee techniques ever developed. Reading this book will impart the knowledge to the reader, but the book will be consumed in the process.
 
-The Judgement Cut is a ranged area attack that creates dimensional slashes at the target location, dealing damage based on the user's equipped weapon to all enemies in the area.</description>
+The Judgement Cut is a ranged area attack that creates multiple concentrated dimensional slashes at the target location, dealing stacked damage based on the user's equipped weapon to all enemies in the area.</description>
     <thingClass>ThingWithComps</thingClass>
     <category>Item</category>
     <selectable>true</selectable>

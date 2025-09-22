@@ -122,8 +122,8 @@ namespace DMCAbilities
                 // Apply damage
                 target.TakeDamage(damageInfo.Value);
 
-                // Create impact effect
-                FleckMaker.Static(target.Position, target.Map, FleckDefOf.MicroSparks, 1f);
+                // Create impact effect - use a valid fleck
+                FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 0.5f);
             }
         }
 
