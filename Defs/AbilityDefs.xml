@@ -31,7 +31,7 @@
     <label>judgement cut</label>
     <description>A devastating ranged slash attack that creates dimensional cuts at the target location. After a brief warmup, unleashes 1-3 concentrated slashes that all strike the same target area, dealing stacked area damage based on the equipped melee weapon. Each slash affects a 2-tile radius.</description>
     <iconPath>UI/Abilities/JudgementCut</iconPath>
-    <cooldownTicksRange>900</cooldownTicksRange> <!-- 15 seconds -->
+    <cooldownTicksRange>420</cooldownTicksRange> <!-- 7 seconds -->
     <aiCanUse>true</aiCanUse>
     <verbProperties>
       <verbClass>DMCAbilities.Verb_JudgementCut</verbClass>

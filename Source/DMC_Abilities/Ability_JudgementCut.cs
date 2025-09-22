@@ -12,6 +12,7 @@ namespace DMCAbilities
         private int warmupTicksLeft = 0;
         private IntVec3 targetPosition;
         private bool isWarmingUp = false;
+        private int currentSlashCount = 0; // Track current slash for visual effects
 
         public override bool Available()
         {
@@ -42,10 +43,10 @@ namespace DMCAbilities
         private void StartWarmup()
         {
             isWarmingUp = true;
-            warmupTicksLeft = Rand.RangeInclusive(30, 60); // 0.5-1 second warmup
+            warmupTicksLeft = Rand.RangeInclusive(15, 25); // Faster: 0.25-0.4 second warmup
             
             // Show warmup effect
-            FleckMaker.Static(CasterPawn.Position, CasterPawn.Map, FleckDefOf.PsycastAreaEffect, 2f);
+            FleckMaker.ThrowDustPuff(CasterPawn.Position.ToVector3Shifted(), CasterPawn.Map, 2f);
             
             // Create a job to handle the warmup
             Job warmupJob = JobMaker.MakeJob(DMC_JobDefOf.DMC_JudgementCutWarmup);
@@ -83,6 +84,7 @@ namespace DMCAbilities
         private void CompleteJudgementCut()
         {
             isWarmingUp = false;
+            currentSlashCount = 0; // Reset slash counter
             
             if (CasterPawn == null || CasterPawn.Map == null || !targetPosition.IsValid)
                 return;
@@ -124,9 +126,22 @@ namespace DMCAbilities
         {
             Map map = CasterPawn.Map;
             
-            // Create visual effect
-            FleckMaker.Static(position, map, FleckDefOf.PsycastAreaEffect, 3f);
+            // Increment slash counter for visual effects
+            currentSlashCount++;
             
+            float effectScale = 2f + (currentSlashCount * 0.5f); // Each slash gets bigger
+            
+            // Create main slash effect with multiple visual layers
+            FleckMaker.ThrowDustPuff(position.ToVector3Shifted(), map, effectScale);
+            FleckMaker.ThrowLightningGlow(position.ToVector3Shifted(), map, effectScale * 0.8f);
+            
+            // Add extra dramatic effect for multiple slashes
+            if (currentSlashCount > 1)
+            {
+                FleckMaker.ThrowDustPuff(position.ToVector3Shifted(), map, effectScale * 0.7f);
+                FleckMaker.ThrowLightningGlow(position.ToVector3Shifted(), map, effectScale * 0.5f);
+            }
+
             // Create explosion-like effect with damage radius of 2
             GenExplosion.DoExplosion(
                 center: position,
@@ -150,7 +165,7 @@ namespace DMCAbilities
                 damageFalloff: false,
                 direction: null,
                 ignoredThings: null,
-                doVisualEffects: false, // We're doing our own visuals
+                doVisualEffects: true, // Let explosion show its own effects too
                 propagationSpeed: 1f
             );
 
@@ -174,7 +189,8 @@ namespace DMCAbilities
                         targetPawn.TakeDamage(damageInfo.Value);
                         
                         // Create impact effect on each target
-                        FleckMaker.Static(targetPawn.Position, map, FleckDefOf.PsycastAreaEffect, 0.5f);
+                        FleckMaker.ThrowDustPuff(targetPawn.Position.ToVector3Shifted(), map, 1.0f);
+                        FleckMaker.ThrowLightningGlow(targetPawn.Position.ToVector3Shifted(), map, 0.8f);
                     }
                 }
             }

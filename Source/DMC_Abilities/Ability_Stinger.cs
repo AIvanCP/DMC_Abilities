@@ -3,6 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.Sound;
 
 namespace DMCAbilities
 {
@@ -101,11 +102,14 @@ namespace DMCAbilities
         {
             Map map = CasterPawn.Map;
 
-            // Dust puff at dash location
-            FleckMaker.ThrowDustPuff(originPos.ToVector3Shifted(), map, 2f);
-
-            // Impact flash on hit
-            FleckMaker.Static(targetPos, map, FleckDefOf.PsycastAreaEffect, 1.5f);
+            // Enhanced dust effect at dash origin
+            FleckMaker.ThrowDustPuff(originPos.ToVector3Shifted(), map, 2.5f);
+            
+            // Dramatic impact effect at target
+            FleckMaker.ThrowDustPuff(targetPos.ToVector3Shifted(), map, 2f);
+            
+            // Play impact sound using the correct RimWorld method
+            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(targetPos, map));
         }
 
         private void ApplyStingerDamage(Pawn caster, Pawn target)
@@ -122,8 +126,10 @@ namespace DMCAbilities
                 // Apply damage
                 target.TakeDamage(damageInfo.Value);
 
-                // Create impact effect - use a valid fleck
-                FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 0.5f);
+                // Create impact effect - use dust puff AND additional sparkle effect
+                FleckMaker.ThrowDustPuff(target.Position.ToVector3Shifted(), target.Map, 1.0f);
+                // Add a light flash effect
+                FleckMaker.ThrowLightningGlow(target.Position.ToVector3Shifted(), target.Map, 1.5f);
             }
         }
 
