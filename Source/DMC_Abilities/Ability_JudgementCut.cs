@@ -62,6 +62,12 @@ namespace DMCAbilities
             if (warmupTicksLeft <= 0)
             {
                 CompleteJudgementCut();
+                
+                // End the warmup job
+                if (CasterPawn?.jobs?.curJob?.def?.defName == "DMC_JudgementCutWarmup")
+                {
+                    CasterPawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+                }
             }
             else
             {
@@ -77,7 +83,11 @@ namespace DMCAbilities
         {
             isWarmingUp = false;
             
-            if (CasterPawn == null || CasterPawn.Map == null)
+            if (CasterPawn == null || CasterPawn.Map == null || !targetPosition.IsValid)
+                return;
+
+            // Additional safety check - make sure pawn is still alive and conscious
+            if (CasterPawn.Dead || CasterPawn.Downed)
                 return;
 
             // Determine number of slashes
@@ -87,7 +97,10 @@ namespace DMCAbilities
             for (int i = 0; i < slashCount; i++)
             {
                 IntVec3 slashPos = GetSlashPosition(i, slashCount);
-                CreateJudgementSlash(slashPos);
+                if (slashPos.IsValid && slashPos.InBounds(CasterPawn.Map))
+                {
+                    CreateJudgementSlash(slashPos);
+                }
             }
         }
 
@@ -225,6 +238,13 @@ namespace DMCAbilities
                 },
                 tickAction = delegate
                 {
+                    // Safety check - if pawn or job is invalid, end the job
+                    if (pawn == null || job?.verbToUse == null)
+                    {
+                        EndJobWith(JobCondition.Errored);
+                        return;
+                    }
+
                     if (job.verbToUse is Verb_JudgementCut judgementCutVerb)
                     {
                         judgementCutVerb.TickWarmup();

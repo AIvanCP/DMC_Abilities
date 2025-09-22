@@ -6,18 +6,15 @@
     <defName>DMC_StingerAbility</defName>
     <label>stinger technique</label>
     <description>Knowledge of the Stinger technique - a lightning-fast dash attack. This combat skill allows the user to instantly close distance and strike with devastating precision.</description>
-    <hediffClass>Hediff_Ability</hediffClass>
+    <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(0.8, 0.8, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
     <maxSeverity>1.0</maxSeverity>
-    <stages>
-      <li>
-        <minSeverity>0.01</minSeverity>
-        <abilities>
-          <li>DMC_Stinger</li>
-        </abilities>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_Stinger</abilityDef>
       </li>
-    </stages>
+    </comps>
   </HediffDef>
 
   <!-- Judgement Cut Ability Hediff -->
@@ -25,18 +22,15 @@
     <defName>DMC_JudgementCutAbility</defName>
     <label>judgement cut technique</label>
     <description>Mastery of the Judgement Cut - a ranged dimensional slash. This advanced combat technique allows the user to cut through space itself, striking distant enemies with phantom blades.</description>
-    <hediffClass>Hediff_Ability</hediffClass>
+    <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(1.0, 0.8, 0.8)</defaultLabelColor>
     <isBad>false</isBad>
     <maxSeverity>1.0</maxSeverity>
-    <stages>
-      <li>
-        <minSeverity>0.01</minSeverity>
-        <abilities>
-          <li>DMC_JudgementCut</li>
-        </abilities>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_JudgementCut</abilityDef>
       </li>
-    </stages>
+    </comps>
   </HediffDef>
 
 </Defs>

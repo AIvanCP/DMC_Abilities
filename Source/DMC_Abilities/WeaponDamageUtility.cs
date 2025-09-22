@@ -27,7 +27,10 @@ namespace DMCAbilities
             // Get base damage from the weapon
             float baseDamage = GetWeaponBaseDamage(weapon, meleeVerb);
             if (baseDamage <= 0)
-                return null;
+            {
+                // Fallback - if we can't get weapon damage, use a small default
+                baseDamage = 8f; // Reasonable fallback damage
+            }
 
             // Apply sword bonus (configurable via mod settings)
             if (IsSword(weapon))
