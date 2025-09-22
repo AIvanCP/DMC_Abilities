@@ -1,8 +1,6 @@
 # Build artifacts
 Source/*/obj/
 Source/*/bin/
-Source/*/Lib/
-*.dll
 *.pdb
 
 # Visual Studio
@@ -14,5 +12,6 @@ Source/*/Lib/
 *.log
 *.tmp
 
-# Keep the compiled mod assembly
+# Keep the compiled mod assembly and required DLLs
 !Assemblies/DMCAbilities.dll
+!Source/*/Lib/

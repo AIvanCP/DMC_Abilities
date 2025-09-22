@@ -39,12 +39,20 @@ A RimWorld mod that adds two Devil May Cry-inspired melee abilities.
 
 ## Building from Source
 
+**Prerequisites:** Copy required RimWorld DLLs to `Source/DMC_Abilities/Lib/`:
+- `Assembly-CSharp.dll`
+- `0Harmony.dll` 
+- `Unity.TextMeshPro.dll`
+- `UnityEngine.CoreModule.dll`
+- `UnityEngine.IMGUIModule.dll`
+
+**Build:**
 ```powershell
 cd Source/DMC_Abilities
 ./build.ps1
 ```
 
-The build script automatically detects RimWorld installations and compiles the mod.
+The DLLs can be found in your RimWorld installation and mod folders.
 
 ## License
 
