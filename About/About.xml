@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<name>DMC Abilities - Devil May Cry Inspired Melee Skills</name>
+	<author>YourName</author>
+	<supportedVersions>
+		<li>1.4</li>
+		<li>1.5</li>
+		<li>1.6</li>
+	</supportedVersions>
+	<description>Adds two Devil May Cry-inspired melee abilities to RimWorld:
+
+• Stinger - A fast dash attack that teleports you to an enemy and strikes instantly
+• Judgement Cut - A ranged slash attack that creates area-of-effect damage
+
+Both abilities work with any modded melee weapons and are learned through consumable skillbooks found in trader inventories.
+
+Features:
+- Full compatibility with modded melee weapons
+- Weapon-based damage scaling with sword bonuses
+- Visual effects using existing RimWorld motes
+- Memory-safe implementation that can be safely removed mid-save
+- Configurable trader stock chances
+
+Requirements: None (uses base game mechanics only)</description>
+	<packageId>dmcabilities.rimworld.devilmaycry</packageId>
+	<modDependencies>
+		<li>
+			<packageId>ludeon.rimworld</packageId>
+			<displayName>RimWorld Core</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/294100</steamWorkshopUrl>
+		</li>
+	</modDependencies>
+	<incompatibleWith>
+	</incompatibleWith>
+	<url></url>
+	<loadAfter>
+		<li>Ludeon.RimWorld</li>
+		<li>Ludeon.RimWorld.Royalty</li>
+	</loadAfter>
+</ModMetaData>

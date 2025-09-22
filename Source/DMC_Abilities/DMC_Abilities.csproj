@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>DMCAbilities</AssemblyName>
+    <RootNamespace>DMCAbilities</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\Assemblies\</OutputPath>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Try multiple common RimWorld installation paths -->
+  <PropertyGroup>
+    <!-- Default Steam path -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('C:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed')">C:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <!-- Alternative Steam paths -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed')">D:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('E:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed')">E:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    
+    <!-- User's specific path variations -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\Game\Rimworld\RimWorldWin64_Data\Managed')">D:\Game\Rimworld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\Game\RimWorld\RimWorldWin64_Data\Managed')">D:\Game\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\Games\RimWorld\RimWorldWin64_Data\Managed')">D:\Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    
+    <!-- Epic Games paths -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('C:\Program Files\Epic Games\RimWorld\RimWorldWin64_Data\Managed')">C:\Program Files\Epic Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\Epic Games\RimWorld\RimWorldWin64_Data\Managed')">D:\Epic Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    
+    <!-- GOG paths -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('C:\GOG Games\RimWorld\RimWorldWin64_Data\Managed')">C:\GOG Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\GOG Games\RimWorld\RimWorldWin64_Data\Managed')">D:\GOG Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    
+    <!-- Common alternative installations -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('C:\Games\RimWorld\RimWorldWin64_Data\Managed')">C:\Games\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('D:\RimWorld\RimWorldWin64_Data\Managed')">D:\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('E:\RimWorld\RimWorldWin64_Data\Managed')">E:\RimWorld\RimWorldWin64_Data\Managed</RimWorldPath>
+    
+    <!-- Local project folder fallback -->
+    <RimWorldPath Condition="'$(RimWorldPath)' == '' AND Exists('$(MSBuildProjectDirectory)\..\..\Lib')">$(MSBuildProjectDirectory)\..\..\Lib</RimWorldPath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RimWorldPath)' != ''">
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RimWorldPath)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(RimWorldPath)\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(RimWorldPath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RimWorldPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(RimWorldPath)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- If no RimWorld installation found, show a helpful error -->
+  <Target Name="CheckRimWorldPath" BeforeTargets="Build" Condition="'$(RimWorldPath)' == ''">
+    <Error Text="RimWorld installation not found! Please either:
+1. Install RimWorld via Steam/Epic/GOG in a standard location, OR
+2. Set the RimWorldPath environment variable to your RimWorld installation, OR
+3. Copy the required DLLs to a 'Lib' folder in the project root, OR
+4. Build using: dotnet build -p:RimWorldPath='C:\Your\RimWorld\Path\RimWorldWin64_Data\Managed'
+
+Required DLLs: Assembly-CSharp.dll, 0Harmony.dll, Unity.TextMeshPro.dll, UnityEngine.CoreModule.dll, UnityEngine.IMGUIModule.dll"/>
+  </Target>
+
+</Project>

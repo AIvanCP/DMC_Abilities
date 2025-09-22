@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  
+  <!-- Stinger Ability -->
+  <AbilityDef>
+    <defName>DMC_Stinger</defName>
+    <label>stinger</label>
+    <description>A lightning-fast dash attack that teleports the user to an adjacent cell of the target and strikes instantly with the equipped melee weapon. Deals 20% increased damage and works with any melee weapon.</description>
+    <iconPath>UI/Abilities/Stinger</iconPath>
+    <cooldownTicksRange>300</cooldownTicksRange> <!-- 5 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_Stinger</verbClass>
+      <range>15</range>
+      <warmupTime>0.5</warmupTime>
+      <soundCast>Pawn_Melee_Punch_HitPawn</soundCast>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnThing</jobDef>
+  </AbilityDef>
+
+  <!-- Judgement Cut Ability -->
+  <AbilityDef>
+    <defName>DMC_JudgementCut</defName>
+    <label>judgement cut</label>
+    <description>A devastating ranged slash attack that creates dimensional cuts at the target location. After a brief warmup, creates 1-3 slashes that deal area damage based on the equipped melee weapon. Each slash affects a 2-tile radius.</description>
+    <iconPath>UI/Abilities/JudgementCut</iconPath>
+    <cooldownTicksRange>900</cooldownTicksRange> <!-- 15 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_JudgementCut</verbClass>
+      <range>20</range>
+      <warmupTime>1.0</warmupTime>
+      <soundCast>Psycast_Skip_Pulse</soundCast>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnCell</jobDef>
+  </AbilityDef>
+
+  <!-- Job definition for Judgement Cut warmup -->
+  <JobDef>
+    <defName>DMC_JudgementCutWarmup</defName>
+    <driverClass>DMCAbilities.JobDriver_JudgementCutWarmup</driverClass>
+    <reportString>warming up judgement cut</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
+</Defs>

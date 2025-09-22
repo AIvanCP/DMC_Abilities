@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- Add Stinger skillbook to Combat Supplier -->
+  <TraderKindDef>
+    <defName>Orbital_CombatSupplier</defName>
+    <stockGenerators>
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SkillbookStinger</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>800-1200</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.95</chance> <!-- 95% chance for 0 (5% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.05</chance> <!-- 5% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
+    </stockGenerators>
+  </TraderKindDef>
+
+  <!-- Add skillbooks to Exotic Trader -->
+  <TraderKindDef>
+    <defName>Orbital_ExoticTrader</defName>
+    <stockGenerators>
+      <!-- Stinger skillbook -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SkillbookStinger</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>800-1200</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.95</chance> <!-- 95% chance for 0 (5% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.05</chance> <!-- 5% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
+      <!-- Judgement Cut skillbook -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SkillbookJudgementCut</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>2000-3000</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.97</chance> <!-- 97% chance for 0 (3% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.03</chance> <!-- 3% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
+    </stockGenerators>
+  </TraderKindDef>
+
+</Defs>

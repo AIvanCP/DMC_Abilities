@@ -1,0 +1,18 @@
+# Build artifacts
+Source/*/obj/
+Source/*/bin/
+Source/*/Lib/
+*.dll
+*.pdb
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Development files
+*.log
+*.tmp
+
+# Keep the compiled mod assembly
+!Assemblies/DMCAbilities.dll

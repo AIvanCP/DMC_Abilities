@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Error Messages -->
+  <DMC_NoMeleeWeapon>No melee weapon equipped</DMC_NoMeleeWeapon>
+  <DMC_NoValidTeleportPosition>Cannot find valid teleport position</DMC_NoValidTeleportPosition>
+  <DMC_MustTargetPawn>Must target a living creature</DMC_MustTargetPawn>
+  <DMC_CannotTargetSelf>Cannot target yourself</DMC_CannotTargetSelf>
+  <DMC_AlreadyWarmingUp>Already warming up an ability</DMC_AlreadyWarmingUp>
+  <DMC_InvalidSkillbook>Invalid skillbook</DMC_InvalidSkillbook>
+
+  <!-- Success Messages -->
+  <DMC_LearnedAbility>{0} has learned {1}!</DMC_LearnedAbility>
+  <DMC_AlreadyKnowsAbility>{0} already knows {1}</DMC_AlreadyKnowsAbility>
+
+</LanguageData>
