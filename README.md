@@ -1,6 +1,7 @@
 # DMC Abilities
 
 A RimWorld mod that adds two Devil May Cry-inspired melee abilities.
+(using AI to create this, so expect some errors and bugs)
 
 ## Features
 
