@@ -57,6 +57,49 @@ namespace DMCAbilities
         }
 
         /// <summary>
+        /// Calculates ranged damage from the equipped weapon (for Gun Stinger)
+        /// </summary>
+        /// <param name="pawn">The pawn using the weapon</param>
+        /// <param name="multiplier">Damage multiplier to apply</param>
+        /// <returns>DamageInfo for the ranged attack, or null if no valid ranged weapon</returns>
+        public static DamageInfo? CalculateRangedDamage(Pawn pawn, float multiplier = 1f)
+        {
+            if (pawn?.equipment?.Primary == null)
+                return null;
+
+            ThingWithComps weapon = pawn.equipment.Primary;
+            
+            // Get ranged verb from the weapon
+            var rangedVerb = GetRangedVerb(weapon);
+            if (rangedVerb == null)
+                return null;
+
+            // Get base damage from the weapon's ranged verb
+            float baseDamage = GetWeaponBaseDamage(weapon, rangedVerb);
+            if (baseDamage <= 0)
+            {
+                // Fallback for shotguns
+                baseDamage = 12f; // Reasonable shotgun damage
+            }
+
+            // Apply multiplier
+            baseDamage *= multiplier;
+
+            // Get damage type from weapon or use Bullet as fallback
+            DamageDef damageDef = GetWeaponDamageType(weapon, rangedVerb) ?? DamageDefOf.Bullet;
+
+            // Create damage info
+            return new DamageInfo(
+                def: damageDef,
+                amount: (int)baseDamage,
+                armorPenetration: 0.2f, // Higher penetration for ranged
+                angle: 0f,
+                instigator: pawn,
+                weapon: weapon.def
+            );
+        }
+
+        /// <summary>
         /// Checks if the pawn has a valid melee weapon equipped
         /// </summary>
         public static bool HasMeleeWeapon(Pawn pawn)
@@ -71,6 +114,91 @@ namespace DMCAbilities
                 return false;
 
             return GetMeleeVerb(weapon) != null;
+        }
+
+        /// <summary>
+        /// Checks if the pawn has a shotgun-type weapon equipped
+        /// Enhanced detection for modded weapons
+        /// </summary>
+        public static bool HasShotgunWeapon(Pawn pawn)
+        {
+            if (pawn?.equipment?.Primary == null)
+                return false;
+
+            ThingWithComps weapon = pawn.equipment.Primary;
+            
+            // Check weapon def name for shotgun indicators (expanded patterns)
+            string defName = weapon.def.defName.ToLower();
+            
+            // Comprehensive shotgun name patterns
+            string[] shotgunPatterns = {
+                "shotgun", "pump", "combat_shotgun", "assault_shotgun", "riot_shotgun",
+                "scatter", "shot", "boom", "blaster", "buckshot", "gauge", 
+                "semi_auto_shotgun", "auto_shotgun", "tactical_shotgun", "hunting_shotgun",
+                "sawed_off", "double_barrel", "lever_action_shotgun", "break_action"
+            };
+            
+            foreach (string pattern in shotgunPatterns)
+            {
+                if (defName.Contains(pattern))
+                    return true;
+            }
+
+            // Check weapon categories if available
+            if (weapon.def.weaponClasses != null)
+            {
+                foreach (var weaponClass in weapon.def.weaponClasses)
+                {
+                    string className = weaponClass.defName.ToLower();
+                    if (className.Contains("shotgun") || className.Contains("scatter") || 
+                        className.Contains("boom") || className.Contains("blaster"))
+                        return true;
+                }
+            }
+
+            // Check by weapon tags (expanded)
+            if (weapon.def.weaponTags != null)
+            {
+                string[] shotgunTags = {
+                    "shotgun", "scatter", "blaster", "boom", "pump", "gauge",
+                    "buckshot", "riot", "combat_shotgun", "hunting_shotgun"
+                };
+                
+                foreach (var tag in weapon.def.weaponTags)
+                {
+                    string tagLower = tag.ToLower();
+                    foreach (string shotgunTag in shotgunTags)
+                    {
+                        if (tagLower.Contains(shotgunTag))
+                            return true;
+                    }
+                }
+            }
+
+            // Check verb properties for shotgun-like characteristics
+            // Shotguns typically have shorter range and spread/burst patterns
+            var rangedVerb = GetRangedVerb(weapon);
+            if (rangedVerb != null)
+            {
+                // Check if it has burst characteristics (many shotguns fire multiple projectiles)
+                if (rangedVerb.verbProps != null)
+                {
+                    // Some shotguns might have burstShotCount > 1 or specific projectile types
+                    if (rangedVerb.verbProps.burstShotCount > 3 && rangedVerb.verbProps.range < 25)
+                        return true;
+                        
+                    // Check projectile for shotgun-like properties
+                    if (rangedVerb.verbProps.defaultProjectile != null)
+                    {
+                        string projName = rangedVerb.verbProps.defaultProjectile.defName.ToLower();
+                        if (projName.Contains("shotgun") || projName.Contains("buckshot") || 
+                            projName.Contains("scatter") || projName.Contains("pellet"))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -99,6 +227,18 @@ namespace DMCAbilities
             return weapon.GetComp<CompEquippable>().AllVerbs
                 .FirstOrDefault(v => v is Verb_MeleeAttack || 
                                    (v.verbProps != null && v.verbProps.range <= 1.42f && v.verbProps.IsMeleeAttack));
+        }
+
+        /// <summary>
+        /// Gets the first ranged verb from a weapon
+        /// </summary>
+        private static Verb GetRangedVerb(ThingWithComps weapon)
+        {
+            if (weapon?.GetComp<CompEquippable>()?.AllVerbs == null)
+                return null;
+
+            return weapon.GetComp<CompEquippable>().AllVerbs
+                .FirstOrDefault(v => v.verbProps != null && v.verbProps.range > 2f && !v.verbProps.IsMeleeAttack);
         }
 
         /// <summary>
@@ -187,6 +327,14 @@ namespace DMCAbilities
         public static string GetNoMeleeWeaponMessage()
         {
             return "DMC_NoMeleeWeapon".Translate();
+        }
+
+        /// <summary>
+        /// Gets a message for when no shotgun weapon is equipped
+        /// </summary>
+        public static string GetNoShotgunWeaponMessage()
+        {
+            return "Requires a shotgun-type weapon equipped.";
         }
     }
 }

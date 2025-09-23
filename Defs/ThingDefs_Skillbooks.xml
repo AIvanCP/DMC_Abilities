@@ -92,4 +92,138 @@ The Judgement Cut is a ranged area attack that creates multiple concentrated dim
     <tickerType>Rare</tickerType>
   </ThingDef>
 
+  <!-- Drive Skillbook -->
+  <ThingDef>
+    <defName>DMC_SkillbookDrive</defName>
+    <label>skillbook: drive</label>
+    <description>A tactical combat manual describing the Drive technique - a vertical energy slash that creates projectiles capable of passing through solid obstacles. This advanced technique requires precise control to master. Reading this book will impart the knowledge to the reader, but the book will be consumed in the process.
+
+The Drive creates 1-3 energy projectiles that travel in a straight line, passing through buildings and striking all enemies in their path. The final projectile deals enhanced damage and burns targets over time.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookDrive</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+      <color>(0.8, 1.0, 0.7)</color>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>60</MaxHitPoints>
+      <Mass>0.4</Mass>
+      <MarketValue>1500</MarketValue>
+      <Flammability>1.0</Flammability>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_DriveAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Drive technique</useLabel>
+        <useDuration>450</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
+  <!-- Void Slash Skillbook -->
+  <ThingDef>
+    <defName>DMC_SkillbookVoidSlash</defName>
+    <label>skillbook: void slash</label>
+    <description>A dark manual containing the secrets of the Void Slash technique. Reading this will teach the reader how to perform cone-shaped debuffing attacks that slow and weaken enemies. This knowledge, once learned, cannot be forgotten.
+
+The Void Slash is a powerful melee ability that creates a cone of void energy in front of the user, damaging and debuffing multiple enemies with movement penalties and bleeding effects. Works with any melee weapon.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookVoidSlash</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>60</MaxHitPoints>
+      <Mass>0.3</Mass>
+      <MarketValue>2000</MarketValue>
+      <Flammability>1.0</Flammability>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_VoidSlashAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Void Slash technique</useLabel>
+        <useDuration>300</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+  </ThingDef>
+
+  <!-- Gun Stinger Skillbook -->
+  <ThingDef>
+    <defName>DMC_GunStingerSkillbook</defName>
+    <label>skillbook: gun stinger</label>
+    <description>A tactical manual containing advanced shotgun techniques and supernatural movement abilities. This book teaches the Gun Stinger technique - a devastating combination of teleportation and point-blank shotgun fire. Reading this book will impart the knowledge to the reader, but the book will be consumed in the process.
+
+The Gun Stinger allows the user to instantly teleport behind an enemy and fire their shotgun at point-blank range, dealing massive damage with a chance to cause burn effects. Only works with shotgun weapons.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookGunStinger</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>60</MaxHitPoints>
+      <Mass>0.3</Mass>
+      <MarketValue>1800</MarketValue>
+      <Flammability>1.0</Flammability>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_GunStingerHediff</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Gun Stinger technique</useLabel>
+        <useDuration>300</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+  </ThingDef>
+
 </Defs>

@@ -1,0 +1,174 @@
+using System.Collections.Generic;
+using RimWorld;
+using UnityEngine;
+using Verse;
+using Verse.Sound;
+
+namespace DMCAbilities
+{
+    public class Verb_VoidSlash : Verb_CastAbility
+    {
+        private const float ConeAngleDegrees = 40f; // 40-degree cone
+        private const float MaxRange = 4f; // 4 cell melee range
+        private const float BaseDamage = 12f; // Increased damage for melee-only ability
+
+        protected override bool TryCastShot()
+        {
+            // Check if mod and ability are enabled
+            if (DMCAbilitiesMod.settings != null && 
+                (!DMCAbilitiesMod.settings.modEnabled || !DMCAbilitiesMod.settings.voidSlashEnabled))
+            {
+                return false;
+            }
+
+            // Check for melee weapon requirement
+            if (!WeaponDamageUtility.HasMeleeWeapon(CasterPawn))
+            {
+                Messages.Message(WeaponDamageUtility.GetNoMeleeWeaponMessage(), 
+                    CasterPawn, MessageTypeDefOf.RejectInput, false);
+                return false;
+            }
+
+            ExecuteVoidSlash();
+            return true;
+        }
+
+        private void ExecuteVoidSlash()
+        {
+            Map map = CasterPawn.Map;
+            IntVec3 casterPos = CasterPawn.Position;
+            Vector3 targetDirection = (currentTarget.Cell - casterPos).ToVector3().normalized;
+
+            // Create visual and audio effects
+            CreateVoidSlashEffects(casterPos, map, targetDirection);
+
+            // Find all pawns in cone and apply effects
+            List<Pawn> affectedPawns = GetPawnsInCone(casterPos, targetDirection, map);
+            
+            foreach (Pawn pawn in affectedPawns)
+            {
+                if (pawn != CasterPawn && !pawn.Dead) // Don't affect caster or dead pawns
+                {
+                    ApplyVoidSlashEffects(pawn);
+                }
+            }
+        }
+
+        private List<Pawn> GetPawnsInCone(IntVec3 origin, Vector3 direction, Map map)
+        {
+            List<Pawn> pawnsInCone = new List<Pawn>();
+            
+            for (int i = 1; i <= MaxRange; i++)
+            {
+                // Calculate the base position along the direction
+                Vector3 basePos = origin.ToVector3() + (direction * i);
+                
+                // Calculate the cone width at this distance
+                float coneWidthAtDistance = i * Mathf.Tan(ConeAngleDegrees * Mathf.Deg2Rad * 0.5f) * 2f;
+                
+                // Check cells in a line perpendicular to the direction
+                Vector3 perpendicular = new Vector3(-direction.z, 0, direction.x); // 90-degree rotation
+                
+                int cellsToCheck = Mathf.CeilToInt(coneWidthAtDistance / 2f);
+                for (int j = -cellsToCheck; j <= cellsToCheck; j++)
+                {
+                    Vector3 checkPos = basePos + (perpendicular * j);
+                    IntVec3 cell = checkPos.ToIntVec3();
+                    
+                    if (cell.InBounds(map))
+                    {
+                        // Check if cell is within the cone angle
+                        Vector3 cellDirection = (cell - origin).ToVector3().normalized;
+                        float angle = Vector3.Angle(direction, cellDirection);
+                        
+                        if (angle <= ConeAngleDegrees * 0.5f)
+                        {
+                            List<Thing> thingsInCell = map.thingGrid.ThingsListAtFast(cell);
+                            // Copy the list to avoid collection modification issues
+                            List<Thing> thingsCopy = new List<Thing>(thingsInCell);
+                            foreach (Thing thing in thingsCopy)
+                            {
+                                if (thing is Pawn pawn && pawn != null && !pawnsInCone.Contains(pawn))
+                                {
+                                    pawnsInCone.Add(pawn);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return pawnsInCone;
+        }
+
+        private void ApplyVoidSlashEffects(Pawn target)
+        {
+            // Null safety checks
+            if (target == null || target.Dead || target.Map == null)
+                return;
+
+            // Apply initial slash damage
+            DamageInfo slashDamage = new DamageInfo(
+                def: DamageDefOf.Cut,
+                amount: BaseDamage,
+                armorPenetration: 0.1f,
+                angle: 0f,
+                instigator: CasterPawn
+            );
+            target.TakeDamage(slashDamage);
+
+            // Apply void slash debuff
+            Hediff_VoidSlashDebuff voidDebuff = (Hediff_VoidSlashDebuff)HediffMaker.MakeHediff(
+                DMC_HediffDefOf.DMC_VoidSlashDebuff, target);
+            target.health.AddHediff(voidDebuff);
+
+            // Visual effect on target with null safety
+            if (target.Map != null)
+            {
+                FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 1.2f);
+                
+                // Play hit sound
+                SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, 
+                    new TargetInfo(target.Position, target.Map));
+            }
+        }
+
+        private void CreateVoidSlashEffects(IntVec3 origin, Map map, Vector3 direction)
+        {
+            // Create wave effect along the cone
+            for (int i = 1; i <= MaxRange; i += 2) // Every 2 cells for performance
+            {
+                Vector3 effectPos = origin.ToVector3() + (direction * i);
+                IntVec3 effectCell = effectPos.ToIntVec3();
+                
+                if (effectCell.InBounds(map))
+                {
+                    // Dark purple psychic wave effect
+                    FleckMaker.Static(effectCell, map, FleckDefOf.PsycastAreaEffect, 2.0f);
+                    
+                    // Add some side effects for cone visualization
+                    if (i <= 8) // Only for closer range to avoid too many effects
+                    {
+                        Vector3 perpendicular = new Vector3(-direction.z, 0, direction.x);
+                        float coneWidth = i * 0.3f; // Approximate cone width
+                        
+                        FleckMaker.Static((effectPos + perpendicular * coneWidth).ToIntVec3(), 
+                            map, FleckDefOf.PsycastAreaEffect, 1.5f);
+                        FleckMaker.Static((effectPos - perpendicular * coneWidth).ToIntVec3(), 
+                            map, FleckDefOf.PsycastAreaEffect, 1.5f);
+                    }
+                }
+            }
+
+            // Play void slash sound
+            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, 
+                new TargetInfo(origin, map));
+        }
+
+        public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
+        {
+            needLOSToCenter = false;
+            return MaxRange;
+        }
+    }
+}

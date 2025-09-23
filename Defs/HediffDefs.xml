@@ -33,4 +33,92 @@
     </comps>
   </HediffDef>
 
+  <!-- Drive Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_DriveAbility</defName>
+    <label>drive technique</label>
+    <description>Knowledge of the Drive technique - a vertical energy slash that creates projectiles. This advanced combat technique allows the user to launch energy projectiles that pass through obstacles and strike distant enemies.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.9, 1.0, 0.8)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_Drive</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Drive Burn DOT Effect -->
+  <HediffDef>
+    <defName>DMC_DriveBurn</defName>
+    <label>drive burn</label>
+    <description>Burning energy from a Drive projectile. Deals continuous damage over time.</description>
+    <hediffClass>DMCAbilities.Hediff_DriveBurn</hediffClass>
+    <defaultLabelColor>(1.0, 0.5, 0.2)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <tendable>false</tendable>
+  </HediffDef>
+
+  <!-- Void Slash Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_VoidSlashAbility</defName>
+    <label>void slash mastery</label>
+    <description>This character has learned the Void Slash technique, allowing them to unleash debuffing cone attacks.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.5, 0.2, 0.8)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_VoidSlash</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Void Slash Debuff Hediff -->
+  <HediffDef>
+    <defName>DMC_VoidSlashDebuff</defName>
+    <label>void slash debuff</label>
+    <description>The target has been struck by a void slash, reducing their movement speed and combat effectiveness while causing minor bleeding.</description>
+    <hediffClass>DMCAbilities.Hediff_VoidSlashDebuff</hediffClass>
+    <defaultLabelColor>(0.5, 0.2, 0.8)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <label>void-touched</label>
+        <statOffsets>
+          <MoveSpeed>-2.0</MoveSpeed>
+          <MeleeDodgeChance>-30</MeleeDodgeChance>
+        </statOffsets>
+        <capMods>
+          <li>
+            <capacity>Moving</capacity>
+            <offset>-0.5</offset>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Gun Stinger Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_GunStingerHediff</defName>
+    <label>gun stinger technique</label>
+    <description>Mastery of the Gun Stinger technique - a teleporting shotgun attack. This advanced combat technique allows the user to instantly appear behind enemies and deliver devastating point-blank shotgun blasts.</description>
+    <hediffClass>DMCAbilities.Hediff_GunStinger</hediffClass>
+    <defaultLabelColor>(0.6, 0.6, 1.0)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_GunStinger</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
 </Defs>

@@ -49,12 +49,108 @@
     <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
-  <!-- Job definition for Judgement Cut warmup -->
+  <!-- Drive Ability -->
+  <AbilityDef>
+    <defName>DMC_Drive</defName>
+    <label>drive</label>
+    <description>A vertical slash attack that creates 1-3 energy projectiles traveling in a straight line. Projectiles pass through buildings and hit all enemies in their path. The final projectile (when multiple are created) deals enhanced damage and applies continuous burning damage over time.</description>
+    <iconPath>UI/Abilities/Drive</iconPath>
+    <cooldownTicksRange>600</cooldownTicksRange> <!-- 10 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_Drive</verbClass>
+      <range>25</range>
+      <warmupTime>0.8</warmupTime>
+      <soundCast>Psycast_Skip_Pulse</soundCast>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnCell</jobDef>
+  </AbilityDef>
+
+  <!-- Void Slash Ability Definition -->
+  <AbilityDef>
+    <defName>DMC_VoidSlash</defName>
+    <label>void slash</label>
+    <description>Unleash a void-infused melee slash in a cone that damages and debuffs enemies, reducing their movement speed and combat effectiveness while causing bleeding. Melee weapon required.</description>
+    <iconPath>UI/Abilities/VoidSlash</iconPath>
+    <cooldownTicksRange>900</cooldownTicksRange> <!-- 15 seconds -->
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_VoidSlash</verbClass>
+      <range>4</range> <!-- Short melee range -->
+      <warmupTime>0.5</warmupTime> <!-- Quick 0.5 second warmup -->
+      <targetParams>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <gizmoClass>Command_Ability</gizmoClass>
+    <showPsycastEffects>false</showPsycastEffects>
+    <displayGizmoWhileUndrafted>false</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <category>DMCAbilities</category>
+  </AbilityDef>
+
+  <!-- Gun Stinger Ability -->
+  <AbilityDef>
+    <defName>DMC_GunStinger</defName>
+    <label>gun stinger</label>
+    <description>Teleports behind a target and fires a shotgun blast at point-blank range. Only works with shotgun weapons. Has a small chance to cause burn damage.</description>
+    <iconPath>UI/Abilities/GunStinger</iconPath>
+    <cooldownTicksRange>900</cooldownTicksRange> <!-- 15 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_GunStinger</verbClass>
+      <range>12</range>
+      <warmupTime>0</warmupTime>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnThing</jobDef>
+  </AbilityDef>
+
+  <!-- Job definition for Drive delayed launch -->
   <JobDef>
-    <defName>DMC_JudgementCutWarmup</defName>
-    <driverClass>DMCAbilities.JobDriver_JudgementCutWarmup</driverClass>
-    <reportString>warming up judgement cut</reportString>
+    <defName>DMC_DriveDelayedLaunch</defName>
+    <driverClass>DMCAbilities.JobDriver_DriveDelayedLaunch</driverClass>
+    <reportString>launching drive projectiles</reportString>
     <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
   </JobDef>
+
+  <!-- Projectile definition for Drive slash -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_DriveSlashProjectile</defName>
+    <label>drive slash</label>
+    <thingClass>DMCAbilities.Projectile_DriveSlash</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <color>(0.9, 0.9, 1.0)</color>
+    </graphicData>
+    <projectile>
+      <damageDef>Cut</damageDef>
+      <damageAmountBase>1</damageAmountBase>
+      <speed>40</speed>
+      <range>25</range>
+      <flyOverhead>false</flyOverhead>
+    </projectile>
+  </ThingDef>
 
 </Defs>

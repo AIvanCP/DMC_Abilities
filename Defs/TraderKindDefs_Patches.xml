@@ -59,6 +59,54 @@
           </li>
         </customCountChances>
       </li>
+      <!-- Drive skillbook -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SkillbookDrive</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>1500-2250</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.96</chance> <!-- 96% chance for 0 (4% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.04</chance> <!-- 4% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
+      <!-- Void Slash skillbook -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SkillbookVoidSlash</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>1600-2400</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.96</chance> <!-- 96% chance for 0 (4% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.04</chance> <!-- 4% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
+      <!-- Gun Stinger skillbook -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_GunStingerSkillbook</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>1700-2550</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.95</chance> <!-- 95% chance for 0 (5% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.05</chance> <!-- 5% chance for 1 -->
+          </li>
+        </customCountChances>
+      </li>
     </stockGenerators>
   </TraderKindDef>
 

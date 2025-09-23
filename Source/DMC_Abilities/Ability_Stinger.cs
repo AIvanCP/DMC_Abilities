@@ -102,11 +102,11 @@ namespace DMCAbilities
         {
             Map map = CasterPawn.Map;
 
-            // Enhanced dust effect at dash origin
-            FleckMaker.ThrowDustPuff(originPos.ToVector3Shifted(), map, 2.5f);
+            // Psycast effect at dash origin
+            FleckMaker.Static(originPos, map, FleckDefOf.PsycastAreaEffect, 2f);
             
-            // Dramatic impact effect at target
-            FleckMaker.ThrowDustPuff(targetPos.ToVector3Shifted(), map, 2f);
+            // Dramatic psycast effect at target
+            FleckMaker.Static(targetPos, map, FleckDefOf.PsycastAreaEffect, 2.5f);
             
             // Play impact sound using the correct RimWorld method
             SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(targetPos, map));
@@ -114,6 +114,10 @@ namespace DMCAbilities
 
         private void ApplyStingerDamage(Pawn caster, Pawn target)
         {
+            // Null safety checks
+            if (caster == null || target == null || target.Dead || target.Map == null)
+                return;
+
             // Check if Stinger is enabled in settings
             if (DMCAbilitiesMod.settings != null && !DMCAbilitiesMod.settings.stingerEnabled)
                 return;
@@ -126,10 +130,11 @@ namespace DMCAbilities
                 // Apply damage
                 target.TakeDamage(damageInfo.Value);
 
-                // Create impact effect - use dust puff AND additional sparkle effect
-                FleckMaker.ThrowDustPuff(target.Position.ToVector3Shifted(), target.Map, 1.0f);
-                // Add a light flash effect
-                FleckMaker.ThrowLightningGlow(target.Position.ToVector3Shifted(), target.Map, 1.5f);
+                // Create impact effect using psycast effect with null safety
+                if (target.Map != null)
+                {
+                    FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 1.5f);
+                }
             }
         }
 

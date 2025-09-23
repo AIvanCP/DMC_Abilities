@@ -54,6 +54,14 @@ namespace DMCAbilities
                 {
                     __result = true;
                 }
+                else if (__instance.def.defName == "DMC_Drive" && !DMCAbilitiesMod.settings.driveEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_VoidSlash" && !DMCAbilitiesMod.settings.voidSlashEnabled)
+                {
+                    __result = true;
+                }
             }
         }
     }

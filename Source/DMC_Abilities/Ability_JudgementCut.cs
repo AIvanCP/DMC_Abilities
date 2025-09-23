@@ -3,22 +3,12 @@ using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
+using Verse.Sound;
 
 namespace DMCAbilities
 {
     public class Verb_JudgementCut : Verb_CastAbility
     {
-        private int warmupTicksLeft = 0;
-        private IntVec3 targetPosition;
-        private bool isWarmingUp = false;
-        private int currentSlashCount = 0; // Track current slash for visual effects
-
-        public override bool Available()
-        {
-            return base.Available() && !isWarmingUp;
-        }
-
         protected override bool TryCastShot()
         {
             // Check if mod and ability are enabled
@@ -35,59 +25,17 @@ namespace DMCAbilities
                 return false;
             }
 
-            targetPosition = currentTarget.Cell;
-            StartWarmup();
+            // Execute immediately without custom warmup
+            ExecuteJudgementCut();
             return true;
         }
 
-        private void StartWarmup()
+        private void ExecuteJudgementCut()
         {
-            isWarmingUp = true;
-            warmupTicksLeft = Rand.RangeInclusive(15, 25); // Faster: 0.25-0.4 second warmup
-            
-            // Show warmup effect
-            FleckMaker.ThrowDustPuff(CasterPawn.Position.ToVector3Shifted(), CasterPawn.Map, 2f);
-            
-            // Create a job to handle the warmup
-            Job warmupJob = JobMaker.MakeJob(DMC_JobDefOf.DMC_JudgementCutWarmup);
-            warmupJob.verbToUse = this;
-            CasterPawn.jobs.TryTakeOrderedJob(warmupJob, JobTag.Misc);
-        }
-
-        public void TickWarmup()
-        {
-            if (!isWarmingUp)
+            if (CasterPawn == null || CasterPawn.Map == null || !currentTarget.IsValid)
                 return;
 
-            warmupTicksLeft--;
-            
-            if (warmupTicksLeft <= 0)
-            {
-                CompleteJudgementCut();
-                
-                // End the warmup job
-                if (CasterPawn?.jobs?.curJob?.def?.defName == "DMC_JudgementCutWarmup")
-                {
-                    CasterPawn.jobs.EndCurrentJob(JobCondition.Succeeded);
-                }
-            }
-            else
-            {
-                // Show ongoing warmup effect
-                if (warmupTicksLeft % 10 == 0)
-                {
-                    FleckMaker.ThrowDustPuff(CasterPawn.Position.ToVector3Shifted(), CasterPawn.Map, 0.8f);
-                }
-            }
-        }
-
-        private void CompleteJudgementCut()
-        {
-            isWarmingUp = false;
-            currentSlashCount = 0; // Reset slash counter
-            
-            if (CasterPawn == null || CasterPawn.Map == null || !targetPosition.IsValid)
-                return;
+            IntVec3 targetPosition = currentTarget.Cell;
 
             // Additional safety check - make sure pawn is still alive and conscious
             if (CasterPawn.Dead || CasterPawn.Downed)
@@ -96,10 +44,10 @@ namespace DMCAbilities
             // Determine number of slashes
             int slashCount = DetermineSlashCount();
             
-            // Create all slashes at the target location (DMC 5 style)
+            // Create all slashes at the target location
             for (int i = 0; i < slashCount; i++)
             {
-                IntVec3 slashPos = GetSlashPosition(i, slashCount);
+                IntVec3 slashPos = GetSlashPosition(i, slashCount, targetPosition);
                 if (slashPos.IsValid && slashPos.InBounds(CasterPawn.Map))
                 {
                     CreateJudgementSlash(slashPos);
@@ -115,34 +63,24 @@ namespace DMCAbilities
             return 1; // 80% chance for 1 slash
         }
 
-        private IntVec3 GetSlashPosition(int slashIndex, int totalSlashes)
+        private IntVec3 GetSlashPosition(int slashIndex, int totalSlashes, IntVec3 targetPos)
         {
             // In DMC 5, all Judgement Cuts hit the same target location
             // This ensures maximum damage concentration like Vergil's technique
-            return targetPosition;
+            return targetPos;
         }
 
         private void CreateJudgementSlash(IntVec3 position)
         {
             Map map = CasterPawn.Map;
             
-            // Increment slash counter for visual effects
-            currentSlashCount++;
+            // Create main slash effect with psycast visual (the one you remember!)
+            FleckMaker.Static(position, map, FleckDefOf.PsycastAreaEffect, 3f);
             
-            float effectScale = 2f + (currentSlashCount * 0.5f); // Each slash gets bigger
-            
-            // Create main slash effect with multiple visual layers
-            FleckMaker.ThrowDustPuff(position.ToVector3Shifted(), map, effectScale);
-            FleckMaker.ThrowLightningGlow(position.ToVector3Shifted(), map, effectScale * 0.8f);
-            
-            // Add extra dramatic effect for multiple slashes
-            if (currentSlashCount > 1)
-            {
-                FleckMaker.ThrowDustPuff(position.ToVector3Shifted(), map, effectScale * 0.7f);
-                FleckMaker.ThrowLightningGlow(position.ToVector3Shifted(), map, effectScale * 0.5f);
-            }
+            // Play Vergil-style sound - use a slashing/psychic sound
+            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, new TargetInfo(position, map));
 
-            // Create explosion-like effect with damage radius of 2
+            // Create explosion-like effect with damage radius of 2 (use default explosion sound)
             GenExplosion.DoExplosion(
                 center: position,
                 map: map,
@@ -151,7 +89,7 @@ namespace DMCAbilities
                 instigator: CasterPawn,
                 damAmount: 0, // We'll apply custom damage
                 armorPenetration: 0f,
-                explosionSound: SoundDefOf.Pawn_Melee_Punch_HitPawn, // Use a valid sound
+                explosionSound: SoundDefOf.Pawn_Melee_Punch_HitPawn, // Use punch sound as placeholder
                 weapon: null,
                 projectile: null,
                 intendedTarget: null,
@@ -188,9 +126,8 @@ namespace DMCAbilities
                         // Apply damage
                         targetPawn.TakeDamage(damageInfo.Value);
                         
-                        // Create impact effect on each target
-                        FleckMaker.ThrowDustPuff(targetPawn.Position.ToVector3Shifted(), map, 1.0f);
-                        FleckMaker.ThrowLightningGlow(targetPawn.Position.ToVector3Shifted(), map, 0.8f);
+                        // Create impact effect on each target - use psycast effect
+                        FleckMaker.Static(targetPawn.Position, map, FleckDefOf.PsycastAreaEffect, 1.5f);
                     }
                 }
             }
@@ -216,57 +153,7 @@ namespace DMCAbilities
             if (!base.ValidateTarget(target, showMessages))
                 return false;
 
-            if (isWarmingUp)
-            {
-                if (showMessages)
-                    Messages.Message("DMC_AlreadyWarmingUp".Translate(), 
-                        MessageTypeDefOf.RejectInput, false);
-                return false;
-            }
-
             return true;
-        }
-    }
-
-    public class JobDriver_JudgementCutWarmup : JobDriver
-    {
-        public override bool TryMakePreToilReservations(bool errorOnFailed)
-        {
-            return true;
-        }
-
-        protected override IEnumerable<Toil> MakeNewToils()
-        {
-            Toil warmupToil = new Toil
-            {
-                initAction = delegate
-                {
-                    // Set pawn stance
-                    pawn.stances.SetStance(new Stance_Warmup(1, null, null));
-                },
-                tickAction = delegate
-                {
-                    // Safety check - if pawn or job is invalid, end the job
-                    if (pawn == null || job?.verbToUse == null)
-                    {
-                        EndJobWith(JobCondition.Errored);
-                        return;
-                    }
-
-                    if (job.verbToUse is Verb_JudgementCut judgementCutVerb)
-                    {
-                        judgementCutVerb.TickWarmup();
-                    }
-                    else
-                    {
-                        EndJobWith(JobCondition.Errored);
-                    }
-                },
-                defaultCompleteMode = ToilCompleteMode.Never
-            };
-
-            warmupToil.AddFailCondition(() => pawn.Drafted && pawn.jobs.curJob != job);
-            yield return warmupToil;
         }
     }
 }
