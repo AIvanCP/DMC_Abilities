@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -8,8 +9,8 @@ namespace DMCAbilities
 {
     public class Verb_VoidSlash : Verb_CastAbility
     {
-        private const float ConeAngleDegrees = 40f; // 40-degree cone
-        private const float MaxRange = 4f; // 4 cell melee range
+        private const float ConeAngleDegrees = 75f; // 75-degree cone (between 60-90°)
+        private const float MaxRange = 7f; // 7 cell range (between 6-8)
         private const float BaseDamage = 12f; // Increased damage for melee-only ability
 
         protected override bool TryCastShot()
@@ -168,7 +169,57 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = false;
-            return MaxRange;
+            return 0f; // Don't use radius highlighting, we'll use cone drawing
+        }
+
+        public override void DrawHighlight(LocalTargetInfo target)
+        {
+            // Draw the cone AoE preview in front of the caster
+            if (CasterPawn != null && CasterPawn.Position.IsValid && target.IsValid)
+            {
+                IntVec3 casterPos = CasterPawn.Position;
+                Vector3 targetDirection = (target.Cell - casterPos).ToVector3().normalized;
+                
+                // Calculate cone cells
+                List<IntVec3> coneCells = new List<IntVec3>();
+                
+                for (int range = 1; range <= MaxRange; range++)
+                {
+                    // Calculate the base position along the direction
+                    Vector3 basePos = casterPos.ToVector3() + (targetDirection * range);
+                    
+                    // Calculate the cone width at this distance
+                    float coneWidthAtDistance = range * Mathf.Tan(ConeAngleDegrees * Mathf.Deg2Rad * 0.5f) * 2f;
+                    
+                    // Check cells in a line perpendicular to the direction
+                    Vector3 perpendicular = new Vector3(-targetDirection.z, 0, targetDirection.x); // 90-degree rotation
+                    
+                    int cellsToCheck = Mathf.CeilToInt(coneWidthAtDistance / 2f);
+                    for (int j = -cellsToCheck; j <= cellsToCheck; j++)
+                    {
+                        Vector3 checkPos = basePos + (perpendicular * j);
+                        IntVec3 cell = checkPos.ToIntVec3();
+                        
+                        if (cell.InBounds(CasterPawn.Map))
+                        {
+                            // Check if cell is within the cone angle
+                            Vector3 cellDirection = (cell - casterPos).ToVector3().normalized;
+                            float angle = Vector3.Angle(targetDirection, cellDirection);
+                            
+                            if (angle <= ConeAngleDegrees * 0.5f && !coneCells.Contains(cell))
+                            {
+                                coneCells.Add(cell);
+                            }
+                        }
+                    }
+                }
+                
+                // Draw the cone preview
+                if (coneCells.Count > 0)
+                {
+                    GenDraw.DrawFieldEdges(coneCells);
+                }
+            }
         }
     }
 }

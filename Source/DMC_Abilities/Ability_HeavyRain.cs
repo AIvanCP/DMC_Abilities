@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -75,6 +76,15 @@ namespace DMCAbilities
             needLOSToCenter = false;
             return BaseRadius;
         }
+
+        public override void DrawHighlight(LocalTargetInfo target)
+        {
+            // Draw the area of effect highlight similar to Judgement Cut
+            if (target.IsValid && target.Cell.InBounds(CasterPawn?.Map))
+            {
+                GenDraw.DrawFieldEdges(GenRadial.RadialCellsAround(target.Cell, BaseRadius, true).ToList());
+            }
+        }
     }
 
     // Job driver for handling the sequential projectile spawning
@@ -130,15 +140,22 @@ namespace DMCAbilities
         {
             Map map = pawn.Map;
             IntVec3 targetCenter = job.targetA.Cell;
+            IntVec3 spawnCell;
 
-            // Find random position within the area
-            Vector2 randomOffset2D = Rand.InsideUnitCircle * 6f; // Random within radius
-            Vector3 randomOffset = new Vector3(randomOffset2D.x, 0, randomOffset2D.y);
-            IntVec3 spawnCell = (targetCenter.ToVector3Shifted() + randomOffset).ToIntVec3();
-
-            if (!spawnCell.InBounds(map))
+            // 70% chance to target enemies, 30% chance for random placement
+            if (Rand.Chance(0.7f))
             {
-                spawnCell = targetCenter; // Fallback to center if out of bounds
+                spawnCell = FindEnemyTarget(targetCenter, map);
+                if (spawnCell == IntVec3.Invalid)
+                {
+                    // No enemy found, use random placement
+                    spawnCell = GetRandomSpawnCell(targetCenter, map);
+                }
+            }
+            else
+            {
+                // Random placement for variety
+                spawnCell = GetRandomSpawnCell(targetCenter, map);
             }
 
             // Create and spawn regular spectral sword projectile
@@ -147,15 +164,121 @@ namespace DMCAbilities
 
             if (projectile != null)
             {
-                projectile.Initialize(pawn, spawnCell.ToVector3Shifted());
-                GenSpawn.Spawn(projectile, spawnCell + IntVec3.North * 10, map); // Spawn high above
+                // Spawn the projectile high above the target cell
+                IntVec3 highSpawnPos = new IntVec3(spawnCell.x, spawnCell.y, spawnCell.z + 15);
+                if (!highSpawnPos.InBounds(map))
+                    highSpawnPos = spawnCell;
 
-                // Visual effect for sword appearance
+                projectile.Initialize(pawn, spawnCell.ToVector3Shifted());
+                GenSpawn.Spawn(projectile, highSpawnPos, map);
+                
+                // Launch the projectile to impact at the target cell
+                projectile.Launch(pawn, highSpawnPos, spawnCell, ProjectileHitFlags.IntendedTarget);
+
+                // Visual effect for sword appearance at target
                 FleckMaker.Static(spawnCell, map, FleckDefOf.PsycastAreaEffect, 0.8f);
                 
                 // Whoosh sound
-                SoundStarter.PlayOneShot(SoundDefOf.Recipe_Surgery, new TargetInfo(spawnCell, map));
+                SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_Miss, new TargetInfo(spawnCell, map));
             }
+        }
+
+        private IntVec3 FindEnemyTarget(IntVec3 center, Map map)
+        {
+            // Find enemies within the area
+            List<Pawn> enemies = new List<Pawn>();
+            
+            foreach (IntVec3 cell in GenRadial.RadialCellsAround(center, 6f, true))
+            {
+                if (cell.InBounds(map))
+                {
+                    Pawn pawn = cell.GetFirstPawn(map);
+                    if (pawn != null && pawn != this.pawn && pawn.HostileTo(this.pawn))
+                    {
+                        enemies.Add(pawn);
+                    }
+                }
+            }
+
+            if (enemies.Count > 0)
+            {
+                // Prioritize enemies based on threat level and proximity to center
+                Pawn bestTarget = enemies
+                    .OrderByDescending(enemy => CalculateEnemyPriority(enemy, center))
+                    .First();
+                
+                return bestTarget.Position;
+            }
+
+            return IntVec3.Invalid;
+        }
+
+        private float CalculateEnemyPriority(Pawn enemy, IntVec3 center)
+        {
+            float priority = 0f;
+            
+            // Base priority
+            priority += 10f;
+            
+            // Distance factor (closer enemies get higher priority)
+            float distance = enemy.Position.DistanceTo(center);
+            priority += (6f - distance) * 2f; // Closer = higher priority
+            
+            // Health factor (wounded enemies get slightly higher priority for finishing off)
+            if (enemy.health != null)
+            {
+                float healthPct = enemy.health.summaryHealth.SummaryHealthPercent;
+                if (healthPct < 0.5f) // Below 50% health
+                {
+                    priority += 5f * (1f - healthPct); // More priority for more wounded
+                }
+            }
+            
+            // Combat effectiveness factor (more dangerous enemies get higher priority)
+            if (enemy.equipment?.Primary != null)
+            {
+                // Has weapon = more threatening
+                priority += 3f;
+                
+                // Ranged weapons are more threatening (check by weapon tags/properties)
+                var weapon = enemy.equipment.Primary;
+                if (weapon.def.IsRangedWeapon || (weapon.def.weaponTags?.Contains("Gun") == true))
+                {
+                    priority += 2f;
+                }
+            }
+            
+            // Group factor (enemies clustered together get priority)
+            int nearbyEnemies = 0;
+            foreach (IntVec3 cell in GenAdjFast.AdjacentCells8Way(enemy))
+            {
+                if (cell.InBounds(enemy.Map))
+                {
+                    Pawn nearbyPawn = cell.GetFirstPawn(enemy.Map);
+                    if (nearbyPawn != null && nearbyPawn != this.pawn && nearbyPawn.HostileTo(this.pawn))
+                    {
+                        nearbyEnemies++;
+                    }
+                }
+            }
+            priority += nearbyEnemies * 1.5f; // Bonus for clustered enemies
+            
+            return priority;
+        }
+
+        private IntVec3 GetRandomSpawnCell(IntVec3 center, Map map)
+        {
+            // Find random position within the area
+            Vector2 randomOffset2D = Rand.InsideUnitCircle * 6f; // Random within radius
+            Vector3 randomOffset = new Vector3(randomOffset2D.x, 0, randomOffset2D.y);
+            IntVec3 spawnCell = (center.ToVector3Shifted() + randomOffset).ToIntVec3();
+
+            if (!spawnCell.InBounds(map))
+            {
+                spawnCell = center; // Fallback to center if out of bounds
+            }
+
+            return spawnCell;
         }
 
         private void TrySpawnSpecialSword()
@@ -181,8 +304,14 @@ namespace DMCAbilities
 
             if (projectile != null)
             {
-                GenSpawn.Spawn(projectile, targetCenter + IntVec3.North * 15, map); // Spawn higher for dramatic effect
-                projectile.Launch(pawn, targetCenter, targetCenter, ProjectileHitFlags.IntendedTarget);
+                // Spawn high above target center
+                IntVec3 highSpawnPos = new IntVec3(targetCenter.x, targetCenter.y, targetCenter.z + 20);
+                if (!highSpawnPos.InBounds(map))
+                    highSpawnPos = targetCenter;
+
+                projectile.Initialize(pawn, targetCenter.ToVector3Shifted());
+                GenSpawn.Spawn(projectile, highSpawnPos, map);
+                projectile.Launch(pawn, highSpawnPos, targetCenter, ProjectileHitFlags.IntendedTarget);
 
                 // Enhanced visual and audio effects for special sword
                 FleckMaker.Static(targetCenter, map, FleckDefOf.PsycastAreaEffect, 3.5f);

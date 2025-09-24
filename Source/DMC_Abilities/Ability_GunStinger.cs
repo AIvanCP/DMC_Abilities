@@ -48,11 +48,14 @@ namespace DMCAbilities
                 return false;
             }
 
-            // Perform teleport
-            TeleportPawn(caster, teleportPos);
-
-            // Create visual effects
-            CreateGunStingerEffects(caster.Position, target.Position);
+            // Perform safe teleport
+            bool teleportSucceeded = WeaponDamageUtility.SafeTeleportPawn(caster, teleportPos, false);
+            
+            if (teleportSucceeded)
+            {
+                // Create visual effects
+                CreateGunStingerEffects(caster.Position, target.Position);
+            }
 
             // Apply shotgun damage at point-blank range
             ApplyGunStingerDamage(caster, target);
@@ -65,41 +68,8 @@ namespace DMCAbilities
             Map map = caster.Map;
             IntVec3 targetPos = target.Position;
 
-            // Try adjacent cells around target
-            List<IntVec3> adjacentCells = new List<IntVec3>();
-            
-            foreach (IntVec3 cell in GenAdj.CellsAdjacent8Way(target))
-            {
-                if (cell.InBounds(map) && cell.Standable(map) && 
-                    cell.GetFirstPawn(map) == null && caster.CanReach(cell, PathEndMode.OnCell, Danger.Deadly))
-                {
-                    adjacentCells.Add(cell);
-                }
-            }
-
-            if (adjacentCells.Count == 0)
-                return IntVec3.Invalid;
-
-            // Return closest cell to caster
-            return adjacentCells.OrderBy(c => c.DistanceTo(caster.Position)).First();
-        }
-
-        private void TeleportPawn(Pawn pawn, IntVec3 destination)
-        {
-            if (pawn?.Map == null || !destination.IsValid)
-                return;
-
-            Map map = pawn.Map;
-            
-            // Create departure effect
-            FleckMaker.ThrowDustPuff(pawn.Position.ToVector3Shifted(), map, 1.5f);
-
-            // Teleport with proper notification
-            pawn.Position = destination;
-            pawn.Notify_Teleported(false, true);
-
-            // Create arrival effect
-            FleckMaker.ThrowDustPuff(destination.ToVector3Shifted(), map, 1.5f);
+            // Use the shared safe teleport utility to find a good position near the target
+            return WeaponDamageUtility.FindSafeTeleportPosition(targetPos, map, caster, 3);
         }
 
         private void CreateGunStingerEffects(IntVec3 casterPos, IntVec3 targetPos)
@@ -131,14 +101,20 @@ namespace DMCAbilities
             var damageInfo = WeaponDamageUtility.CalculateRangedDamage(caster, multiplier);
             if (damageInfo.HasValue)
             {
-                // Apply damage
+                // Apply full damage to primary target
                 target.TakeDamage(damageInfo.Value);
 
-                // 15% chance to apply burn effect
+                // 15% chance to apply burn effect to primary target
                 if (Rand.Chance(0.15f))
                 {
                     ApplyBurnEffect(target);
                 }
+
+                // Apply stun effect to primary target (0.5-1.5 seconds = 30-90 ticks)
+                ApplyStunEffect(target);
+
+                // Apply blast area damage to nearby enemies (shotgun spread effect)
+                ApplyBlastAreaDamage(caster, target, damageInfo.Value);
 
                 // Create impact effect using psycast effect with null safety
                 if (target.Map != null)
@@ -148,9 +124,68 @@ namespace DMCAbilities
                     // Additional muzzle flash effect
                     FleckMaker.ThrowLightningGlow(target.Position.ToVector3Shifted(), target.Map, 1.5f);
                 }
+            }
+        }
 
-                // Apply stun effect (0.5-1.5 seconds = 30-90 ticks)
-                ApplyStunEffect(target);
+        private void ApplyBlastAreaDamage(Pawn caster, Pawn primaryTarget, DamageInfo originalDamage)
+        {
+            Map map = primaryTarget.Map;
+            IntVec3 targetPos = primaryTarget.Position;
+            IntVec3 casterPos = caster.Position;
+
+            // Calculate direction from caster to target for cone calculation
+            Vector3 direction = (targetPos - casterPos).ToVector3().normalized;
+            float coneAngle = 90f; // 90-degree cone like DMC5 Gun Stinger
+            float maxRange = 3f; // 3-cell blast radius
+
+            // Find all pawns within blast range
+            List<Pawn> pawnsInRange = new List<Pawn>();
+            foreach (IntVec3 cell in GenRadial.RadialCellsAround(targetPos, maxRange, true))
+            {
+                if (!cell.InBounds(map) || cell == targetPos) // Skip primary target position
+                    continue;
+
+                Pawn pawn = cell.GetFirstPawn(map);
+                if (pawn != null && pawn != caster && pawn != primaryTarget && pawn.HostileTo(caster))
+                {
+                    // Check if pawn is within the cone
+                    Vector3 toPawn = (cell - casterPos).ToVector3().normalized;
+                    float angle = Vector3.Angle(direction, toPawn);
+                    
+                    if (angle <= coneAngle / 2f) // Half-angle check for cone
+                    {
+                        pawnsInRange.Add(pawn);
+                    }
+                }
+            }
+
+            // Apply reduced damage to pawns in blast area
+            foreach (Pawn pawn in pawnsInRange)
+            {
+                // Calculate distance falloff (closer = more damage)
+                float distance = targetPos.DistanceTo(pawn.Position);
+                float falloffMultiplier = Mathf.Lerp(0.7f, 0.3f, distance / maxRange); // 70% damage at close range, 30% at max range
+
+                // Create reduced damage info
+                DamageInfo blastDamage = new DamageInfo(
+                    def: originalDamage.Def,
+                    amount: (int)(originalDamage.Amount * falloffMultiplier),
+                    armorPenetration: 0.15f, // Reduced armor penetration for blast damage
+                    angle: originalDamage.Angle,
+                    instigator: caster,
+                    weapon: originalDamage.Weapon
+                );
+
+                pawn.TakeDamage(blastDamage);
+
+                // Visual effect for blast victims
+                FleckMaker.Static(pawn.Position, map, FleckDefOf.ShotFlash, 1.0f);
+                
+                // 5% chance for burn on blast targets (reduced from primary target)
+                if (Rand.Chance(0.05f))
+                {
+                    ApplyBurnEffect(pawn);
+                }
             }
         }
 
@@ -210,7 +245,48 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = true;
-            return 0f;
+            return 3f; // Show blast range
+        }
+
+        public override void DrawHighlight(LocalTargetInfo target)
+        {
+            // Draw the blast cone area behind the target
+            if (target.IsValid && target.Pawn != null && CasterPawn != null)
+            {
+                IntVec3 targetPos = target.Cell;
+                IntVec3 casterPos = CasterPawn.Position;
+                
+                // Calculate direction from caster to target for cone calculation
+                Vector3 direction = (targetPos - casterPos).ToVector3().normalized;
+                float coneAngle = 90f; // 90-degree cone
+                float maxRange = 3f; // 3-cell blast radius
+
+                // Find all cells within the blast cone
+                List<IntVec3> coneCells = new List<IntVec3>();
+                foreach (IntVec3 cell in GenRadial.RadialCellsAround(targetPos, maxRange, true))
+                {
+                    if (!cell.InBounds(CasterPawn.Map) || cell == targetPos) 
+                        continue;
+
+                    // Check if cell is within the cone
+                    Vector3 toCellDir = (cell - casterPos).ToVector3().normalized;
+                    float angle = Vector3.Angle(direction, toCellDir);
+                    
+                    if (angle <= coneAngle / 2f) // Half-angle check for cone
+                    {
+                        coneCells.Add(cell);
+                    }
+                }
+
+                // Draw the cone area
+                if (coneCells.Count > 0)
+                {
+                    GenDraw.DrawFieldEdges(coneCells);
+                }
+                
+                // Also highlight the primary target
+                GenDraw.DrawTargetHighlight(target);
+            }
         }
 
         public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)

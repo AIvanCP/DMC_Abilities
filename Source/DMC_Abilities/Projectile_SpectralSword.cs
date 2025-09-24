@@ -9,18 +9,11 @@ namespace DMCAbilities
     public class Projectile_SpectralSword : Projectile
     {
         private int lifeTimeTicks = 300; // 5 seconds max lifetime
-        private bool hasFallen = false;
-        private Vector3 spawnPosition;
-        private Vector3 targetPosition;
-        private float fallSpeed = 2f;
         protected Pawn casterPawn;
 
         public void Initialize(Pawn caster, Vector3 target)
         {
             casterPawn = caster;
-            targetPosition = target;
-            spawnPosition = target + Vector3.up * 10f; // Spawn above target
-            Position = spawnPosition.ToIntVec3();
         }
 
         protected override void Impact(Thing hitThing, bool blockedByShield = false)
@@ -136,37 +129,23 @@ namespace DMCAbilities
             }
 
             // Impact sound
-            SoundStarter.PlayOneShot(SoundDefOf.Recipe_Surgery, new TargetInfo(position, map));
+            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(position, map));
         }
 
         protected override void Tick()
         {
             base.Tick();
 
-            if (!hasFallen)
-            {
-                // Move the projectile downward toward target
-                Vector3 currentPos = Position.ToVector3();
-                Vector3 newPos = Vector3.MoveTowards(currentPos, targetPosition, fallSpeed * 0.016f); // Approximate tick time
-
-                if (Vector3.Distance(newPos, targetPosition) < 0.1f)
-                {
-                    // Reached target, trigger impact
-                    hasFallen = true;
-                    Impact(null, false);
-                }
-                else
-                {
-                    Position = newPos.ToIntVec3();
-                }
-            }
-
             // Cleanup after lifetime
             lifeTimeTicks--;
             if (lifeTimeTicks <= 0)
             {
                 Destroy();
+                return;
             }
+
+            // Let the base projectile handle movement towards the destination
+            // The projectile will automatically impact when it reaches its destination
         }
 
         protected override void DrawAt(Vector3 drawLoc, bool flip = false)

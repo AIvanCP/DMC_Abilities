@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -84,6 +85,11 @@ namespace DMCAbilities
             Vector3 casterPos = CasterPawn.Position.ToVector3Shifted();
             Vector3 targetPos = targetPosition.ToVector3Shifted();
             Vector3 direction = (targetPos - casterPos).normalized;
+            
+            // Calculate maximum range target (extend projectile to max distance)
+            float maxRange = 25f; // Max projectile range
+            Vector3 maxRangeTarget = casterPos + direction * maxRange;
+            IntVec3 finalTarget = maxRangeTarget.ToIntVec3();
 
             // Create projectile
             Thing projectileThing = ThingMaker.MakeThing(DMC_ThingDefOf.DMC_DriveSlashProjectile);
@@ -103,9 +109,9 @@ namespace DMCAbilities
                     projectile.SetFinalProjectile(false, damageMultiplier);
                 }
 
-                // Launch projectile
+                // Launch projectile to max range
                 GenSpawn.Spawn(projectile, CasterPawn.Position, CasterPawn.Map);
-                projectile.Launch(CasterPawn, targetPosition, targetPosition, ProjectileHitFlags.IntendedTarget);
+                projectile.Launch(CasterPawn, finalTarget, finalTarget, ProjectileHitFlags.IntendedTarget);
 
                 // Visual and sound effects
                 CreateDriveEffects(projectileIndex, isFinalProjectile);
@@ -162,7 +168,30 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = false;
-            return 0f; // No area highlight, it's a directional projectile
+            return 0f; // Don't use radius highlighting, we'll use line drawing
+        }
+
+        public override void DrawHighlight(LocalTargetInfo target)
+        {
+            // Draw the drive line from caster to max range in target direction
+            if (target.IsValid && CasterPawn != null && CasterPawn.Position.IsValid)
+            {
+                Vector3 casterPos = CasterPawn.Position.ToVector3Shifted();
+                Vector3 targetPos = target.Cell.ToVector3Shifted();
+                Vector3 direction = (targetPos - casterPos).normalized;
+                
+                // Calculate max range endpoint
+                float maxRange = 25f;
+                Vector3 endPos = casterPos + direction * maxRange;
+                IntVec3 endCell = endPos.ToIntVec3();
+                
+                if (endCell.InBounds(CasterPawn.Map))
+                {
+                    // Draw line cells from caster to end position
+                    List<IntVec3> lineCells = GenSight.PointsOnLineOfSight(CasterPawn.Position, endCell).ToList();
+                    GenDraw.DrawFieldEdges(lineCells);
+                }
+            }
         }
 
         public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)

@@ -271,4 +271,49 @@ The Heavy Rain is a devastating area-of-effect ability that summons multiple spe
     </comps>
   </ThingDef>
 
+  <!-- Rain Bullet Skillbook -->
+  <ThingDef>
+    <defName>DMC_SkillbookRainBullet</defName>
+    <label>skillbook: rain bullet</label>
+    <description>An advanced gunslinging manual detailing the Rain Bullet technique - an acrobatic aerial shooting maneuver. Reading this book will teach the technique to the reader, but the book will be consumed in the process.
+
+The Rain Bullet allows the user to leap through the air toward a target, continuously firing 3-6 bullets per cell traveled during the jump, then land dramatically at the target position like Dante in the classic games. The farther you jump, the more total bullets are fired! Jump height scales with melee skill for better mobility, while bullets per cell scale with shooting skill for more firepower. Each bullet lands randomly within a small area and has a chance to stagger the target. Requires the target to be at medium range (6-10 cells away).</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookRainstrom</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>80</MaxHitPoints>
+      <Mass>0.5</Mass>
+      <MarketValue>950</MarketValue>
+      <Flammability>1.0</Flammability>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_RainBulletAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Rain Bullet technique</useLabel>
+        <useDuration>300</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
 </Defs>

@@ -48,11 +48,14 @@ namespace DMCAbilities
                 return false;
             }
 
-            // Perform teleport
-            TeleportPawn(caster, teleportPos);
-
-            // Create visual effects
-            CreateStingerEffects(caster.Position, target.Position);
+            // Perform safe teleport
+            bool teleportSucceeded = WeaponDamageUtility.SafeTeleportPawn(caster, teleportPos, false);
+            
+            if (teleportSucceeded)
+            {
+                // Create visual effects
+                CreateStingerEffects(caster.Position, target.Position);
+            }
 
             // Apply damage
             ApplyStingerDamage(caster, target);
@@ -65,37 +68,8 @@ namespace DMCAbilities
             Map map = caster.Map;
             IntVec3 targetPos = target.Position;
 
-            // Try adjacent cells around target
-            List<IntVec3> adjacentCells = new List<IntVec3>();
-            
-            foreach (IntVec3 cell in GenAdj.CellsAdjacent8Way(target))
-            {
-                if (cell.InBounds(map) && cell.Standable(map) && 
-                    cell.GetFirstPawn(map) == null && caster.CanReach(cell, PathEndMode.OnCell, Danger.Deadly))
-                {
-                    adjacentCells.Add(cell);
-                }
-            }
-
-            if (adjacentCells.Count == 0)
-                return IntVec3.Invalid;
-
-            // Prefer cells that are closer to the caster's current position
-            adjacentCells.SortBy(cell => cell.DistanceTo(caster.Position));
-            return adjacentCells[0];
-        }
-
-        private void TeleportPawn(Pawn pawn, IntVec3 destination)
-        {
-            // Create dust effect at origin
-            FleckMaker.ThrowDustPuff(pawn.Position.ToVector3Shifted(), pawn.Map, 1.5f);
-
-            // Move pawn
-            pawn.Position = destination;
-            pawn.Notify_Teleported(false, true);
-
-            // Create dust effect at destination
-            FleckMaker.ThrowDustPuff(destination.ToVector3Shifted(), pawn.Map, 1.5f);
+            // Use the shared safe teleport utility to find a good position near the target
+            return WeaponDamageUtility.FindSafeTeleportPosition(targetPos, map, caster, 3);
         }
 
         private void CreateStingerEffects(IntVec3 originPos, IntVec3 targetPos)

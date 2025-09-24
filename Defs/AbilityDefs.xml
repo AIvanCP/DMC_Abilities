@@ -237,4 +237,62 @@
     </projectile>
   </ThingDef>
 
+  <!-- Rain Bullet Ability -->
+  <AbilityDef>
+    <defName>DMC_RainBullet</defName>
+    <label>rain bullet</label>
+    <description>Leap through the air toward your target, continuously firing 3-6 bullets per cell traveled during the jump, then land dramatically at the target position. The farther you jump, the more bullets are fired! Jump height scales with melee skill, bullets per cell scale with shooting skill. Each bullet lands randomly within a small area and has a 10% chance to stagger. Requires a pistol or revolver equipped. Target must be 6-10 cells away.</description>
+    <iconPath>UI/Abilities/Rainstrom</iconPath>
+    <cooldownTicksRange>480</cooldownTicksRange> <!-- 8 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_RainBullet</verbClass>
+      <range>10</range>
+      <minRange>6</minRange>
+      <warmupTime>0.3</warmupTime>
+      <soundCast>Pawn_Melee_Punch_Miss</soundCast>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnCell</jobDef>
+  </AbilityDef>
+
+  <!-- Job definition for Rain Bullet casting -->
+  <JobDef>
+    <defName>DMC_RainBulletCast</defName>
+    <driverClass>DMCAbilities.JobDriver_RainBulletCast</driverClass>
+    <reportString>raining bullets</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
+  <!-- Rain Bullet Projectile -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_RainBulletProjectile</defName>
+    <label>rain bullet</label>
+    <thingClass>DMCAbilities.Projectile_RainBullet</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <color>(0.9, 0.7, 0.2)</color>
+    </graphicData>
+    <projectile>
+      <damageDef>Bullet</damageDef>
+      <damageAmountBase>1</damageAmountBase>
+      <speed>50</speed>
+      <range>15</range>
+      <flyOverhead>true</flyOverhead>
+    </projectile>
+  </ThingDef>
+
 </Defs>

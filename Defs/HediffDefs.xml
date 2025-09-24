@@ -187,4 +187,42 @@
     </stages>
   </HediffDef>
 
+  <!-- Rain Bullet Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_RainBulletAbility</defName>
+    <label>rain bullet technique</label>
+    <description>Mastery of the Rain Bullet technique - an aerial shooting maneuver. This advanced gunslinging technique allows the user to leap into the air and rain down precision shots on targets using pistols and revolvers.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.9, 0.7, 0.2)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_RainBullet</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Stagger Effect Hediff -->
+  <HediffDef>
+    <defName>DMC_Stagger</defName>
+    <label>staggered</label>
+    <description>Momentarily staggered by a precise shot. Movement and reaction speed are temporarily reduced.</description>
+    <hediffClass>DMCAbilities.Hediff_Stagger</hediffClass>
+    <defaultLabelColor>(0.7, 0.4, 0.1)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <MoveSpeed>-0.2</MoveSpeed>
+          <MeleeDodgeChance>-0.05</MeleeDodgeChance>
+          <RangedDodgeChance>-0.05</RangedDodgeChance>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
 </Defs>
