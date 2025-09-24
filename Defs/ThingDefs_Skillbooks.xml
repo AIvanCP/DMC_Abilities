@@ -226,4 +226,49 @@ The Gun Stinger allows the user to instantly teleport behind an enemy and fire t
     </comps>
   </ThingDef>
 
+  <!-- Heavy Rain Skillbook -->
+  <ThingDef>
+    <defName>DMC_HeavyRainSkillbook</defName>
+    <label>skillbook: heavy rain</label>
+    <description>An ancient tome containing the forbidden art of spectral summoning. This book teaches the Heavy Rain technique - the ability to call forth storms of ghostly swords from beyond the veil. Reading this book will impart the knowledge to the reader, but the book will be consumed in the process.
+
+The Heavy Rain is a devastating area-of-effect ability that summons multiple spectral swords to rain down on enemies within a large radius. The number of swords increases with the user's melee skill, and there's a chance to summon a massive special sword with enhanced destructive power. No weapon restrictions apply.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <drawerType>MapMeshOnly</drawerType>
+    <useHitPoints>true</useHitPoints>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <stackLimit>1</stackLimit>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookHeavyRain</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+    </graphicData>
+    <statBases>
+      <MaxHitPoints>100</MaxHitPoints>
+      <Mass>1.5</Mass>
+      <Flammability>1.0</Flammability>
+      <MarketValue>1200</MarketValue>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_HeavyRainAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Heavy Rain technique</useLabel>
+        <useDuration>300</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+  </ThingDef>
+
 </Defs>

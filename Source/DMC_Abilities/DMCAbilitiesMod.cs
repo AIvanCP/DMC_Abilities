@@ -42,6 +42,9 @@ namespace DMCAbilities
             listingStandard.CheckboxLabeled("Enable Gun Stinger ability", ref settings.gunStingerEnabled,
                 "Enable or disable the Gun Stinger shotgun dash ability.");
             
+            listingStandard.CheckboxLabeled("Enable Heavy Rain ability", ref settings.heavyRainEnabled,
+                "Enable or disable the Heavy Rain spectral sword storm ability.");
+            
             listingStandard.Gap();
             listingStandard.Label("Balance Settings:");
             
@@ -87,6 +90,7 @@ namespace DMCAbilities
         public bool driveEnabled = true;
         public bool voidSlashEnabled = true;
         public bool gunStingerEnabled = true;
+        public bool heavyRainEnabled = true;
         public float stingerDamageMultiplier = 1.2f;
         public float driveDamageMultiplier = 1.0f;
         public float gunStingerDamageMultiplier = 1.5f;
@@ -96,6 +100,7 @@ namespace DMCAbilities
         public float driveTradeChance = 4f;
         public float voidSlashTradeChance = 4f;
         public float gunStingerTradeChance = 4f;
+        public float heavyRainTradeChance = 2f;
 
         public override void ExposeData()
         {
@@ -105,6 +110,7 @@ namespace DMCAbilities
             Scribe_Values.Look(ref driveEnabled, "driveEnabled", true);
             Scribe_Values.Look(ref voidSlashEnabled, "voidSlashEnabled", true);
             Scribe_Values.Look(ref gunStingerEnabled, "gunStingerEnabled", true);
+            Scribe_Values.Look(ref heavyRainEnabled, "heavyRainEnabled", true);
             Scribe_Values.Look(ref stingerDamageMultiplier, "stingerDamageMultiplier", 1.2f);
             Scribe_Values.Look(ref driveDamageMultiplier, "driveDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref gunStingerDamageMultiplier, "gunStingerDamageMultiplier", 1.5f);
@@ -114,6 +120,7 @@ namespace DMCAbilities
             Scribe_Values.Look(ref driveTradeChance, "driveTradeChance", 4f);
             Scribe_Values.Look(ref voidSlashTradeChance, "voidSlashTradeChance", 4f);
             Scribe_Values.Look(ref gunStingerTradeChance, "gunStingerTradeChance", 4f);
+            Scribe_Values.Look(ref heavyRainTradeChance, "heavyRainTradeChance", 2f);
             base.ExposeData();
         }
     }

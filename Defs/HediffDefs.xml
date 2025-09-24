@@ -121,4 +121,70 @@
     </comps>
   </HediffDef>
 
+  <!-- Heavy Rain Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_HeavyRainAbility</defName>
+    <label>heavy rain mastery</label>
+    <description>This character has learned the Heavy Rain technique, allowing them to summon spectral sword storms over large areas.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.3, 0.5, 0.8)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_HeavyRain</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Spectral Wound Debuff -->
+  <HediffDef>
+    <defName>DMC_SpectralWound</defName>
+    <label>spectral wound</label>
+    <description>Wounds inflicted by spectral swords that hinder movement and combat effectiveness. The ghostly nature of these wounds makes them particularly difficult to overcome.</description>
+    <hediffClass>DMCAbilities.Hediff_SpectralWound</hediffClass>
+    <defaultLabelColor>(0.4, 0.2, 0.6)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <MoveSpeed>-0.3</MoveSpeed>
+          <MeleeDodgeChance>-0.10</MeleeDodgeChance>
+          <RangedDodgeChance>-0.10</RangedDodgeChance>
+          <ManipulationCapacity>-0.15</ManipulationCapacity>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Spectral Stun Hediff -->
+  <HediffDef>
+    <defName>DMC_SpectralStun</defName>
+    <label>spectral paralysis</label>
+    <description>Paralyzed by the overwhelming force of spectral energy. The affected pawn is temporarily unable to move or act.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.2, 0.1, 0.4)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <capMods>
+          <li>
+            <capacity>Moving</capacity>
+            <setMax>0.01</setMax>
+          </li>
+          <li>
+            <capacity>Manipulation</capacity>
+            <setMax>0.01</setMax>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+  </HediffDef>
+
 </Defs>

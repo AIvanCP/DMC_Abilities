@@ -120,11 +120,43 @@
     <jobDef>CastAbilityOnThing</jobDef>
   </AbilityDef>
 
+  <!-- Heavy Rain Ability -->
+  <AbilityDef>
+    <defName>DMC_HeavyRain</defName>
+    <label>heavy rain</label>
+    <description>Summons a rain of spectral swords over a large area. Swords fall randomly within the target zone, each dealing 15-20 damage and applying debuffing spectral wounds. Number of swords increases with melee skill. Has a chance to summon a massive special sword with enhanced effects.</description>
+    <iconPath>UI/Abilities/HeavyRain</iconPath>
+    <cooldownTicksRange>780</cooldownTicksRange> <!-- 13 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_HeavyRain</verbClass>
+      <range>25</range>
+      <warmupTime>1.2</warmupTime>
+      <soundCast>Psycast_Skip_Pulse</soundCast>
+      <targetParams>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnCell</jobDef>
+  </AbilityDef>
+
   <!-- Job definition for Drive delayed launch -->
   <JobDef>
     <defName>DMC_DriveDelayedLaunch</defName>
     <driverClass>DMCAbilities.JobDriver_DriveDelayedLaunch</driverClass>
     <reportString>launching drive projectiles</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
+  <!-- Job definition for Heavy Rain casting -->
+  <JobDef>
+    <defName>DMC_HeavyRainCast</defName>
+    <driverClass>DMCAbilities.JobDriver_HeavyRainCast</driverClass>
+    <reportString>summoning heavy rain</reportString>
     <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
   </JobDef>
 
@@ -150,6 +182,58 @@
       <speed>40</speed>
       <range>25</range>
       <flyOverhead>false</flyOverhead>
+    </projectile>
+  </ThingDef>
+
+  <!-- Spectral Sword Projectile -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_SpectralSwordProjectile</defName>
+    <label>spectral sword</label>
+    <thingClass>DMCAbilities.Projectile_SpectralSword</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <color>(0.5, 0.3, 0.8)</color>
+    </graphicData>
+    <projectile>
+      <damageDef>Cut</damageDef>
+      <damageAmountBase>18</damageAmountBase>
+      <speed>30</speed>
+      <range>10</range>
+      <flyOverhead>true</flyOverhead>
+    </projectile>
+  </ThingDef>
+
+  <!-- Special Spectral Sword Projectile -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_SpectralSwordSpecialProjectile</defName>
+    <label>summoned spectral blade</label>
+    <thingClass>DMCAbilities.Projectile_SpectralSwordSpecial</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <color>(0.2, 0.4, 1.0)</color>
+      <drawSize>(2, 2)</drawSize>
+    </graphicData>
+    <projectile>
+      <damageDef>Cut</damageDef>
+      <damageAmountBase>35</damageAmountBase>
+      <speed>25</speed>
+      <range>15</range>
+      <flyOverhead>true</flyOverhead>
+      <explosionRadius>4</explosionRadius>
     </projectile>
   </ThingDef>
 

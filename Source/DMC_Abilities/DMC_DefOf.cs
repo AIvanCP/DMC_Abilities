@@ -7,6 +7,7 @@ namespace DMCAbilities
     public static class DMC_JobDefOf
     {
         public static JobDef DMC_DriveDelayedLaunch;
+        public static JobDef DMC_HeavyRainCast;
 
         static DMC_JobDefOf()
         {
@@ -24,6 +25,9 @@ namespace DMCAbilities
         public static HediffDef DMC_VoidSlashAbility;
         public static HediffDef DMC_VoidSlashDebuff;
         public static HediffDef DMC_GunStingerHediff;
+        public static HediffDef DMC_HeavyRainAbility;
+        public static HediffDef DMC_SpectralWound;
+        public static HediffDef DMC_SpectralStun;
 
         static DMC_HediffDefOf()
         {
@@ -39,6 +43,7 @@ namespace DMCAbilities
         public static AbilityDef DMC_Drive;
         public static AbilityDef DMC_VoidSlash;
         public static AbilityDef DMC_GunStinger;
+        public static AbilityDef DMC_HeavyRain;
 
         static DMC_AbilityDefOf()
         {
@@ -50,6 +55,8 @@ namespace DMCAbilities
     public static class DMC_ThingDefOf
     {
         public static ThingDef DMC_DriveSlashProjectile;
+        public static ThingDef DMC_SpectralSwordProjectile;
+        public static ThingDef DMC_SpectralSwordSpecialProjectile;
 
         static DMC_ThingDefOf()
         {
