@@ -43,7 +43,7 @@ namespace DMCAbilities
 
 
 
-        public void FireBulletStorm(IntVec3 targetCell)
+        public void FireDownwardBulletStorm(IntVec3 centerPos)
         {
             if (CasterPawn == null || CasterPawn.Dead) return;
 
@@ -54,50 +54,43 @@ namespace DMCAbilities
                 return;
             }
 
-            // Calculate total bullets based on skills like before
+            // Calculate bullets based on skills (3-6 per area)
             int meleeSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
             int shootingSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Shooting)?.Level ?? 0;
             
-            float jumpDistance = Vector3.Distance(CasterPawn.Position.ToVector3(), targetCell.ToVector3());
-            float meleeModifier = 1f + (meleeSkill * 0.05f);
-            float effectiveDistance = jumpDistance * meleeModifier;
+            // Calculate area coverage (like the old system)
+            float areaRadius = 3f + (meleeSkill * 0.1f); // Bigger area with skill
+            int bulletsPerArea = Mathf.RoundToInt(3f + (shootingSkill * 0.15f));
+            bulletsPerArea = Mathf.Clamp(bulletsPerArea, 3, 6);
             
-            float bulletsPerCell = 3f + (shootingSkill * 0.15f);
-            bulletsPerCell = Mathf.Clamp(bulletsPerCell, 3f, 6f);
-            
-            int totalBullets = Mathf.RoundToInt(effectiveDistance * bulletsPerCell);
-            totalBullets = Mathf.Clamp(totalBullets, 8, 30);
+            int totalBullets = Mathf.RoundToInt(areaRadius * areaRadius * bulletsPerArea * 0.5f);
+            totalBullets = Mathf.Clamp(totalBullets, 12, 40);
 
             var map = CasterPawn.Map;
             
-            // Fire all bullets rapidly in a storm pattern (like DMC)
+            // Fire bullets in area around caster (like DMC Rainstorm)
             for (int i = 0; i < totalBullets; i++)
             {
-                // Random area around target for bulletstorm effect (3 cell radius)
-                Vector2 randomOffset = Rand.InsideUnitCircle * Rand.Range(1f, 3f);
-                Vector3 impactPos = targetCell.ToVector3() + new Vector3(randomOffset.x, 0, randomOffset.y);
+                // Random spread around caster position
+                Vector2 randomOffset = Rand.InsideUnitCircle * areaRadius;
+                Vector3 impactPos = centerPos.ToVector3() + new Vector3(randomOffset.x, 0, randomOffset.y);
                 IntVec3 impactCell = impactPos.ToIntVec3().ClampInsideMap(map);
 
-                // Spawn from above (simulate aerial shooting)
-                IntVec3 skyPos = new IntVec3(impactCell.x, 0, impactCell.z + 8); // High above target
+                // Spawn bullets from above (simulate downward rain)
+                IntVec3 skyPos = new IntVec3(impactCell.x, 0, impactCell.z + 8);
                 
                 var projectile = (Projectile_RainBullet)GenSpawn.Spawn(projectileDef, skyPos, map);
                 projectile.Initialize(CasterPawn, impactCell.ToVector3());
                 projectile.Launch(CasterPawn, impactCell, impactCell, ProjectileHitFlags.IntendedTarget);
             }
 
-            Log.Message($"Rain Bullet: Fired bulletstorm of {totalBullets} bullets at {targetCell}");
-        }
-
-        public bool TryTeleportCaster(IntVec3 targetCell)
-        {
-            Log.Message($"Rain Bullet: Attempting to teleport {CasterPawn} to {targetCell}");
-            return WeaponDamageUtility.SafeTeleportPawn(CasterPawn, targetCell);
+            Log.Message($"Rain Bullet: Fired downward bullet storm of {totalBullets} bullets around {centerPos}");
         }
     }
 
     public class JobDriver_RainBulletCast : JobDriver
     {
+        private bool hasTeleported = false;
         private bool bulletStormFired = false;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -109,53 +102,58 @@ namespace DMCAbilities
         {
             yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
 
-            // Simple DMC-style: fire bulletstorm, then teleport
-            var castToil = new Toil();
-            castToil.initAction = () =>
+            // DMC Rainstorm style: teleport above and shoot downward
+            var rainStormToil = new Toil();
+            rainStormToil.initAction = () =>
             {
-                var verb = job.verbToUse as Verb_RainBullet;
-                if (verb == null)
+                Log.Message($"Rain Bullet: Starting DMC Rainstorm - teleport and shoot downward");
+                
+                // Teleport to target position first
+                if (WeaponDamageUtility.SafeTeleportPawn(pawn, TargetA.Cell))
                 {
-                    Log.Error("Rain Bullet: Invalid verb in job");
-                    EndJobWith(JobCondition.Errored);
+                    hasTeleported = true;
+                    Log.Message($"Rain Bullet: Teleported to {TargetA.Cell}");
+                }
+                else
+                {
+                    // If teleport fails, end ability
+                    Log.Warning($"Rain Bullet: Failed to teleport to {TargetA.Cell}");
+                    EndJobWith(JobCondition.Incompletable);
                     return;
                 }
-
-                Log.Message($"Rain Bullet: Starting DMC-style bulletstorm");
-                
-                // Fire the entire bulletstorm immediately
-                verb.FireBulletStorm(TargetA.Cell);
-                bulletStormFired = true;
             };
 
-            castToil.tickAction = () =>
+            rainStormToil.tickAction = () =>
             {
-                var verb = job.verbToUse as Verb_RainBullet;
-                if (verb == null || pawn.Dead || pawn.Downed)
+                if (pawn.Dead || pawn.Downed)
                 {
                     EndJobWith(JobCondition.Errored);
                     return;
                 }
 
-                // Wait 1 second for bullets to rain down, then teleport
+                // After teleporting, fire bullet storm downward
+                if (hasTeleported && !bulletStormFired)
+                {
+                    var verb = job.verbToUse as Verb_RainBullet;
+                    if (verb != null)
+                    {
+                        verb.FireDownwardBulletStorm(TargetA.Cell);
+                        bulletStormFired = true;
+                    }
+                }
+
+                // Wait a moment then end
                 if (bulletStormFired && Find.TickManager.TicksGame % 60 == 0)
                 {
-                    Log.Message($"Rain Bullet: Bulletstorm complete, teleporting to {TargetA.Cell}");
-                    if (verb.TryTeleportCaster(TargetA.Cell))
-                    {
-                        Log.Message($"Rain Bullet: Teleport successful");
-                        EndJobWith(JobCondition.Succeeded);
-                    }
-                    else
-                    {
-                        Log.Warning($"Rain Bullet: Teleport failed to {TargetA.Cell}");
-                        EndJobWith(JobCondition.Incompletable);
-                    }
+                    Log.Message($"Rain Bullet: Rainstorm complete");
+                    EndJobWith(JobCondition.Succeeded);
                 }
             };
 
-            castToil.defaultCompleteMode = ToilCompleteMode.Never;
-            yield return castToil;
+            rainStormToil.defaultCompleteMode = ToilCompleteMode.Never;
+            yield return rainStormToil;
         }
+
+        // Old dash methods removed - now using teleport and downward shooting system
     }
 }

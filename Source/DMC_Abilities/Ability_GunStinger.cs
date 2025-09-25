@@ -367,29 +367,20 @@ namespace DMCAbilities
                 {
                     IntVec3 nextCell = dashPath[currentPathIndex];
                     
-                    // Dash to next cell
-                    if (WeaponDamageUtility.SafeTeleportPawn(pawn, nextCell))
+                    // Force dash through obstacles (trees, walls, etc.)
+                    WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
+                    Log.Message($"Gun Stinger: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    
+                    // Check if we're close enough for the point-blank shot
+                    if (TargetA.HasThing && TargetA.Thing is Pawn target && 
+                        pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasShot)
                     {
-                        Log.Message($"Gun Stinger: Dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
-                        
-                        // Check if we're close enough for the point-blank shot
-                        if (TargetA.HasThing && TargetA.Thing is Pawn target && 
-                            pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasShot)
-                        {
-                            PerformGunStingerShot(target);
-                            hasShot = true;
-                        }
-                        
-                        currentPathIndex++;
-                        lastMoveTick = Find.TickManager.TicksGame;
+                        PerformGunStingerShot(target);
+                        hasShot = true;
                     }
-                    else
-                    {
-                        // Hit obstacle, end dash
-                        Log.Warning($"Gun Stinger: Hit obstacle at {nextCell}, ending dash");
-                        EndJobWith(JobCondition.Succeeded);
-                        return;
-                    }
+                    
+                    currentPathIndex++;
+                    lastMoveTick = Find.TickManager.TicksGame;
                 }
             };
 
@@ -411,20 +402,34 @@ namespace DMCAbilities
             if (lineCells.Count > 0 && lineCells[0] == startPos)
                 lineCells.RemoveAt(0);
 
-            // Add all cells up to the target
+            // Add all cells up to (but NOT including) the target position - bypass obstacles
+            // This ensures we land adjacent to the enemy, not on top (like regular Stinger)
             foreach (IntVec3 cell in lineCells)
             {
-                if (cell.InBounds(pawn.Map) && cell.Standable(pawn.Map))
+                if (cell == targetPos)
                 {
-                    dashPath.Add(cell);
+                    // Stop before reaching the target position - we want to be adjacent
+                    break;
                 }
-                else
+                
+                if (cell.InBounds(pawn.Map))
                 {
-                    break; // Stop at first impassable cell
+                    // Add ALL cells - Gun Stinger bypasses trees, walls, everything
+                    dashPath.Add(cell);
                 }
             }
 
-            Log.Message($"Gun Stinger: Dash path calculated with {dashPath.Count} cells");
+            // If the path is empty (target too close), find an adjacent position
+            if (dashPath.Count == 0)
+            {
+                IntVec3 adjacentPos = WeaponDamageUtility.FindSafeTeleportPosition(targetPos, pawn.Map, pawn, 1);
+                if (adjacentPos != IntVec3.Invalid && adjacentPos != startPos)
+                {
+                    dashPath.Add(adjacentPos);
+                }
+            }
+
+            Log.Message($"Gun Stinger: Dash path calculated with {dashPath.Count} cells (stops adjacent to target)");
         }
 
         private void PerformGunStingerShot(Pawn target)
@@ -452,6 +457,9 @@ namespace DMCAbilities
                 
                 Log.Message($"Gun Stinger: Shotgun blast hit {target.Label}");
             }
+
+            // NEW: Perform 90-degree cone area blast after point-blank shot
+            PerformConeAreaBlast(target.Position);
         }
 
         private void CreateGunStingerBlastEffects(IntVec3 position)
@@ -464,6 +472,60 @@ namespace DMCAbilities
             
             // Shotgun sound
             SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(position, map));
+        }
+
+        private void PerformConeAreaBlast(IntVec3 centerPosition)
+        {
+            Map map = pawn.Map;
+            if (map == null) return;
+
+            // Get the facing direction of the caster
+            Rot4 facingDirection = pawn.Rotation;
+            
+            // Get cells in a 90-degree cone blast area
+            List<IntVec3> coneCells = WeaponDamageUtility.GetConeBlastCells(centerPosition, facingDirection, map, 3);
+            
+            Log.Message($"Gun Stinger: Performing cone blast in {coneCells.Count} cells");
+
+            // Apply damage to all entities in the cone area
+            foreach (IntVec3 cell in coneCells)
+            {
+                // Get all things at this cell
+                List<Thing> thingsInCell = map.thingGrid.ThingsListAtFast(cell).ToList();
+                
+                foreach (Thing thing in thingsInCell)
+                {
+                    // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
+                    if ((thing is Pawn targetPawn && targetPawn != pawn && !targetPawn.Dead) ||
+                        (thing.def.building?.IsTurret == true))
+                    {
+                        // Apply reduced cone damage (0.8x normal damage)
+                        float coneMultiplier = (DMCAbilitiesMod.settings?.gunStingerDamageMultiplier ?? 1.5f) * 0.8f;
+                        var damageInfo = WeaponDamageUtility.CalculateRangedDamage(pawn, coneMultiplier);
+                        
+                        if (damageInfo.HasValue)
+                        {
+                            thing.TakeDamage(damageInfo.Value);
+                            
+                            // Apply light stagger only to pawns (turrets don't have health hediffs)
+                            if (thing is Pawn pawnTarget && pawnTarget.health?.hediffSet != null)
+                            {
+                                Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, pawnTarget);
+                                stagger.Severity = 0.3f; // Lighter stagger for area effect
+                                pawnTarget.health.AddHediff(stagger);
+                            }
+                            
+                            Log.Message($"Gun Stinger: Cone blast hit {thing.Label} at {cell}");
+                        }
+                    }
+                }
+                
+                // Create blast effects at each cell
+                FleckMaker.Static(cell, map, FleckDefOf.ExplosionFlash, 0.8f);
+            }
+            
+            // Play area blast sound
+            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(centerPosition, map));
         }
     }
 }

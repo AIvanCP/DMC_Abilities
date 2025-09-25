@@ -68,7 +68,7 @@ namespace DMCAbilities
         private int currentPathIndex = 0;
         private const int TicksBetweenCells = 2; // Very fast forward dash
         private int lastMoveTick = 0;
-        private HashSet<Pawn> alreadyHit = new HashSet<Pawn>();
+        private HashSet<Thing> alreadyHit = new HashSet<Thing>();
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -114,24 +114,15 @@ namespace DMCAbilities
                 {
                     IntVec3 nextCell = dashPath[currentPathIndex];
                     
-                    // Move to next cell (dash forward)
-                    if (WeaponDamageUtility.SafeTeleportPawn(pawn, nextCell))
-                    {
-                        Log.Message($"Rapid Slash: Dashing forward to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
-                        
-                        // Slash everything in 3x3 area around current position
-                        SlashInThreeByThreeArea(nextCell);
-                        
-                        currentPathIndex++;
-                        lastMoveTick = Find.TickManager.TicksGame;
-                    }
-                    else
-                    {
-                        // Hit obstacle, end dash
-                        Log.Warning($"Rapid Slash: Hit obstacle at {nextCell}, ending dash");
-                        EndJobWith(JobCondition.Succeeded);
-                        return;
-                    }
+                    // Force dash through ALL obstacles (trees, walls, etc.)
+                    WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
+                    Log.Message($"Rapid Slash: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    
+                    // Slash everything in 3x3 area around current position
+                    SlashInThreeByThreeArea(nextCell);
+                    
+                    currentPathIndex++;
+                    lastMoveTick = Find.TickManager.TicksGame;
                 }
             };
 
@@ -158,18 +149,14 @@ namespace DMCAbilities
             int maxDashCells = 10 + (meleeSkill / 2); // Increased from 6 to 10 base range
             maxDashCells = Mathf.Clamp(maxDashCells, 10, 20); // Max range increased to 20
 
-            // Take up to max dash cells along the path to target
+            // Take up to max dash cells along the path to target - bypass ALL obstacles
             for (int i = 0; i < Mathf.Min(lineCells.Count, maxDashCells); i++)
             {
                 IntVec3 cell = lineCells[i];
-                if (cell.InBounds(pawn.Map) && cell.Standable(pawn.Map))
+                if (cell.InBounds(pawn.Map))
                 {
+                    // Add ALL cells in path - Rapid Slash bypasses trees, walls, everything
                     dashPath.Add(cell);
-                }
-                else
-                {
-                    // Stop at first impassable cell
-                    break;
                 }
             }
 
@@ -198,27 +185,26 @@ namespace DMCAbilities
             
             foreach (IntVec3 cell in threeBythreeCells)
             {
-                // Find pawns in this cell
-                List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                // Find pawns in this cell - CRITICAL: Use .ToList() to prevent collection modification errors
+                List<Thing> things = map.thingGrid.ThingsListAtFast(cell).ToList();
                 foreach (Thing thing in things)
                 {
-                    Pawn targetPawn = thing as Pawn;
-                    if (targetPawn != null && 
-                        targetPawn != pawn && 
-                        !targetPawn.Dead && 
-                        !alreadyHit.Contains(targetPawn))
+                    // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
+                    if (((thing is Pawn targetPawn && targetPawn != pawn && !targetPawn.Dead) ||
+                         (thing.def.building?.IsTurret == true)) &&
+                        !alreadyHit.Contains(thing))
                     {
-                        // Rapid Slash damages ANY pawn, mecha, or animal in the path
-                        PerformDashSlash(targetPawn);
-                        alreadyHit.Add(targetPawn); // Each target can only be hit once during the dash
+                        // Rapid Slash damages ANY pawn, mecha, turret, or animal in the path
+                        PerformDashSlash(thing);
+                        alreadyHit.Add(thing); // Each target can only be hit once during the dash
                     }
                 }
             }
         }
 
-        private void PerformDashSlash(Pawn target)
+        private void PerformDashSlash(Thing target)
         {
-            if (target == null || target.Dead) return;
+            if (target == null || target.Destroyed) return;
 
             // Calculate and apply melee damage for forward dash slashes
             float damageMultiplier = 1.0f; // Standard weapon damage for each slash
@@ -229,18 +215,60 @@ namespace DMCAbilities
                 target.TakeDamage(damageInfo.Value);
             }
 
-            // Apply stagger effect
-            if (target.health?.hediffSet != null)
+            // Apply stagger effect only to pawns (turrets don't have health hediffs)
+            if (target is Pawn pawnTarget && pawnTarget.health?.hediffSet != null)
             {
-                Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, target);
+                Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, pawnTarget);
                 stagger.Severity = 0.4f; // Strong stagger from dash attack
-                target.health.AddHediff(stagger);
+                pawnTarget.health.AddHediff(stagger);
             }
+
+            // Try to spawn spectral summoned sword above target
+            TrySpawnSpectralSword(target);
 
             // Visual and sound effects
             CreateSlashEffects(target.Position);
 
             Log.Message($"Rapid Slash: Forward dash hit {target.Label}");
+        }
+
+        private void TrySpawnSpectralSword(Thing target)
+        {
+            // Calculate chance: 10% base + 1% per 5 melee skill levels
+            int meleeSkill = pawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
+            float baseChance = 10f; // 10% base chance
+            float skillBonus = (meleeSkill / 5) * 1f; // +1% per 5 skill levels
+            float totalChance = (baseChance + skillBonus) / 100f;
+
+            if (Rand.Chance(totalChance))
+            {
+                SpawnSpectralSword(target.Position);
+                Log.Message($"Rapid Slash: Spawned spectral sword above {target.Label} (chance: {totalChance:P1})");
+            }
+        }
+
+        private void SpawnSpectralSword(IntVec3 targetPosition)
+        {
+            Map map = pawn.Map;
+            if (map == null) return;
+
+            // Spawn spectral sword projectile on same cell (visually above their head)
+            
+            Thing projectileThing = ThingMaker.MakeThing(DMC_ThingDefOf.DMC_SpectralSwordRapidSlashProjectile);
+            Projectile_SpectralSwordRapidSlash projectile = projectileThing as Projectile_SpectralSwordRapidSlash;
+            
+            if (projectile != null)
+            {
+                // Set explosion delay and target
+                projectile.SetExplosionTarget(targetPosition, pawn);
+                
+                // Spawn on the same cell as the target (visually appears above their head)
+                GenSpawn.Spawn(projectile, targetPosition, map);
+                projectile.Launch(pawn, targetPosition, targetPosition, ProjectileHitFlags.IntendedTarget);
+                
+                // Visual effect at spawn (on same cell, visually above)
+                FleckMaker.Static(targetPosition, map, FleckDefOf.PsycastAreaEffect, 1.0f);
+            }
         }
 
         private void CreateSlashEffects(IntVec3 position)
@@ -254,8 +282,8 @@ namespace DMCAbilities
             // Slash sparks
             FleckMaker.Static(position, map, FleckDefOf.MicroSparks, 1.2f);
             
-            // Blade slash sound for dash attack
-            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(position, map));
+            // Dramatic blade slash sound for dash attack
+            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Entry, new TargetInfo(position, map));
         }
     }
 }

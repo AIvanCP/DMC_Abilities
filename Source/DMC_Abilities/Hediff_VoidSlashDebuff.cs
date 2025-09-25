@@ -1,5 +1,6 @@
 using RimWorld;
 using Verse;
+using UnityEngine;
 
 namespace DMCAbilities
 {
@@ -90,6 +91,6 @@ namespace DMCAbilities
             }
         }
 
-        public override string LabelInBrackets => $"{(400 - ageTicks) / 60f:F1}s";
+        public override string LabelInBrackets => $"{Mathf.Max(0f, (400 - ageTicks) / 60f):F1}s";
     }
 }

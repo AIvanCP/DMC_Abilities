@@ -34,6 +34,7 @@ namespace DMCAbilities
         public static HediffDef DMC_RapidSlashAbility;
         public static HediffDef DMC_SpectralWound;
         public static HediffDef DMC_SpectralStun;
+        public static HediffDef DMC_SpectralShock;
         public static HediffDef DMC_Stagger;
 
         static DMC_HediffDefOf()
@@ -66,6 +67,7 @@ namespace DMCAbilities
         public static ThingDef DMC_DriveSlashProjectile;
         public static ThingDef DMC_SpectralSwordProjectile;
         public static ThingDef DMC_SpectralSwordSpecialProjectile;
+        public static ThingDef DMC_SpectralSwordRapidSlashProjectile;
         public static ThingDef DMC_RainBulletProjectile;
 
         static DMC_ThingDefOf()

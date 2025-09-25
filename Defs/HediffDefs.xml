@@ -241,4 +241,25 @@
     </comps>
   </HediffDef>
 
+  <!-- Spectral Shock Debuff -->
+  <HediffDef>
+    <defName>DMC_SpectralShock</defName>
+    <label>spectral shock</label>
+    <description>Shocked by spectral energy from an exploding summoned sword. Manipulation is reduced and aiming is impaired due to the lingering effects of otherworldly energy.</description>
+    <hediffClass>DMCAbilities.Hediff_SpectralShock</hediffClass>
+    <defaultLabelColor>(0.5, 0.3, 0.8)</defaultLabelColor>
+    <isBad>true</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <ManipulationCapacity>-0.10</ManipulationCapacity>
+          <AimingDelayFactor>0.20</AimingDelayFactor>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
 </Defs>

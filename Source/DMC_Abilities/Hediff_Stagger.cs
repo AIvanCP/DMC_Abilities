@@ -1,5 +1,6 @@
 using RimWorld;
 using Verse;
+using UnityEngine;
 
 namespace DMCAbilities
 {
@@ -9,6 +10,18 @@ namespace DMCAbilities
         {
             base.PostAdd(dinfo);
             ApplyStaggerEffect();
+        }
+
+        public override void Tick()
+        {
+            base.Tick();
+            
+            // Auto-remove stagger after 2 seconds (120 ticks)
+            if (ageTicks >= 120)
+            {
+                if (pawn?.health != null)
+                    pawn.health.RemoveHediff(this);
+            }
         }
 
         private void ApplyStaggerEffect()
@@ -35,6 +48,6 @@ namespace DMCAbilities
             }
         }
 
-        public override string LabelInBrackets => $"{(120 - ageTicks) / 60f:F1}s";
+        public override string LabelInBrackets => $"{Mathf.Max(0f, (120 - ageTicks) / 60f):F1}s";
     }
 }

@@ -283,4 +283,138 @@ namespace DMCAbilities
             SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, new TargetInfo(position, map));
         }
     }
+
+    /// <summary>
+    /// Rapid Slash spectral sword that explodes after delay with AOE damage and Spectral Shock debuff
+    /// </summary>
+    public class Projectile_SpectralSwordRapidSlash : Projectile
+    {
+        private IntVec3 explosionTarget;
+        private Pawn originalCaster;
+        private int ticksToExplode = 30; // 0.5 seconds at 60 ticks/second
+        private bool hasExploded = false;
+
+        public void SetExplosionTarget(IntVec3 target, Pawn caster)
+        {
+            explosionTarget = target;
+            originalCaster = caster;
+        }
+
+        protected override void Tick()
+        {
+            base.Tick();
+
+            if (hasExploded)
+                return;
+
+            ticksToExplode--;
+
+            // Visual warning effect as it gets close to explosion
+            if (ticksToExplode <= 15 && ticksToExplode % 5 == 0)
+            {
+                FleckMaker.Static(Position, Map, FleckDefOf.MicroSparks, 0.8f);
+            }
+
+            // Explode after delay
+            if (ticksToExplode <= 0)
+            {
+                ExplodeSpectralSword();
+                hasExploded = true;
+            }
+        }
+
+        private void ExplodeSpectralSword()
+        {
+            Map map = Map;
+            if (map == null) return;
+
+            IntVec3 center = explosionTarget.IsValid ? explosionTarget : Position;
+
+            // Create explosion visual effects
+            FleckMaker.Static(center, map, FleckDefOf.ExplosionFlash, 2.0f);
+            FleckMaker.ThrowDustPuffThick(center.ToVector3Shifted(), map, 2.0f, UnityEngine.Color.cyan);
+
+            // Sound effect
+            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, new TargetInfo(center, map));
+
+            // Find all targets in radius 2 AOE
+            List<IntVec3> affectedCells = new List<IntVec3>();
+            foreach (IntVec3 cell in GenRadial.RadialCellsAround(center, 2, true))
+            {
+                if (cell.InBounds(map))
+                {
+                    affectedCells.Add(cell);
+                }
+            }
+
+            // Apply damage to all valid targets in AOE
+            foreach (IntVec3 cell in affectedCells)
+            {
+                List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                // Create a copy to prevent collection modification errors
+                List<Thing> thingsCopy = new List<Thing>(things);
+                foreach (Thing thing in thingsCopy)
+                {
+                    // Target pawns, animals, mechs, and turrets
+                    if ((thing is Pawn targetPawn && targetPawn != originalCaster && !targetPawn.Dead) ||
+                        (thing.def.building?.IsTurret == true))
+                    {
+                        ApplySpectralExplosionDamage(thing);
+                    }
+                }
+            }
+
+            // Destroy the projectile
+            Destroy();
+        }
+
+        private void ApplySpectralExplosionDamage(Thing target)
+        {
+            if (target == null || target.Destroyed) return;
+
+            // AOE damage: 8-12 cut/pierce damage
+            float damage = Rand.Range(8f, 12f);
+            
+            DamageInfo damageInfo = new DamageInfo(
+                DamageDefOf.Cut,
+                damage,
+                0f,
+                -1f,
+                originalCaster,
+                null,
+                null,
+                DamageInfo.SourceCategory.ThingOrUnknown
+            );
+
+            target.TakeDamage(damageInfo);
+
+            // Apply Spectral Shock debuff to pawns only
+            if (target is Pawn pawnTarget && pawnTarget.health?.hediffSet != null)
+            {
+                ApplySpectralShock(pawnTarget);
+            }
+
+            // Visual effect at impact
+            FleckMaker.ThrowDustPuffThick(target.Position.ToVector3Shifted(), Map, 0.8f, UnityEngine.Color.blue);
+
+            Log.Message($"Spectral Sword Explosion: Hit {target.Label} for {damage:F1} damage");
+        }
+
+        private void ApplySpectralShock(Pawn target)
+        {
+            // Remove existing spectral shock to refresh duration
+            Hediff existingShock = target.health.hediffSet.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_SpectralShock);
+            if (existingShock != null)
+            {
+                target.health.RemoveHediff(existingShock);
+            }
+
+            // Add Spectral Shock debuff: -10% manipulation, +20% aiming time, 3 seconds
+            Hediff spectralShock = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_SpectralShock, target);
+            spectralShock.Severity = 1.0f;
+            target.health.AddHediff(spectralShock);
+
+            Log.Message($"Applied Spectral Shock to {target.Label}");
+        }
+    }
 }

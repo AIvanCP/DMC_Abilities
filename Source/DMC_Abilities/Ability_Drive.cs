@@ -40,7 +40,7 @@ namespace DMCAbilities
         {
             if (CasterPawn == null || CasterPawn.Map == null)
                 return;
-                
+
             // Determine number of projectiles (same RNG as Judgement Cut)
             projectilesToLaunch = DetermineProjectileCount();
             projectilesLaunched = 0;
@@ -130,9 +130,15 @@ namespace DMCAbilities
             // Enhanced effects for final projectile
             if (isFinal)
             {
+                // Massive visual effects for triple Drive finale
                 FleckMaker.Static(CasterPawn.Position, map, FleckDefOf.PsycastAreaEffect, 3.5f);
                 FleckMaker.ThrowLightningGlow(casterPos, map, 2f);
+                FleckMaker.Static(CasterPawn.Position, map, FleckDefOf.ExplosionFlash, 2.5f);
+                
+                // Special sound and message for triple Drive
                 SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Exit, new TargetInfo(CasterPawn.Position, map));
+                
+                
             }
             else
             {

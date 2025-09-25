@@ -351,4 +351,28 @@
     <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
   </JobDef>
 
+  <!-- Rapid Slash Spectral Sword Projectile -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_SpectralSwordRapidSlashProjectile</defName>
+    <label>spectral sword</label>
+    <thingClass>DMCAbilities.Projectile_SpectralSwordRapidSlash</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <color>(0.6, 0.3, 0.9)</color>
+    </graphicData>
+    <projectile>
+      <damageDef>Cut</damageDef>
+      <damageAmountBase>10</damageAmountBase>
+      <speed>25</speed>
+      <range>8</range>
+    </projectile>
+  </ThingDef>
+
 </Defs>

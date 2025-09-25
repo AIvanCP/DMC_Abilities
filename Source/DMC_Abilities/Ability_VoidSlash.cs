@@ -43,21 +43,22 @@ namespace DMCAbilities
             // Create visual and audio effects
             CreateVoidSlashEffects(casterPos, map, targetDirection);
 
-            // Find all pawns in cone and apply effects
-            List<Pawn> affectedPawns = GetPawnsInCone(casterPos, targetDirection, map);
+            // Find all targets in cone and apply effects
+            List<Thing> affectedTargets = GetTargetsInCone(casterPos, targetDirection, map);
             
-            foreach (Pawn pawn in affectedPawns)
+            foreach (Thing target in affectedTargets)
             {
-                if (pawn != CasterPawn && !pawn.Dead) // Don't affect caster or dead pawns
+                // Don't affect caster or destroyed targets
+                if (target != CasterPawn && !target.Destroyed)
                 {
-                    ApplyVoidSlashEffects(pawn);
+                    ApplyVoidSlashEffects(target);
                 }
             }
         }
 
-        private List<Pawn> GetPawnsInCone(IntVec3 origin, Vector3 direction, Map map)
+        private List<Thing> GetTargetsInCone(IntVec3 origin, Vector3 direction, Map map)
         {
-            List<Pawn> pawnsInCone = new List<Pawn>();
+            List<Thing> targetsInCone = new List<Thing>();
             
             for (int i = 1; i <= MaxRange; i++)
             {
@@ -89,9 +90,12 @@ namespace DMCAbilities
                             List<Thing> thingsCopy = new List<Thing>(thingsInCell);
                             foreach (Thing thing in thingsCopy)
                             {
-                                if (thing is Pawn pawn && pawn != null && !pawnsInCone.Contains(pawn))
+                                // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
+                                if (((thing is Pawn pawn && pawn != null) || 
+                                     (thing.def.building?.IsTurret == true)) &&
+                                    !targetsInCone.Contains(thing))
                                 {
-                                    pawnsInCone.Add(pawn);
+                                    targetsInCone.Add(thing);
                                 }
                             }
                         }
@@ -99,13 +103,13 @@ namespace DMCAbilities
                 }
             }
             
-            return pawnsInCone;
+            return targetsInCone;
         }
 
-        private void ApplyVoidSlashEffects(Pawn target)
+        private void ApplyVoidSlashEffects(Thing target)
         {
             // Null safety checks
-            if (target == null || target.Dead || target.Map == null)
+            if (target == null || target.Destroyed || target.Map == null)
                 return;
 
             // Apply initial slash damage
@@ -118,10 +122,13 @@ namespace DMCAbilities
             );
             target.TakeDamage(slashDamage);
 
-            // Apply void slash debuff
-            Hediff_VoidSlashDebuff voidDebuff = (Hediff_VoidSlashDebuff)HediffMaker.MakeHediff(
-                DMC_HediffDefOf.DMC_VoidSlashDebuff, target);
-            target.health.AddHediff(voidDebuff);
+            // Apply void slash debuff only to pawns (turrets don't have health hediffs)
+            if (target is Pawn pawnTarget && pawnTarget.health?.hediffSet != null)
+            {
+                Hediff_VoidSlashDebuff voidDebuff = (Hediff_VoidSlashDebuff)HediffMaker.MakeHediff(
+                    DMC_HediffDefOf.DMC_VoidSlashDebuff, pawnTarget);
+                pawnTarget.health.AddHediff(voidDebuff);
+            }
 
             // Visual effect on target with null safety
             if (target.Map != null)

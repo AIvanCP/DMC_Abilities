@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -671,5 +672,108 @@ namespace DMCAbilities
 
             return true;
         }
+
+        /// <summary>
+        /// Force teleport a pawn to exact destination, bypassing ALL obstacles (for Rapid Slash)
+        /// </summary>
+        public static bool ForceTeleportPawn(Pawn pawn, IntVec3 destination, bool showEffects = true)
+        {
+            if (pawn?.Map == null || !destination.InBounds(pawn.Map))
+                return false;
+
+            Map map = pawn.Map;
+            IntVec3 originalPos = pawn.Position;
+
+            if (showEffects)
+            {
+                // Create dust effect at origin
+                FleckMaker.ThrowDustPuff(originalPos.ToVector3Shifted(), map, 1.5f);
+            }
+
+            // Force teleportation to exact position - bypass ALL obstacles
+            pawn.Position = destination;
+            pawn.Notify_Teleported(false, true);
+
+            if (showEffects)
+            {
+                // Create effects at destination
+                FleckMaker.ThrowDustPuff(destination.ToVector3Shifted(), map, 1.5f);
+                FleckMaker.Static(destination, map, FleckDefOf.ExplosionFlash, 1.5f);
+                
+                // Play teleport sound
+                SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_Miss, new TargetInfo(destination, map));
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets cells in a 90-degree cone blast based on facing direction
+        /// </summary>
+        /// <param name="center">Center position of the cone</param>
+        /// <param name="facingDirection">Direction the caster is facing (Rot4)</param>
+        /// <param name="map">Map reference</param>
+        /// <param name="range">Range of the cone blast</param>
+        /// <returns>List of cells in the cone area</returns>
+        public static List<IntVec3> GetConeBlastCells(IntVec3 center, Rot4 facingDirection, Map map, int range = 3)
+        {
+            List<IntVec3> coneCells = new List<IntVec3>();
+            
+            // Get the base direction vector
+            IntVec3 baseDirection = facingDirection.FacingCell;
+            
+            // For each distance from 1 to range
+            for (int distance = 1; distance <= range; distance++)
+            {
+                // Calculate the width of the cone at this distance (90 degrees means it expands)
+                int coneWidth = distance; // At distance 1: width 1, distance 2: width 2, etc.
+                
+                // Get the center cell at this distance
+                IntVec3 centerAtDistance = center + (baseDirection * distance);
+                
+                // Add center cell
+                if (centerAtDistance.InBounds(map))
+                {
+                    coneCells.Add(centerAtDistance);
+                }
+                
+                // Add cells to the left and right of center
+                IntVec3 perpendicular = GetPerpendicularVector(baseDirection);
+                
+                for (int offset = 1; offset <= coneWidth; offset++)
+                {
+                    // Left side
+                    IntVec3 leftCell = centerAtDistance + (perpendicular * offset);
+                    if (leftCell.InBounds(map))
+                    {
+                        coneCells.Add(leftCell);
+                    }
+                    
+                    // Right side  
+                    IntVec3 rightCell = centerAtDistance - (perpendicular * offset);
+                    if (rightCell.InBounds(map))
+                    {
+                        coneCells.Add(rightCell);
+                    }
+                }
+            }
+            
+            return coneCells;
+        }
+
+        /// <summary>
+        /// Gets a perpendicular vector for cone calculation
+        /// </summary>
+        private static IntVec3 GetPerpendicularVector(IntVec3 direction)
+        {
+            // Convert direction to perpendicular for cone width
+            if (direction == IntVec3.North) return IntVec3.East;
+            if (direction == IntVec3.South) return IntVec3.West;
+            if (direction == IntVec3.East) return IntVec3.South;
+            if (direction == IntVec3.West) return IntVec3.North;
+            return IntVec3.East; // Fallback
+        }
+
+        // DMC dialogue system removed per user request - floating text was too complex
     }
 }

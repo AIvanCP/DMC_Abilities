@@ -117,17 +117,19 @@ namespace DMCAbilities
             
             foreach (Thing thing in GenRadial.RadialDistinctThingsAround(center, map, radius, true))
             {
-                if (thing is Pawn targetPawn && targetPawn != CasterPawn)
+                // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
+                if ((thing is Pawn targetPawn && targetPawn != CasterPawn) ||
+                    (thing.def.building?.IsTurret == true))
                 {
                     // Calculate damage without multiplier (base weapon damage)
                     var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(CasterPawn, 1f);
                     if (damageInfo.HasValue)
                     {
                         // Apply damage
-                        targetPawn.TakeDamage(damageInfo.Value);
+                        thing.TakeDamage(damageInfo.Value);
                         
                         // Create impact effect on each target - use psycast effect
-                        FleckMaker.Static(targetPawn.Position, map, FleckDefOf.PsycastAreaEffect, 1.5f);
+                        FleckMaker.Static(thing.Position, map, FleckDefOf.PsycastAreaEffect, 1.5f);
                     }
                 }
             }

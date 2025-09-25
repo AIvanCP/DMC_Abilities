@@ -187,29 +187,20 @@ namespace DMCAbilities
                 {
                     IntVec3 nextCell = dashPath[currentPathIndex];
                     
-                    // Dash to next cell
-                    if (WeaponDamageUtility.SafeTeleportPawn(pawn, nextCell))
+                    // Force dash through obstacles (trees, walls, etc.)
+                    WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
+                    Log.Message($"Stinger: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    
+                    // Check if we're adjacent to target for the strike
+                    if (TargetA.HasThing && TargetA.Thing is Pawn target && 
+                        pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasStruck)
                     {
-                        Log.Message($"Stinger: Dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
-                        
-                        // Check if we're adjacent to target for the strike
-                        if (TargetA.HasThing && TargetA.Thing is Pawn target && 
-                            pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasStruck)
-                        {
-                            PerformStingerStrike(target);
-                            hasStruck = true;
-                        }
-                        
-                        currentPathIndex++;
-                        lastMoveTick = Find.TickManager.TicksGame;
+                        PerformStingerStrike(target);
+                        hasStruck = true;
                     }
-                    else
-                    {
-                        // Hit obstacle, end dash
-                        Log.Warning($"Stinger: Hit obstacle at {nextCell}, ending dash");
-                        EndJobWith(JobCondition.Succeeded);
-                        return;
-                    }
+                    
+                    currentPathIndex++;
+                    lastMoveTick = Find.TickManager.TicksGame;
                 }
             };
 
@@ -231,20 +222,34 @@ namespace DMCAbilities
             if (lineCells.Count > 0 && lineCells[0] == startPos)
                 lineCells.RemoveAt(0);
 
-            // Add all cells up to the target
+            // Add all cells up to (but NOT including) the target position - bypass obstacles
+            // This ensures we land adjacent to the enemy, not on top
             foreach (IntVec3 cell in lineCells)
             {
-                if (cell.InBounds(pawn.Map) && cell.Standable(pawn.Map))
+                if (cell == targetPos)
                 {
-                    dashPath.Add(cell);
+                    // Stop before reaching the target position - we want to be adjacent
+                    break;
                 }
-                else
+                
+                if (cell.InBounds(pawn.Map))
                 {
-                    break; // Stop at first impassable cell
+                    // Add ALL cells - Stinger bypasses trees, walls, everything
+                    dashPath.Add(cell);
                 }
             }
 
-            Log.Message($"Stinger: Dash path calculated with {dashPath.Count} cells");
+            // If the path is empty (target too close), find an adjacent position
+            if (dashPath.Count == 0)
+            {
+                IntVec3 adjacentPos = WeaponDamageUtility.FindSafeTeleportPosition(targetPos, pawn.Map, pawn, 1);
+                if (adjacentPos != IntVec3.Invalid && adjacentPos != startPos)
+                {
+                    dashPath.Add(adjacentPos);
+                }
+            }
+
+            Log.Message($"Stinger: Dash path calculated with {dashPath.Count} cells (stops adjacent to target)");
         }
 
         private void PerformStingerStrike(Pawn target)
