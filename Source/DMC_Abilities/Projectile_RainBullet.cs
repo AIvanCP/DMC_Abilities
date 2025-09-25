@@ -9,27 +9,21 @@ namespace DMCAbilities
     {
         private Vector3 targetPosition;
         private Vector3 actualImpactPosition;
-        private bool hasCalculatedImpact = false;
         protected Pawn casterPawn;
 
         public void Initialize(Pawn caster, Vector3 target)
         {
             casterPawn = caster;
             targetPosition = target;
+            
+            // Calculate impact position immediately when initialized
+            Vector2 randomOffset = Rand.InsideUnitCircle * Rand.Range(0.5f, 1.5f);
+            actualImpactPosition = targetPosition + new Vector3(randomOffset.x, 0, randomOffset.y);
         }
 
         protected override void Tick()
         {
             base.Tick();
-
-            // Calculate random impact position once when projectile is created
-            if (!hasCalculatedImpact)
-            {
-                // Random landing within 1-2 cell radius of target
-                Vector2 randomOffset = Rand.InsideUnitCircle * Rand.Range(1f, 2f);
-                actualImpactPosition = targetPosition + new Vector3(randomOffset.x, 0, randomOffset.y);
-                hasCalculatedImpact = true;
-            }
         }
 
         protected override void Impact(Thing hitThing, bool blockedByShield = false)
@@ -62,24 +56,28 @@ namespace DMCAbilities
             if (target == null || target.Dead || casterPawn == null)
                 return;
 
-            // Calculate weapon-based ranged damage
+            // Calculate weapon-based ranged damage - each bullet should cause full damage
             var damageInfo = WeaponDamageUtility.CalculateRangedDamage(casterPawn, 1f);
             if (damageInfo.HasValue)
             {
-                // Apply main damage
-                target.TakeDamage(damageInfo.Value);
+                var gunDamage = damageInfo.Value;
 
-                // 10% chance to apply stagger effect
+                // Each bullet applies full damage independently (continuous damage)
+                target.TakeDamage(gunDamage);
+
+                // 10% chance to apply stagger effect per bullet
                 if (Rand.Chance(0.1f))
                 {
                     ApplyStagger(target);
                 }
 
-                // Impact sound effect
+                // Impact sound effect - use gunshot sound
                 if (target.Map != null)
                 {
-                    SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(target.Position, target.Map));
+                    SoundStarter.PlayOneShot(SoundDefOf.BulletImpact_Ground, new TargetInfo(target.Position, target.Map));
                 }
+
+                Log.Message($"Rain Bullet: Applied {gunDamage.Amount} damage to {target.Label}");
             }
         }
 

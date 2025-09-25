@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -39,26 +40,10 @@ namespace DMCAbilities
                 return false;
             }
 
-            // Find teleport position adjacent to target
-            IntVec3 teleportPos = FindTeleportPosition(caster, target);
-            if (!teleportPos.IsValid)
-            {
-                Messages.Message("DMC_NoValidTeleportPosition".Translate(), 
-                    caster, MessageTypeDefOf.RejectInput, false);
-                return false;
-            }
-
-            // Perform safe teleport
-            bool teleportSucceeded = WeaponDamageUtility.SafeTeleportPawn(caster, teleportPos, false);
-            
-            if (teleportSucceeded)
-            {
-                // Create visual effects
-                CreateStingerEffects(caster.Position, target.Position);
-            }
-
-            // Apply damage
-            ApplyStingerDamage(caster, target);
+            // Start dash-to-target job instead of instant teleport
+            var job = JobMaker.MakeJob(DMC_JobDefOf.DMC_StingerCast, target);
+            job.verbToUse = this;
+            caster.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 
             return true;
         }
@@ -115,7 +100,7 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = true;
-            return 0f;
+            return this.verbProps.range; // Show ability range during targeting
         }
 
         public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
@@ -143,8 +128,14 @@ namespace DMCAbilities
         }
     }
 
-    public class JobDriver_CastStinger : JobDriver
+    public class JobDriver_StingerCast : JobDriver
     {
+        private List<IntVec3> dashPath;
+        private int currentPathIndex = 0;
+        private const int TicksBetweenCells = 1; // Faster dash for Stinger
+        private int lastMoveTick = 0;
+        private bool hasStruck = false;
+
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
             return true;
@@ -152,25 +143,147 @@ namespace DMCAbilities
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
+            this.FailOnDespawnedOrNull(TargetIndex.A);
+
             yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
-            
-            Toil castToil = new Toil
+
+            var stingerDashToil = new Toil();
+            stingerDashToil.initAction = () =>
             {
-                initAction = delegate
+                // Calculate direct dash path to target
+                CalculateStingerDashPath();
+                currentPathIndex = 0;
+                lastMoveTick = Find.TickManager.TicksGame;
+                hasStruck = false;
+
+                // Face the target
+                pawn.rotationTracker.FaceTarget(TargetA);
+
+                Log.Message($"Stinger: Starting dash to target through {dashPath.Count} cells");
+            };
+
+            stingerDashToil.tickAction = () =>
+            {
+                if (pawn.Dead || pawn.Downed)
                 {
-                    Ability ability = job.ability;
-                    if (ability != null && ability.verb is Verb_Stinger stingerVerb)
+                    EndJobWith(JobCondition.Errored);
+                    return;
+                }
+
+                // Check if dash is complete
+                if (currentPathIndex >= dashPath.Count)
+                {
+                    // Perform final strike if we haven't already
+                    if (!hasStruck && TargetA.HasThing && TargetA.Thing is Pawn target)
                     {
-                        stingerVerb.TryStartCastOn(job.GetTarget(TargetIndex.A), false, true);
+                        PerformStingerStrike(target);
+                    }
+                    EndJobWith(JobCondition.Succeeded);
+                    return;
+                }
+
+                // Dash forward rapidly
+                if (Find.TickManager.TicksGame - lastMoveTick >= TicksBetweenCells)
+                {
+                    IntVec3 nextCell = dashPath[currentPathIndex];
+                    
+                    // Dash to next cell
+                    if (WeaponDamageUtility.SafeTeleportPawn(pawn, nextCell))
+                    {
+                        Log.Message($"Stinger: Dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                        
+                        // Check if we're adjacent to target for the strike
+                        if (TargetA.HasThing && TargetA.Thing is Pawn target && 
+                            pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasStruck)
+                        {
+                            PerformStingerStrike(target);
+                            hasStruck = true;
+                        }
+                        
+                        currentPathIndex++;
+                        lastMoveTick = Find.TickManager.TicksGame;
                     }
                     else
                     {
-                        EndJobWith(JobCondition.Errored);
+                        // Hit obstacle, end dash
+                        Log.Warning($"Stinger: Hit obstacle at {nextCell}, ending dash");
+                        EndJobWith(JobCondition.Succeeded);
+                        return;
                     }
                 }
             };
-            castToil.FailOnDespawnedOrNull(TargetIndex.A);
-            yield return castToil;
+
+            stingerDashToil.defaultCompleteMode = ToilCompleteMode.Never;
+            yield return stingerDashToil;
+        }
+
+        private void CalculateStingerDashPath()
+        {
+            dashPath = new List<IntVec3>();
+            
+            IntVec3 startPos = pawn.Position;
+            IntVec3 targetPos = TargetA.Cell;
+            
+            // Create direct path to target
+            List<IntVec3> lineCells = GenSight.PointsOnLineOfSight(startPos, targetPos).ToList();
+            
+            // Remove starting position
+            if (lineCells.Count > 0 && lineCells[0] == startPos)
+                lineCells.RemoveAt(0);
+
+            // Add all cells up to the target
+            foreach (IntVec3 cell in lineCells)
+            {
+                if (cell.InBounds(pawn.Map) && cell.Standable(pawn.Map))
+                {
+                    dashPath.Add(cell);
+                }
+                else
+                {
+                    break; // Stop at first impassable cell
+                }
+            }
+
+            Log.Message($"Stinger: Dash path calculated with {dashPath.Count} cells");
+        }
+
+        private void PerformStingerStrike(Pawn target)
+        {
+            if (target == null || target.Dead) return;
+
+            // Calculate enhanced damage for stinger strike
+            float multiplier = DMCAbilitiesMod.settings?.stingerDamageMultiplier ?? 1.2f;
+            var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(pawn, multiplier);
+            
+            if (damageInfo.HasValue)
+            {
+                target.TakeDamage(damageInfo.Value);
+                
+                // Apply stagger effect
+                if (target.health?.hediffSet != null)
+                {
+                    Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, target);
+                    stagger.Severity = 0.5f; // Strong stagger from stinger
+                    target.health.AddHediff(stagger);
+                }
+
+                // Create impact effects
+                CreateStingerImpactEffects(target.Position);
+                
+                Log.Message($"Stinger: Strike hit {target.Label}");
+            }
+        }
+
+        private void CreateStingerImpactEffects(IntVec3 position)
+        {
+            Map map = pawn.Map;
+            if (map == null) return;
+
+            // Impact effect
+            FleckMaker.Static(position, map, FleckDefOf.PsycastAreaEffect, 2.0f);
+            
+            // Impact sound
+            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(position, map));
         }
     }
 }

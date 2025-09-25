@@ -169,7 +169,7 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = false;
-            return 0f; // Don't use radius highlighting, we'll use cone drawing
+            return MaxRange; // Show max range radius during targeting
         }
 
         public override void DrawHighlight(LocalTargetInfo target)
@@ -218,6 +218,14 @@ namespace DMCAbilities
                 if (coneCells.Count > 0)
                 {
                     GenDraw.DrawFieldEdges(coneCells);
+                }
+                
+                // Also draw a radius ring at max range for better visualization
+                Vector3 maxRangePos = casterPos.ToVector3() + (targetDirection * MaxRange);
+                IntVec3 maxRangeCell = maxRangePos.ToIntVec3();
+                if (maxRangeCell.InBounds(CasterPawn.Map))
+                {
+                    GenDraw.DrawRadiusRing(maxRangeCell, 1f);
                 }
             }
         }

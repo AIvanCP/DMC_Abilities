@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -26,252 +27,135 @@ namespace DMCAbilities
                 return false;
             }
 
-            // Check range (6-10 cells)
-            float distance = CasterPawn.Position.DistanceTo(currentTarget.Cell);
-            if (distance < 6f || distance > 10f)
-            {
-                Messages.Message("Rain Bullet target must be 6-10 cells away.", 
-                    CasterPawn, MessageTypeDefOf.RejectInput, false);
-                return false;
-            }
+            Log.Message($"Rain Bullet: Starting cast job for {CasterPawn} at target {CurrentTarget}");
 
-            // Check if target destination is valid for teleportation
-            IntVec3 safeDestination = WeaponDamageUtility.FindSafeTeleportPosition(currentTarget.Cell, CasterPawn.Map, CasterPawn, 3);
-            if (safeDestination == IntVec3.Invalid)
-            {
-                Messages.Message("Rain Bullet: No safe landing area found near target.", 
-                    CasterPawn, MessageTypeDefOf.RejectInput, false);
-                return false;
-            }
-
-            StartRainBullet();
+            var job = JobMaker.MakeJob(DMC_JobDefOf.DMC_RainBulletCast, CurrentTarget);
+            job.verbToUse = this;
+            CasterPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
             return true;
         }
 
-        private void StartRainBullet()
+        public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
-            Map map = CasterPawn.Map;
-            IntVec3 targetCell = currentTarget.Cell;
-
-            // Calculate bullets per cell based on shooting skill (3-6)
-            // Higher shooting skill = more precise shots = more bullets per cell
-            int shootingSkill = CasterPawn.skills?.GetSkill(SkillDefOf.Shooting)?.Level ?? 0;
-            int bulletsPerCell = Mathf.Clamp(3 + (shootingSkill / 4), 3, 6);
-
-            // Calculate jump path distance for total projectile calculation
-            float jumpDistance = CasterPawn.Position.DistanceTo(targetCell);
-            int pathCells = Mathf.CeilToInt(jumpDistance); // Number of cells in jump path
-
-            // Create cast effects
-            CreateCastEffects(CasterPawn.Position, map);
-
-            // Start the rain bullet job - will define job def in XML
-            JobDef rainBulletJobDef = DefDatabase<JobDef>.GetNamedSilentFail("DMC_RainBulletCast");
-            if (rainBulletJobDef != null)
-            {
-                Job rainBulletJob = JobMaker.MakeJob(rainBulletJobDef);
-                rainBulletJob.targetA = targetCell;
-                rainBulletJob.count = bulletsPerCell; // Store bullets per cell
-                rainBulletJob.targetB = CasterPawn.Position; // Store starting position
-                CasterPawn.jobs.StartJob(rainBulletJob, JobCondition.InterruptForced);
-            }
+            needLOSToCenter = false;
+            return verbProps.range;
         }
 
-        private void CreateCastEffects(IntVec3 casterPos, Map map)
+
+
+        public void FireBulletStorm(IntVec3 targetCell)
         {
-            // Jump effect at caster position
-            FleckMaker.Static(casterPos, map, FleckDefOf.PsycastAreaEffect, 1.2f);
+            if (CasterPawn == null || CasterPawn.Dead) return;
+
+            var projectileDef = DefDatabase<ThingDef>.GetNamed("DMC_RainBulletProjectile", false);
+            if (projectileDef == null)
+            {
+                Log.Error("Rain Bullet: Could not find DMC_RainBulletProjectile def");
+                return;
+            }
+
+            // Calculate total bullets based on skills like before
+            int meleeSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
+            int shootingSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Shooting)?.Level ?? 0;
             
-            // Jump sound
-            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_Miss, new TargetInfo(casterPos, map));
+            float jumpDistance = Vector3.Distance(CasterPawn.Position.ToVector3(), targetCell.ToVector3());
+            float meleeModifier = 1f + (meleeSkill * 0.05f);
+            float effectiveDistance = jumpDistance * meleeModifier;
+            
+            float bulletsPerCell = 3f + (shootingSkill * 0.15f);
+            bulletsPerCell = Mathf.Clamp(bulletsPerCell, 3f, 6f);
+            
+            int totalBullets = Mathf.RoundToInt(effectiveDistance * bulletsPerCell);
+            totalBullets = Mathf.Clamp(totalBullets, 8, 30);
+
+            var map = CasterPawn.Map;
+            
+            // Fire all bullets rapidly in a storm pattern (like DMC)
+            for (int i = 0; i < totalBullets; i++)
+            {
+                // Random area around target for bulletstorm effect (3 cell radius)
+                Vector2 randomOffset = Rand.InsideUnitCircle * Rand.Range(1f, 3f);
+                Vector3 impactPos = targetCell.ToVector3() + new Vector3(randomOffset.x, 0, randomOffset.y);
+                IntVec3 impactCell = impactPos.ToIntVec3().ClampInsideMap(map);
+
+                // Spawn from above (simulate aerial shooting)
+                IntVec3 skyPos = new IntVec3(impactCell.x, 0, impactCell.z + 8); // High above target
+                
+                var projectile = (Projectile_RainBullet)GenSpawn.Spawn(projectileDef, skyPos, map);
+                projectile.Initialize(CasterPawn, impactCell.ToVector3());
+                projectile.Launch(CasterPawn, impactCell, impactCell, ProjectileHitFlags.IntendedTarget);
+            }
+
+            Log.Message($"Rain Bullet: Fired bulletstorm of {totalBullets} bullets at {targetCell}");
+        }
+
+        public bool TryTeleportCaster(IntVec3 targetCell)
+        {
+            Log.Message($"Rain Bullet: Attempting to teleport {CasterPawn} to {targetCell}");
+            return WeaponDamageUtility.SafeTeleportPawn(CasterPawn, targetCell);
         }
     }
 
-    // Job driver for handling the Rain Bullet sequence
     public class JobDriver_RainBulletCast : JobDriver
     {
-        private int bulletsShot = 0;
-        private int bulletsPerCell = 0;
-        private int ticksSinceLastBullet = 0;
-        private const int DelayBetweenBullets = 3; // Faster rate for continuous fire
-        private bool hasJumped = false;
-        private List<IntVec3> jumpPath = new List<IntVec3>();
-        private int currentPathIndex = 0;
-        private int bulletsInCurrentCell = 0;
-        private const int MaxTotalBullets = 50; // Safety cap to prevent performance issues
+        private bool bulletStormFired = false;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return true; // No reservations needed for this ability
+            return true;
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            Toil bulletToil = new Toil()
+            yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
+
+            // Simple DMC-style: fire bulletstorm, then teleport
+            var castToil = new Toil();
+            castToil.initAction = () =>
             {
-                initAction = () =>
+                var verb = job.verbToUse as Verb_RainBullet;
+                if (verb == null)
                 {
-                    bulletsPerCell = job.count; // Bullets to fire per cell
-                    bulletsShot = 0;
-                    ticksSinceLastBullet = 0;
-                    hasJumped = false;
-                    currentPathIndex = 0;
-                    bulletsInCurrentCell = 0;
-                    
-                    // Calculate jump path from start to target
-                    IntVec3 startPos = job.targetB.Cell;
-                    IntVec3 endPos = job.targetA.Cell;
-                    jumpPath = CalculateJumpPath(startPos, endPos);
-                },
-                tickAction = () =>
+                    Log.Error("Rain Bullet: Invalid verb in job");
+                    EndJobWith(JobCondition.Errored);
+                    return;
+                }
+
+                Log.Message($"Rain Bullet: Starting DMC-style bulletstorm");
+                
+                // Fire the entire bulletstorm immediately
+                verb.FireBulletStorm(TargetA.Cell);
+                bulletStormFired = true;
+            };
+
+            castToil.tickAction = () =>
+            {
+                var verb = job.verbToUse as Verb_RainBullet;
+                if (verb == null || pawn.Dead || pawn.Downed)
                 {
-                    // Jump effect on first tick
-                    if (!hasJumped)
+                    EndJobWith(JobCondition.Errored);
+                    return;
+                }
+
+                // Wait 1 second for bullets to rain down, then teleport
+                if (bulletStormFired && Find.TickManager.TicksGame % 60 == 0)
+                {
+                    Log.Message($"Rain Bullet: Bulletstorm complete, teleporting to {TargetA.Cell}");
+                    if (verb.TryTeleportCaster(TargetA.Cell))
                     {
-                        CreateJumpEffect();
-                        hasJumped = true;
+                        Log.Message($"Rain Bullet: Teleport successful");
+                        EndJobWith(JobCondition.Succeeded);
                     }
-
-                    // Safety check - prevent excessive bullets
-                    if (bulletsShot >= MaxTotalBullets)
+                    else
                     {
-                        ReadyForNextToil();
-                        return;
-                    }
-
-                    // Check if we've completed the entire jump path
-                    if (currentPathIndex >= jumpPath.Count)
-                    {
-                        // Teleport pawn to target position (like Dante landing after Rain Bullet)
-                        TeleportPawnToTarget();
-                        ReadyForNextToil();
-                        return;
-                    }
-
-                    ticksSinceLastBullet++;
-                    if (ticksSinceLastBullet >= DelayBetweenBullets)
-                    {
-                        // Fire bullet for current path cell
-                        IntVec3 currentCell = jumpPath[currentPathIndex];
-                        ShootRainBulletAtCell(currentCell);
-                        bulletsShot++;
-                        bulletsInCurrentCell++;
-                        ticksSinceLastBullet = 0;
-
-                        // Check if we've fired enough bullets for this cell
-                        if (bulletsInCurrentCell >= bulletsPerCell)
-                        {
-                            // Move to next cell in path
-                            currentPathIndex++;
-                            bulletsInCurrentCell = 0;
-                        }
+                        Log.Warning($"Rain Bullet: Teleport failed to {TargetA.Cell}");
+                        EndJobWith(JobCondition.Incompletable);
                     }
                 }
             };
 
-            bulletToil.defaultCompleteMode = ToilCompleteMode.Never;
-            bulletToil.WithProgressBar(TargetIndex.A, () => jumpPath.Count > 0 ? (float)currentPathIndex / jumpPath.Count : 0f);
-
-            yield return bulletToil;
+            castToil.defaultCompleteMode = ToilCompleteMode.Never;
+            yield return castToil;
         }
-
-        private List<IntVec3> CalculateJumpPath(IntVec3 start, IntVec3 end)
-        {
-            List<IntVec3> path = new List<IntVec3>();
-            
-            // Simple line-drawing algorithm to get cells between start and end
-            int dx = Mathf.Abs(end.x - start.x);
-            int dz = Mathf.Abs(end.z - start.z);
-            int x = start.x;
-            int z = start.z;
-            int n = 1 + dx + dz;
-            int x_inc = (end.x > start.x) ? 1 : -1;
-            int z_inc = (end.z > start.z) ? 1 : -1;
-            int error = dx - dz;
-            dx *= 2;
-            dz *= 2;
-
-            for (; n > 0; --n)
-            {
-                path.Add(new IntVec3(x, 0, z));
-
-                if (error > 0)
-                {
-                    x += x_inc;
-                    error -= dz;
-                }
-                else
-                {
-                    z += z_inc;
-                    error += dx;
-                }
-            }
-
-            return path;
-        }
-
-        private void CreateJumpEffect()
-        {
-            Map map = pawn.Map;
-            if (map != null)
-            {
-                // Visual jump effect
-                FleckMaker.Static(pawn.Position, map, FleckDefOf.ExplosionFlash, 1.5f);
-                
-                // Jump sound
-                SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_Miss, new TargetInfo(pawn.Position, map));
-            }
-        }
-
-        private void ShootRainBulletAtCell(IntVec3 targetCell)
-        {
-            Map map = pawn.Map;
-
-            // Create and spawn rain bullet projectile - will define in XML
-            ThingDef projectileDef = DefDatabase<ThingDef>.GetNamedSilentFail("DMC_RainBulletProjectile");
-            if (projectileDef == null) return; // Projectile def not found
-            
-            Thing projectileThing = ThingMaker.MakeThing(projectileDef);
-            Projectile_RainBullet projectile = projectileThing as Projectile_RainBullet;
-
-            if (projectile != null)
-            {
-                projectile.Initialize(pawn, targetCell.ToVector3Shifted());
-                
-                // Calculate jump height/distance based on melee skill
-                // Higher melee skill = better body control = higher/further jump
-                int meleeSkill = pawn.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
-                int jumpHeight = Mathf.Clamp(3 + (meleeSkill / 3), 3, 8); // Height ranges from 3 to 8 based on skill
-                
-                // Launch from above the current cell in jump path
-                IntVec3 launchPos = targetCell + IntVec3.North * jumpHeight;
-                
-                GenSpawn.Spawn(projectile, launchPos, map);
-
-                // Enhanced muzzle flash effect at current jump position
-                FleckMaker.Static(targetCell, map, FleckDefOf.ShotFlash, 0.8f + (meleeSkill * 0.01f));
-                
-                // Gunshot sound - slightly quieter for continuous fire
-                SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(targetCell, map));
-            }
-        }
-
-        private void TeleportPawnToTarget()
-        {
-            IntVec3 targetPos = job.targetA.Cell;
-            
-            // Use the shared safe teleport utility
-            bool teleportSucceeded = WeaponDamageUtility.SafeTeleportPawn(pawn, targetPos, true);
-            
-            if (teleportSucceeded)
-            {
-                // Add extra dramatic landing effects for Rain Bullet
-                Map map = pawn.Map;
-                FleckMaker.Static(pawn.Position, map, FleckDefOf.ExplosionFlash, 2.0f);
-            }
-            // The utility already handles failure cases and shows appropriate messages
-        }
-
-
     }
 }

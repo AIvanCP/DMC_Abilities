@@ -225,4 +225,20 @@
     </stages>
   </HediffDef>
 
+  <!-- Rapid Slash Ability Hediff -->
+  <HediffDef>
+    <defName>DMC_RapidSlashAbility</defName>
+    <label>rapid slash technique</label>
+    <description>Mastery of the Rapid Slash - a devastating multi-hit combo attack. This advanced combat technique allows the user to dash to enemies and unleash a flurry of increasingly powerful strikes, ending with a spectacular explosion.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(1.0, 0.5, 0.8)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_RapidSlash</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
 </Defs>

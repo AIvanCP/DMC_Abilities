@@ -316,4 +316,53 @@ The Rain Bullet allows the user to leap through the air toward a target, continu
     <tickerType>Rare</tickerType>
   </ThingDef>
 
+  <!-- Rapid Slash Skillbook -->
+  <ThingDef>
+    <defName>DMC_SkillbookRapidSlash</defName>
+    <label>skillbook: rapid slash</label>
+    <description>A legendary combat manual containing the secrets of the Rapid Slash technique - a devastating multi-hit combo attack that ends in a spectacular explosion. Reading this book will impart the knowledge to the reader, but the book will be consumed in the process.
+
+The Rapid Slash allows the user to dash to an enemy and unleash 3-8 increasingly powerful melee strikes (number scales with melee skill). Each successive slash deals more damage than the last. The combo finishes with a spectacular spectral explosion that damages and stuns all nearby enemies. Requires a melee weapon equipped.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookStinger</texPath> <!-- Reuse Stinger texture temporarily -->
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+      <color>(1.0, 0.4, 0.6)</color>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>60</MaxHitPoints>
+      <Mass>0.4</Mass>
+      <MarketValue>2200</MarketValue>
+      <Flammability>1.0</Flammability>
+      <DeteriorationRate>0.1</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_RapidSlashAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Rapid Slash technique</useLabel>
+        <useDuration>400</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
 </Defs>

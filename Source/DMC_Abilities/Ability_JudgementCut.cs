@@ -144,6 +144,10 @@ namespace DMCAbilities
             // Draw the damage area highlight
             if (target.IsValid)
             {
+                // Draw clear radius ring showing exact damage area
+                GenDraw.DrawRadiusRing(target.Cell, 2f);
+                
+                // Also draw field edges for additional clarity
                 GenDraw.DrawFieldEdges(GenRadial.RadialCellsAround(target.Cell, 2f, true).ToList());
             }
         }

@@ -40,25 +40,10 @@ namespace DMCAbilities
             if (caster == null || target == null || target.Dead)
                 return false;
 
-            // Find teleport position near target
-            IntVec3 teleportPos = FindTeleportPosition(caster, target);
-            if (teleportPos == IntVec3.Invalid)
-            {
-                Messages.Message("Cannot reach target.", caster, MessageTypeDefOf.RejectInput, false);
-                return false;
-            }
-
-            // Perform safe teleport
-            bool teleportSucceeded = WeaponDamageUtility.SafeTeleportPawn(caster, teleportPos, false);
-            
-            if (teleportSucceeded)
-            {
-                // Create visual effects
-                CreateGunStingerEffects(caster.Position, target.Position);
-            }
-
-            // Apply shotgun damage at point-blank range
-            ApplyGunStingerDamage(caster, target);
+            // Start dash-to-target job instead of instant teleport
+            var job = JobMaker.MakeJob(DMC_JobDefOf.DMC_GunStingerCast, target);
+            job.verbToUse = this;
+            caster.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 
             return true;
         }
@@ -129,6 +114,10 @@ namespace DMCAbilities
 
         private void ApplyBlastAreaDamage(Pawn caster, Pawn primaryTarget, DamageInfo originalDamage)
         {
+            // Null safety checks
+            if (caster == null || primaryTarget == null || primaryTarget.Map == null)
+                return;
+
             Map map = primaryTarget.Map;
             IntVec3 targetPos = primaryTarget.Position;
             IntVec3 casterPos = caster.Position;
@@ -162,18 +151,22 @@ namespace DMCAbilities
             // Apply reduced damage to pawns in blast area
             foreach (Pawn pawn in pawnsInRange)
             {
+                // Additional null safety for each pawn
+                if (pawn == null || pawn.Dead || pawn.Map == null)
+                    continue;
+
                 // Calculate distance falloff (closer = more damage)
                 float distance = targetPos.DistanceTo(pawn.Position);
                 float falloffMultiplier = Mathf.Lerp(0.7f, 0.3f, distance / maxRange); // 70% damage at close range, 30% at max range
 
-                // Create reduced damage info
+                // Create reduced damage info with null safety for weapon
                 DamageInfo blastDamage = new DamageInfo(
                     def: originalDamage.Def,
                     amount: (int)(originalDamage.Amount * falloffMultiplier),
                     armorPenetration: 0.15f, // Reduced armor penetration for blast damage
                     angle: originalDamage.Angle,
                     instigator: caster,
-                    weapon: originalDamage.Weapon
+                    weapon: originalDamage.Weapon // This can be null, DamageInfo handles it
                 );
 
                 pawn.TakeDamage(blastDamage);
@@ -256,6 +249,9 @@ namespace DMCAbilities
                 IntVec3 targetPos = target.Cell;
                 IntVec3 casterPos = CasterPawn.Position;
                 
+                // Draw radius ring around blast area for clarity
+                GenDraw.DrawRadiusRing(targetPos, 3f);
+                
                 // Calculate direction from caster to target for cone calculation
                 Vector3 direction = (targetPos - casterPos).ToVector3().normalized;
                 float coneAngle = 90f; // 90-degree cone
@@ -309,6 +305,165 @@ namespace DMCAbilities
             }
 
             return true;
+        }
+    }
+
+    public class JobDriver_GunStingerCast : JobDriver
+    {
+        private List<IntVec3> dashPath;
+        private int currentPathIndex = 0;
+        private const int TicksBetweenCells = 1; // Fast dash for Gun Stinger
+        private int lastMoveTick = 0;
+        private bool hasShot = false;
+
+        public override bool TryMakePreToilReservations(bool errorOnFailed)
+        {
+            return true;
+        }
+
+        protected override IEnumerable<Toil> MakeNewToils()
+        {
+            this.FailOnDespawnedOrNull(TargetIndex.A);
+
+            yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
+
+            var gunStingerDashToil = new Toil();
+            gunStingerDashToil.initAction = () =>
+            {
+                // Calculate direct dash path to target
+                CalculateGunStingerDashPath();
+                currentPathIndex = 0;
+                lastMoveTick = Find.TickManager.TicksGame;
+                hasShot = false;
+
+                // Face the target
+                pawn.rotationTracker.FaceTarget(TargetA);
+
+                Log.Message($"Gun Stinger: Starting dash to target through {dashPath.Count} cells");
+            };
+
+            gunStingerDashToil.tickAction = () =>
+            {
+                if (pawn.Dead || pawn.Downed)
+                {
+                    EndJobWith(JobCondition.Errored);
+                    return;
+                }
+
+                // Check if dash is complete
+                if (currentPathIndex >= dashPath.Count)
+                {
+                    // Perform final shotgun blast if we haven't already
+                    if (!hasShot && TargetA.HasThing && TargetA.Thing is Pawn target)
+                    {
+                        PerformGunStingerShot(target);
+                    }
+                    EndJobWith(JobCondition.Succeeded);
+                    return;
+                }
+
+                // Dash forward rapidly
+                if (Find.TickManager.TicksGame - lastMoveTick >= TicksBetweenCells)
+                {
+                    IntVec3 nextCell = dashPath[currentPathIndex];
+                    
+                    // Dash to next cell
+                    if (WeaponDamageUtility.SafeTeleportPawn(pawn, nextCell))
+                    {
+                        Log.Message($"Gun Stinger: Dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                        
+                        // Check if we're close enough for the point-blank shot
+                        if (TargetA.HasThing && TargetA.Thing is Pawn target && 
+                            pawn.Position.AdjacentTo8WayOrInside(target.Position) && !hasShot)
+                        {
+                            PerformGunStingerShot(target);
+                            hasShot = true;
+                        }
+                        
+                        currentPathIndex++;
+                        lastMoveTick = Find.TickManager.TicksGame;
+                    }
+                    else
+                    {
+                        // Hit obstacle, end dash
+                        Log.Warning($"Gun Stinger: Hit obstacle at {nextCell}, ending dash");
+                        EndJobWith(JobCondition.Succeeded);
+                        return;
+                    }
+                }
+            };
+
+            gunStingerDashToil.defaultCompleteMode = ToilCompleteMode.Never;
+            yield return gunStingerDashToil;
+        }
+
+        private void CalculateGunStingerDashPath()
+        {
+            dashPath = new List<IntVec3>();
+            
+            IntVec3 startPos = pawn.Position;
+            IntVec3 targetPos = TargetA.Cell;
+            
+            // Create direct path to target
+            List<IntVec3> lineCells = GenSight.PointsOnLineOfSight(startPos, targetPos).ToList();
+            
+            // Remove starting position
+            if (lineCells.Count > 0 && lineCells[0] == startPos)
+                lineCells.RemoveAt(0);
+
+            // Add all cells up to the target
+            foreach (IntVec3 cell in lineCells)
+            {
+                if (cell.InBounds(pawn.Map) && cell.Standable(pawn.Map))
+                {
+                    dashPath.Add(cell);
+                }
+                else
+                {
+                    break; // Stop at first impassable cell
+                }
+            }
+
+            Log.Message($"Gun Stinger: Dash path calculated with {dashPath.Count} cells");
+        }
+
+        private void PerformGunStingerShot(Pawn target)
+        {
+            if (target == null || target.Dead) return;
+
+            // Calculate enhanced shotgun damage for point-blank shot
+            float multiplier = DMCAbilitiesMod.settings?.gunStingerDamageMultiplier ?? 1.5f;
+            var damageInfo = WeaponDamageUtility.CalculateRangedDamage(pawn, multiplier);
+            
+            if (damageInfo.HasValue)
+            {
+                target.TakeDamage(damageInfo.Value);
+                
+                // Apply stronger stagger from shotgun blast
+                if (target.health?.hediffSet != null)
+                {
+                    Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, target);
+                    stagger.Severity = 0.6f; // Very strong stagger from shotgun blast
+                    target.health.AddHediff(stagger);
+                }
+
+                // Create shotgun blast effects
+                CreateGunStingerBlastEffects(target.Position);
+                
+                Log.Message($"Gun Stinger: Shotgun blast hit {target.Label}");
+            }
+        }
+
+        private void CreateGunStingerBlastEffects(IntVec3 position)
+        {
+            Map map = pawn.Map;
+            if (map == null) return;
+
+            // Shotgun blast effect
+            FleckMaker.Static(position, map, FleckDefOf.ExplosionFlash, 1.5f);
+            
+            // Shotgun sound
+            SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(position, map));
         }
     }
 }

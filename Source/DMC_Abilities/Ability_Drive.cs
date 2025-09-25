@@ -168,7 +168,7 @@ namespace DMCAbilities
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
         {
             needLOSToCenter = false;
-            return 0f; // Don't use radius highlighting, we'll use line drawing
+            return 25f; // Show max range radius during targeting
         }
 
         public override void DrawHighlight(LocalTargetInfo target)

@@ -82,6 +82,10 @@ namespace DMCAbilities
             // Draw the area of effect highlight similar to Judgement Cut
             if (target.IsValid && target.Cell.InBounds(CasterPawn?.Map))
             {
+                // Draw radius ring for clear area visualization
+                GenDraw.DrawRadiusRing(target.Cell, BaseRadius);
+                
+                // Also draw field edges for additional clarity
                 GenDraw.DrawFieldEdges(GenRadial.RadialCellsAround(target.Cell, BaseRadius, true).ToList());
             }
         }
@@ -164,21 +168,19 @@ namespace DMCAbilities
 
             if (projectile != null)
             {
-                // Spawn the projectile high above the target cell
-                IntVec3 highSpawnPos = new IntVec3(spawnCell.x, spawnCell.y, spawnCell.z + 15);
-                if (!highSpawnPos.InBounds(map))
-                    highSpawnPos = spawnCell;
-
+                // Create targeting indicator just before sword spawns for better visual feedback
+                FleckMaker.Static(spawnCell, map, FleckDefOf.PsycastAreaEffect, 0.5f);
+                
+                // Spawn directly at target location for precise damage alignment
+                // The visual "falling" effect will be handled by the projectile's graphics and trajectory
                 projectile.Initialize(pawn, spawnCell.ToVector3Shifted());
-                GenSpawn.Spawn(projectile, highSpawnPos, map);
+                GenSpawn.Spawn(projectile, spawnCell, map);
                 
-                // Launch the projectile to impact at the target cell
-                projectile.Launch(pawn, highSpawnPos, spawnCell, ProjectileHitFlags.IntendedTarget);
-
-                // Visual effect for sword appearance at target
-                FleckMaker.Static(spawnCell, map, FleckDefOf.PsycastAreaEffect, 0.8f);
+                // Launch projectile with immediate impact at target location
+                // This ensures damage applies exactly where the visual sword appears
+                projectile.Launch(pawn, spawnCell, spawnCell, ProjectileHitFlags.IntendedTarget);
                 
-                // Whoosh sound
+                // Whoosh sound at target location
                 SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_Miss, new TargetInfo(spawnCell, map));
             }
         }
@@ -304,14 +306,17 @@ namespace DMCAbilities
 
             if (projectile != null)
             {
-                // Spawn high above target center
-                IntVec3 highSpawnPos = new IntVec3(targetCenter.x, targetCenter.y, targetCenter.z + 20);
-                if (!highSpawnPos.InBounds(map))
-                    highSpawnPos = targetCenter;
-
+                // Create pre-impact indicator for better visual feedback
+                FleckMaker.Static(targetCenter, map, FleckDefOf.PsycastAreaEffect, 1.0f);
+                
+                // Spawn directly at target location for precise damage alignment
+                // The visual "falling" effect will be handled by the projectile's enhanced graphics
                 projectile.Initialize(pawn, targetCenter.ToVector3Shifted());
-                GenSpawn.Spawn(projectile, highSpawnPos, map);
-                projectile.Launch(pawn, highSpawnPos, targetCenter, ProjectileHitFlags.IntendedTarget);
+                GenSpawn.Spawn(projectile, targetCenter, map);
+                
+                // Launch projectile with immediate impact at target location
+                // This ensures damage applies exactly where the visual sword appears
+                projectile.Launch(pawn, targetCenter, targetCenter, ProjectileHitFlags.IntendedTarget);
 
                 // Enhanced visual and audio effects for special sword
                 FleckMaker.Static(targetCenter, map, FleckDefOf.PsycastAreaEffect, 3.5f);

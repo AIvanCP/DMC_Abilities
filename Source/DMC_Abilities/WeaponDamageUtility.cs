@@ -86,8 +86,8 @@ namespace DMCAbilities
             // Apply multiplier
             baseDamage *= multiplier;
 
-            // Get damage type from weapon or use Bullet as fallback
-            DamageDef damageDef = GetWeaponDamageType(weapon, rangedVerb) ?? DamageDefOf.Bullet;
+            // Get damage type from ranged weapon projectile
+            DamageDef damageDef = GetRangedWeaponDamageType(weapon, rangedVerb) ?? DamageDefOf.Bullet;
 
             // Create damage info
             return new DamageInfo(
@@ -306,6 +306,27 @@ namespace DMCAbilities
 
             // Default to Cut damage
             return DamageDefOf.Cut;
+        }
+
+        /// <summary>
+        /// Gets damage type from ranged weapon's projectile
+        /// </summary>
+        private static DamageDef GetRangedWeaponDamageType(ThingWithComps weapon, Verb rangedVerb)
+        {
+            // Try to get from verb's projectile
+            if (rangedVerb?.verbProps?.defaultProjectile?.projectile?.damageDef != null)
+                return rangedVerb.verbProps.defaultProjectile.projectile.damageDef;
+            
+            // Try direct access to projectile damage
+            if (rangedVerb?.verbProps?.defaultProjectile?.GetStatValueAbstract(StatDefOf.RangedWeapon_DamageMultiplier) != null)
+            {
+                // For most ranged weapons, the projectile defines the damage type
+                var projectile = rangedVerb.verbProps.defaultProjectile;
+                if (projectile?.projectile?.damageDef != null)
+                    return projectile.projectile.damageDef;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -558,9 +579,15 @@ namespace DMCAbilities
                 // Avoid bridgeable terrain (usually water/chasms that need bridges)
                 if (terrain.bridge == true)
                     return false;
+                
+                // Additional dangerous terrain checks
+                if (terrain.defName?.Contains("Lava") == true || 
+                    terrain.defName?.Contains("WaterDeep") == true ||
+                    terrain.defName?.Contains("Marsh") == true)
+                    return false;
             }
 
-            // Check for impassable buildings/edifices
+            // Check for impassable buildings/edifices (walls, etc.)
             Building edifice = cell.GetEdifice(map);
             if (edifice != null && edifice.def.passability == Traversability.Impassable)
                 return false;
@@ -616,7 +643,7 @@ namespace DMCAbilities
                 // No safe destination found
                 if (showEffects)
                 {
-                    Messages.Message($"{pawn.LabelShort}: No safe teleport destination found.", 
+                    Messages.Message($"{pawn.LabelShort}: Cannot teleport - no safe ground nearby (avoid deep water, lava, walls).", 
                         pawn, MessageTypeDefOf.RejectInput, false);
                 }
                 return false;

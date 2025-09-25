@@ -48,6 +48,9 @@ namespace DMCAbilities
             listingStandard.CheckboxLabeled("Enable Rain Bullet ability", ref settings.rainBulletEnabled,
                 "Enable or disable the Rain Bullet aerial shooting ability.");
             
+            listingStandard.CheckboxLabeled("Enable Rapid Slash ability", ref settings.rapidSlashEnabled,
+                "Enable or disable the Rapid Slash combo attack ability.");
+            
             listingStandard.Gap();
             listingStandard.Label("Balance Settings:");
             
@@ -95,6 +98,7 @@ namespace DMCAbilities
         public bool gunStingerEnabled = true;
         public bool heavyRainEnabled = true;
         public bool rainBulletEnabled = true;
+        public bool rapidSlashEnabled = true;
         public float stingerDamageMultiplier = 1.2f;
         public float driveDamageMultiplier = 1.0f;
         public float gunStingerDamageMultiplier = 1.5f;
@@ -106,6 +110,7 @@ namespace DMCAbilities
         public float gunStingerTradeChance = 4f;
         public float heavyRainTradeChance = 2f;
         public float rainBulletTradeChance = 4f;
+        public float rapidSlashTradeChance = 3f;
 
         public override void ExposeData()
         {
@@ -117,6 +122,7 @@ namespace DMCAbilities
             Scribe_Values.Look(ref gunStingerEnabled, "gunStingerEnabled", true);
             Scribe_Values.Look(ref heavyRainEnabled, "heavyRainEnabled", true);
             Scribe_Values.Look(ref rainBulletEnabled, "rainBulletEnabled", true);
+            Scribe_Values.Look(ref rapidSlashEnabled, "rapidSlashEnabled", true);
             Scribe_Values.Look(ref stingerDamageMultiplier, "stingerDamageMultiplier", 1.2f);
             Scribe_Values.Look(ref driveDamageMultiplier, "driveDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref gunStingerDamageMultiplier, "gunStingerDamageMultiplier", 1.5f);
@@ -128,6 +134,7 @@ namespace DMCAbilities
             Scribe_Values.Look(ref gunStingerTradeChance, "gunStingerTradeChance", 4f);
             Scribe_Values.Look(ref heavyRainTradeChance, "heavyRainTradeChance", 2f);
             Scribe_Values.Look(ref rainBulletTradeChance, "rainBulletTradeChance", 4f);
+            Scribe_Values.Look(ref rapidSlashTradeChance, "rapidSlashTradeChance", 3f);
             base.ExposeData();
         }
     }

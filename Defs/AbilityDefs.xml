@@ -20,6 +20,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>false</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnThing</jobDef>
@@ -44,6 +45,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnCell</jobDef>
@@ -68,6 +70,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnCell</jobDef>
@@ -88,6 +91,7 @@
         <canTargetLocations>true</canTargetLocations>
         <canTargetPawns>false</canTargetPawns>
         <canTargetBuildings>false</canTargetBuildings>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <gizmoClass>Command_Ability</gizmoClass>
@@ -115,6 +119,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>false</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnThing</jobDef>
@@ -139,6 +144,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnCell</jobDef>
@@ -257,6 +263,7 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <jobDef>CastAbilityOnCell</jobDef>
@@ -294,5 +301,54 @@
       <flyOverhead>true</flyOverhead>
     </projectile>
   </ThingDef>
+
+  <!-- Rapid Slash Ability -->
+  <AbilityDef>
+    <defName>DMC_RapidSlash</defName>
+    <label>rapid slash</label>
+    <description>Dash forward, relentlessly slashing everything in your path. Creates a 3x3 damage area around each position during the dash. Can target terrain or enemies. Dash range scales with melee skill (10-20 cells). Requires a melee weapon.</description>
+    <iconPath>UI/Abilities/RapidSlash</iconPath>
+    <cooldownTicksRange>600</cooldownTicksRange> <!-- 10 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_RapidSlash</verbClass>
+      <range>15</range>
+      <warmupTime>0.2</warmupTime>
+      <soundCast>Pawn_Melee_Blade_Stab</soundCast>
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnThingOrLocation</jobDef>
+  </AbilityDef>
+
+  <!-- Job definition for Rapid Slash casting -->
+  <JobDef>
+    <defName>DMC_RapidSlashCast</defName>
+    <driverClass>DMCAbilities.JobDriver_RapidSlashCast</driverClass>
+    <reportString>performing rapid slash combo</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
+  <!-- Job definition for Stinger dash casting -->
+  <JobDef>
+    <defName>DMC_StingerCast</defName>
+    <driverClass>DMCAbilities.JobDriver_StingerCast</driverClass>
+    <reportString>performing stinger dash</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
+  <!-- Job definition for Gun Stinger dash casting -->
+  <JobDef>
+    <defName>DMC_GunStingerCast</defName>
+    <driverClass>DMCAbilities.JobDriver_GunStingerCast</driverClass>
+    <reportString>performing gun stinger dash</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
 
 </Defs>
