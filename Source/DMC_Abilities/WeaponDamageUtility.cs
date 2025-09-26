@@ -774,6 +774,37 @@ namespace DMCAbilities
             return IntVec3.East; // Fallback
         }
 
+        /// <summary>
+        /// Checks if a pawn should be targeted based on friendly fire settings
+        /// </summary>
+        /// <param name="caster">The pawn using the ability</param>
+        /// <param name="target">The potential target pawn</param>
+        /// <returns>True if should be targeted, false if should be avoided</returns>
+        public static bool ShouldTargetPawn(Pawn caster, Pawn target)
+        {
+            if (caster == null || target == null || target.Dead) return false;
+            if (caster == target) return false; // Never target self
+            
+            // If friendly fire is disabled, check relationships
+            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true)
+            {
+                // Don't target colonists or allies
+                if (target.IsColonist || caster.IsColonistPlayerControlled && target.IsColonistPlayerControlled)
+                    return false;
+                    
+                // Don't target faction allies
+                if (caster.Faction != null && target.Faction != null && 
+                    !caster.Faction.HostileTo(target.Faction))
+                    return false;
+                    
+                // Don't target tamed animals (but wild animals are fair game)
+                if (target.RaceProps.Animal && target.Faction == caster.Faction)
+                    return false;
+            }
+            
+            return true; // Target is valid
+        }
+
         // DMC dialogue system removed per user request - floating text was too complex
     }
 }

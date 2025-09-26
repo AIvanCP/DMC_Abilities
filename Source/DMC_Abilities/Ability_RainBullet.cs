@@ -43,10 +43,8 @@ namespace DMCAbilities
 
 
 
-        public void FireDownwardBulletStorm(IntVec3 centerPos)
+        public void FireDownwardBulletStorm(IntVec3 centerPos, IntVec3 originalPos)
         {
-            if (CasterPawn == null || CasterPawn.Dead) return;
-
             var projectileDef = DefDatabase<ThingDef>.GetNamed("DMC_RainBulletProjectile", false);
             if (projectileDef == null)
             {
@@ -58,33 +56,80 @@ namespace DMCAbilities
             int meleeSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
             int shootingSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Shooting)?.Level ?? 0;
             
-            // Calculate area coverage (like the old system)
-            float areaRadius = 3f + (meleeSkill * 0.1f); // Bigger area with skill
-            int bulletsPerArea = Mathf.RoundToInt(3f + (shootingSkill * 0.15f));
-            bulletsPerArea = Mathf.Clamp(bulletsPerArea, 3, 6);
-            
-            int totalBullets = Mathf.RoundToInt(areaRadius * areaRadius * bulletsPerArea * 0.5f);
-            totalBullets = Mathf.Clamp(totalBullets, 12, 40);
+            int bulletsPerArea = Mathf.RoundToInt(3f + (shootingSkill * 0.15f)); // Uncapped scaling
 
             var map = CasterPawn.Map;
             
-            // Fire bullets in area around caster (like DMC Rainstorm)
-            for (int i = 0; i < totalBullets; i++)
+            // 1. DAMAGE ALONG TELEPORTATION PATH
+            List<IntVec3> teleportPath = GenSight.PointsOnLineOfSight(originalPos, centerPos).ToList();
+            foreach (IntVec3 pathCell in teleportPath)
             {
-                // Random spread around caster position
-                Vector2 randomOffset = Rand.InsideUnitCircle * areaRadius;
-                Vector3 impactPos = centerPos.ToVector3() + new Vector3(randomOffset.x, 0, randomOffset.y);
-                IntVec3 impactCell = impactPos.ToIntVec3().ClampInsideMap(map);
-
-                // Spawn bullets from above (simulate downward rain)
-                IntVec3 skyPos = new IntVec3(impactCell.x, 0, impactCell.z + 8);
+                if (pathCell == centerPos) continue; // Skip destination, handled separately
                 
-                var projectile = (Projectile_RainBullet)GenSpawn.Spawn(projectileDef, skyPos, map);
-                projectile.Initialize(CasterPawn, impactCell.ToVector3());
-                projectile.Launch(CasterPawn, impactCell, impactCell, ProjectileHitFlags.IntendedTarget);
+                // Each cell along path gets 3-6 bullets
+                for (int i = 0; i < bulletsPerArea; i++)
+                {
+                    FireRainBulletAt(pathCell, map, projectileDef, false);
+                }
+            }
+            
+            // 2. ENHANCED BULLETS AT DESTINATION (with enemy targeting)
+            float areaRadius = 3f + (meleeSkill * 0.1f);
+            int destinationBullets = bulletsPerArea * 3; // More bullets at destination
+            
+            for (int i = 0; i < destinationBullets; i++)
+            {
+                IntVec3 targetCell = GetSmartTargetCell(centerPos, areaRadius, map);
+                FireRainBulletAt(targetCell, map, projectileDef, true);
             }
 
-            Log.Message($"Rain Bullet: Fired downward bullet storm of {totalBullets} bullets around {centerPos}");
+            Log.Message($"Rain Bullet: Path damage through {teleportPath.Count} cells, {destinationBullets} bullets at destination");
+        }
+
+        private IntVec3 GetSmartTargetCell(IntVec3 center, float radius, Map map)
+        {
+            // 70% chance to target nearby enemies, 30% random
+            if (Rand.Chance(0.7f))
+            {
+                // Look for enemies in area
+                List<Pawn> nearbyEnemies = new List<Pawn>();
+                foreach (IntVec3 cell in GenRadial.RadialCellsAround(center, radius, true))
+                {
+                    if (!cell.InBounds(map)) continue;
+                    
+                    List<Thing> things = map.thingGrid.ThingsListAtFast(cell);
+                    foreach (Thing thing in things)
+                    {
+                        if (thing is Pawn pawn && pawn != CasterPawn && !pawn.Dead && 
+                            pawn.HostileTo(CasterPawn))
+                        {
+                            nearbyEnemies.Add(pawn);
+                        }
+                    }
+                }
+
+                if (nearbyEnemies.Count > 0)
+                {
+                    return nearbyEnemies.RandomElement().Position;
+                }
+            }
+
+            // Fallback to random position in area
+            Vector2 randomOffset = Rand.InsideUnitCircle * radius;
+            Vector3 randomPos = center.ToVector3() + new Vector3(randomOffset.x, 0, randomOffset.y);
+            return randomPos.ToIntVec3().ClampInsideMap(map);
+        }
+
+        private void FireRainBulletAt(IntVec3 targetCell, Map map, ThingDef projectileDef, bool isDestinationShot)
+        {
+            // Small random offset for visual variety
+            Vector2 offset = Rand.InsideUnitCircle * 0.5f;
+            Vector3 finalTarget = targetCell.ToVector3() + new Vector3(offset.x, 0, offset.y);
+            IntVec3 finalCell = finalTarget.ToIntVec3().ClampInsideMap(map);
+
+            var projectile = (Projectile_RainBullet)GenSpawn.Spawn(projectileDef, finalCell, map);
+            projectile.Initialize(CasterPawn, finalCell.ToVector3());
+            projectile.Launch(CasterPawn, finalCell, finalCell, ProjectileHitFlags.IntendedTarget);
         }
     }
 
@@ -92,6 +137,7 @@ namespace DMCAbilities
     {
         private bool hasTeleported = false;
         private bool bulletStormFired = false;
+        private IntVec3 originalPosition;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -108,11 +154,14 @@ namespace DMCAbilities
             {
                 Log.Message($"Rain Bullet: Starting DMC Rainstorm - teleport and shoot downward");
                 
+                // Store original position before teleporting
+                originalPosition = pawn.Position;
+                
                 // Teleport to target position first
                 if (WeaponDamageUtility.SafeTeleportPawn(pawn, TargetA.Cell))
                 {
                     hasTeleported = true;
-                    Log.Message($"Rain Bullet: Teleported to {TargetA.Cell}");
+                    Log.Message($"Rain Bullet: Teleported from {originalPosition} to {TargetA.Cell}");
                 }
                 else
                 {
@@ -137,7 +186,7 @@ namespace DMCAbilities
                     var verb = job.verbToUse as Verb_RainBullet;
                     if (verb != null)
                     {
-                        verb.FireDownwardBulletStorm(TargetA.Cell);
+                        verb.FireDownwardBulletStorm(TargetA.Cell, originalPosition);
                         bulletStormFired = true;
                     }
                 }

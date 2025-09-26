@@ -3,6 +3,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DMCAbilities
 {
@@ -256,13 +257,17 @@ namespace DMCAbilities
 
         private void ApplyBleedingWound(Pawn target)
         {
-            // Apply a minor bleeding wound
-            BodyPartRecord bodyPart = target.RaceProps.body.AllParts.RandomElement();
-            if (bodyPart != null)
+            // Apply a minor bleeding wound to an existing body part
+            List<BodyPartRecord> availableParts = target.health.hediffSet.GetNotMissingParts().ToList();
+            if (availableParts.Count > 0)
             {
-                Hediff bleedingWound = HediffMaker.MakeHediff(HediffDefOf.Cut, target, bodyPart);
-                bleedingWound.Severity = 5f; // Light bleeding
-                target.health.AddHediff(bleedingWound, bodyPart);
+                BodyPartRecord bodyPart = availableParts.RandomElement();
+                if (bodyPart != null)
+                {
+                    Hediff bleedingWound = HediffMaker.MakeHediff(HediffDefOf.Cut, target, bodyPart);
+                    bleedingWound.Severity = 5f; // Light bleeding
+                    target.health.AddHediff(bleedingWound, bodyPart);
+                }
             }
         }
 

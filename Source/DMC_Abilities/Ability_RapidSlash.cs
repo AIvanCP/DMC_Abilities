@@ -144,10 +144,9 @@ namespace DMCAbilities
             if (lineCells.Count > 0 && lineCells[0] == startPos)
                 lineCells.RemoveAt(0);
 
-            // Increased dash distance based on melee skill (user requested increased range)
+            // Uncapped dash distance based on melee skill
             int meleeSkill = pawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;
-            int maxDashCells = 10 + (meleeSkill / 2); // Increased from 6 to 10 base range
-            maxDashCells = Mathf.Clamp(maxDashCells, 10, 20); // Max range increased to 20
+            int maxDashCells = 10 + (meleeSkill / 2); // 10 base + 0.5 per melee level (uncapped)
 
             // Take up to max dash cells along the path to target - bypass ALL obstacles
             for (int i = 0; i < Mathf.Min(lineCells.Count, maxDashCells); i++)

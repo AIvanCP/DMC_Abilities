@@ -139,6 +139,22 @@
           </li>
         </customCountChances>
       </li>
+      <!-- Heavy Rain skillbook (EXTREMELY RARE) -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_HeavyRainSkillbook</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>4000-6000</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.99</chance> <!-- 99% chance for 0 (1% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.01</chance> <!-- 1% chance for 1 - EXTREMELY RARE -->
+          </li>
+        </customCountChances>
+      </li>
     </stockGenerators>
   </TraderKindDef>
 

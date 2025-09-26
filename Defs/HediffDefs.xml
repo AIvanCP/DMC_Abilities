@@ -254,8 +254,13 @@
     <tendable>false</tendable>
     <stages>
       <li>
+        <capMods>
+          <li>
+            <capacity>Manipulation</capacity>
+            <offset>-0.10</offset>
+          </li>
+        </capMods>
         <statOffsets>
-          <ManipulationCapacity>-0.10</ManipulationCapacity>
           <AimingDelayFactor>0.20</AimingDelayFactor>
         </statOffsets>
       </li>

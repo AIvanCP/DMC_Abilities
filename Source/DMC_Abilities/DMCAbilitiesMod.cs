@@ -52,6 +52,12 @@ namespace DMCAbilities
                 "Enable or disable the Rapid Slash combo attack ability.");
             
             listingStandard.Gap();
+            listingStandard.Label("Combat Settings:");
+            
+            listingStandard.CheckboxLabeled("Disable friendly fire", ref settings.disableFriendlyFire,
+                "When enabled, abilities won't damage allied pawns, colonists, or tamed animals. Wild animals will still be targeted. Default: OFF (damage everyone)");
+            
+            listingStandard.Gap();
             listingStandard.Label("Balance Settings:");
             
             listingStandard.Label($"Stinger damage multiplier: {settings.stingerDamageMultiplier:F1}x");
@@ -99,6 +105,7 @@ namespace DMCAbilities
         public bool heavyRainEnabled = true;
         public bool rainBulletEnabled = true;
         public bool rapidSlashEnabled = true;
+        public bool disableFriendlyFire = false; // Default: OFF (still damage everyone)
         public float stingerDamageMultiplier = 1.2f;
         public float driveDamageMultiplier = 1.0f;
         public float gunStingerDamageMultiplier = 1.5f;
@@ -123,6 +130,7 @@ namespace DMCAbilities
             Scribe_Values.Look(ref heavyRainEnabled, "heavyRainEnabled", true);
             Scribe_Values.Look(ref rainBulletEnabled, "rainBulletEnabled", true);
             Scribe_Values.Look(ref rapidSlashEnabled, "rapidSlashEnabled", true);
+            Scribe_Values.Look(ref disableFriendlyFire, "disableFriendlyFire", false);
             Scribe_Values.Look(ref stingerDamageMultiplier, "stingerDamageMultiplier", 1.2f);
             Scribe_Values.Look(ref driveDamageMultiplier, "driveDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref gunStingerDamageMultiplier, "gunStingerDamageMultiplier", 1.5f);
