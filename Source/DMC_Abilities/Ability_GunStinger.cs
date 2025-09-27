@@ -86,6 +86,13 @@ namespace DMCAbilities
             var damageInfo = WeaponDamageUtility.CalculateRangedDamage(caster, multiplier);
             if (damageInfo.HasValue)
             {
+                // Apply friendly fire protection
+                if (target is Pawn targetPawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                    !WeaponDamageUtility.ShouldTargetPawn(caster, targetPawn))
+                {
+                    return; // Skip friendly targets
+                }
+                
                 // Apply full damage to primary target
                 target.TakeDamage(damageInfo.Value);
 
@@ -160,6 +167,13 @@ namespace DMCAbilities
                 float falloffMultiplier = Mathf.Lerp(0.7f, 0.3f, distance / maxRange); // 70% damage at close range, 30% at max range
 
                 // Create reduced damage info with null safety for weapon
+                // Apply friendly fire protection for blast damage
+                if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                    !WeaponDamageUtility.ShouldTargetPawn(caster, pawn))
+                {
+                    continue; // Skip friendly targets
+                }
+                
                 DamageInfo blastDamage = new DamageInfo(
                     def: originalDamage.Def,
                     amount: (int)(originalDamage.Amount * falloffMultiplier),
@@ -339,7 +353,7 @@ namespace DMCAbilities
                 // Face the target
                 pawn.rotationTracker.FaceTarget(TargetA);
 
-                Log.Message($"Gun Stinger: Starting dash to target through {dashPath.Count} cells");
+                // Starting dash to target
             };
 
             gunStingerDashToil.tickAction = () =>
@@ -369,7 +383,7 @@ namespace DMCAbilities
                     
                     // Force dash through obstacles (trees, walls, etc.)
                     WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
-                    Log.Message($"Gun Stinger: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    // Dashing through obstacles
                     
                     // Check if we're close enough for the point-blank shot
                     if (TargetA.HasThing && TargetA.Thing is Pawn target && 
@@ -429,7 +443,7 @@ namespace DMCAbilities
                 }
             }
 
-            Log.Message($"Gun Stinger: Dash path calculated with {dashPath.Count} cells (stops adjacent to target)");
+            // Dash path calculated
         }
 
         private void PerformGunStingerShot(Pawn target)
@@ -442,6 +456,13 @@ namespace DMCAbilities
             
             if (damageInfo.HasValue)
             {
+                // Apply friendly fire protection
+                if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                    !WeaponDamageUtility.ShouldTargetPawn(pawn, target))
+                {
+                    return; // Skip friendly targets
+                }
+                
                 target.TakeDamage(damageInfo.Value);
                 
                 // Apply stronger stagger from shotgun blast
@@ -455,7 +476,7 @@ namespace DMCAbilities
                 // Create shotgun blast effects
                 CreateGunStingerBlastEffects(target.Position);
                 
-                Log.Message($"Gun Stinger: Shotgun blast hit {target.Label}");
+                // Shotgun blast hit target
             }
 
             // NEW: Perform 90-degree cone area blast after point-blank shot
@@ -485,7 +506,7 @@ namespace DMCAbilities
             // Get cells in a 90-degree cone blast area
             List<IntVec3> coneCells = WeaponDamageUtility.GetConeBlastCells(centerPosition, facingDirection, map, 3);
             
-            Log.Message($"Gun Stinger: Performing cone blast in {coneCells.Count} cells");
+            // Performing cone blast
 
             // Apply damage to all entities in the cone area
             foreach (IntVec3 cell in coneCells)
@@ -505,6 +526,13 @@ namespace DMCAbilities
                         
                         if (damageInfo.HasValue)
                         {
+                            // Apply friendly fire protection for cone damage
+                            if (thing is Pawn coneTarget && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                                !WeaponDamageUtility.ShouldTargetPawn(pawn, coneTarget))
+                            {
+                                continue; // Skip friendly targets
+                            }
+                            
                             thing.TakeDamage(damageInfo.Value);
                             
                             // Apply light stagger only to pawns (turrets don't have health hediffs)
@@ -515,7 +543,7 @@ namespace DMCAbilities
                                 pawnTarget.health.AddHediff(stagger);
                             }
                             
-                            Log.Message($"Gun Stinger: Cone blast hit {thing.Label} at {cell}");
+                            // Cone blast hit target
                         }
                     }
                 }

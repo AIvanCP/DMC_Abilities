@@ -132,12 +132,15 @@ namespace DMCAbilities
             // Check weapon def name for shotgun indicators (expanded patterns)
             string defName = weapon.def.defName.ToLower();
             
-            // Comprehensive shotgun name patterns
+            // Comprehensive shotgun name patterns (expanded for more modded weapons)
             string[] shotgunPatterns = {
                 "shotgun", "pump", "combat_shotgun", "assault_shotgun", "riot_shotgun",
-                "scatter", "shot", "boom", "blaster", "buckshot", "gauge", 
+                "scatter", "shot", "boom", "blaster", "buckshot", "gauge", "shell",
                 "semi_auto_shotgun", "auto_shotgun", "tactical_shotgun", "hunting_shotgun",
-                "sawed_off", "double_barrel", "lever_action_shotgun", "break_action"
+                "sawed_off", "double_barrel", "lever_action_shotgun", "break_action",
+                "scattergun", "boomstick", "trench_gun", "coach_gun", "fowler",
+                "12gauge", "20gauge", "410gauge", "16gauge", "10gauge",
+                "mossberg", "remington", "benelli", "winchester", "spas"
             };
             
             foreach (string pattern in shotgunPatterns)
@@ -162,8 +165,10 @@ namespace DMCAbilities
             if (weapon.def.weaponTags != null)
             {
                 string[] shotgunTags = {
-                    "shotgun", "scatter", "blaster", "boom", "pump", "gauge",
-                    "buckshot", "riot", "combat_shotgun", "hunting_shotgun"
+                    "shotgun", "scatter", "blaster", "boom", "pump", "gauge", "shell",
+                    "buckshot", "riot", "combat_shotgun", "hunting_shotgun", "scattergun",
+                    "boomstick", "trench", "coach", "fowler", "tactical_shotgun",
+                    "12ga", "20ga", "410ga", "16ga", "10ga"
                 };
                 
                 foreach (var tag in weapon.def.weaponTags)
@@ -175,6 +180,23 @@ namespace DMCAbilities
                             return true;
                     }
                 }
+            }
+
+            // Check weapon label/description for shotgun-like names
+            string label = weapon.def.label?.ToLower() ?? "";
+            foreach (string pattern in shotgunPatterns)
+            {
+                if (label.Contains(pattern))
+                    return true;
+            }
+
+            // Check description for shotgun indicators
+            string description = weapon.def.description?.ToLower() ?? "";
+            string[] descriptionPatterns = { "shotgun", "scatter", "buckshot", "shell", "gauge" };
+            foreach (string pattern in descriptionPatterns)
+            {
+                if (description.Contains(pattern))
+                    return true;
             }
 
             // Check verb properties for shotgun-like characteristics
@@ -194,7 +216,8 @@ namespace DMCAbilities
                     {
                         string projName = rangedVerb.verbProps.defaultProjectile.defName.ToLower();
                         if (projName.Contains("shotgun") || projName.Contains("buckshot") || 
-                            projName.Contains("scatter") || projName.Contains("pellet"))
+                            projName.Contains("scatter") || projName.Contains("pellet") ||
+                            projName.Contains("shell") || projName.Contains("gauge"))
                             return true;
                     }
                 }
@@ -206,7 +229,7 @@ namespace DMCAbilities
         /// <summary>
         /// Checks if a weapon is primarily ranged
         /// </summary>
-        private static bool IsRangedWeapon(ThingWithComps weapon)
+        public static bool IsRangedWeapon(ThingWithComps weapon)
         {
             if (weapon?.GetComp<CompEquippable>()?.AllVerbs == null)
                 return false;
@@ -803,6 +826,46 @@ namespace DMCAbilities
             }
             
             return true; // Target is valid
+        }
+
+        /// <summary>
+        /// Calculates skill-based damage for abilities that summon projectiles (Red Hot Night, Heavy Rain, etc.)
+        /// Uses the ability name instead of weapon for damage attribution
+        /// </summary>
+        /// <param name="pawn">The pawn using the ability</param>
+        /// <param name="multiplier">Damage multiplier to apply</param>
+        /// <param name="abilityName">Name of the ability for damage attribution</param>
+        /// <param name="damageDef">Type of damage to deal (default: Burn for fire abilities)</param>
+        /// <returns>DamageInfo for the skill-based attack</returns>
+        public static DamageInfo CalculateSkillDamage(Pawn pawn, float multiplier = 1f, string abilityName = "DMC Ability", DamageDef damageDef = null)
+        {
+            // Base damage for summoned abilities (independent of weapon)
+            float baseDamage = 15f; // Reasonable base for fire/energy attacks
+            
+            // Apply pawn shooting skill modifier for ranged abilities like Red Hot Night
+            if (pawn?.skills != null)
+            {
+                int shootingSkill = pawn.skills.GetSkill(SkillDefOf.Shooting)?.Level ?? 0;
+                float skillMultiplier = 1f + (shootingSkill * 0.1f); // 10% per skill level
+                baseDamage *= skillMultiplier;
+            }
+            
+            // Apply multiplier
+            baseDamage *= multiplier;
+            
+            // Use provided damage type or default to Burn for fire abilities
+            DamageDef finalDamageDef = damageDef ?? DamageDefOf.Burn;
+            
+            // Create damage info with NULL weapon (so it shows ability name)
+            return new DamageInfo(
+                def: finalDamageDef,
+                amount: (int)baseDamage,
+                armorPenetration: 0.15f, // Moderate penetration for magical attacks
+                angle: 0f,
+                instigator: pawn,
+                weapon: null, // NULL weapon = shows ability name instead
+                category: DamageInfo.SourceCategory.ThingOrUnknown
+            );
         }
 
         // DMC dialogue system removed per user request - floating text was too complex

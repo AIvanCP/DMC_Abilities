@@ -91,7 +91,7 @@ namespace DMCAbilities
                 // Face the dash direction
                 pawn.rotationTracker.FaceCell(TargetA.Cell);
 
-                Log.Message($"Rapid Slash: Starting forward dash through {dashPath.Count} cells to {TargetA.Cell}");
+                // Starting Rapid Slash dash
             };
 
             forwardDashToil.tickAction = () =>
@@ -116,7 +116,7 @@ namespace DMCAbilities
                     
                     // Force dash through ALL obstacles (trees, walls, etc.)
                     WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
-                    Log.Message($"Rapid Slash: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    // Dashing through obstacles
                     
                     // Slash everything in 3x3 area around current position
                     SlashInThreeByThreeArea(nextCell);
@@ -159,7 +159,7 @@ namespace DMCAbilities
                 }
             }
 
-            Log.Message($"Rapid Slash: Forward dash path calculated with {dashPath.Count} cells (melee skill: {meleeSkill}, max range: {maxDashCells})");
+            // Dash path calculated
         }
 
         private void SlashInThreeByThreeArea(IntVec3 centerCell)
@@ -205,8 +205,15 @@ namespace DMCAbilities
         {
             if (target == null || target.Destroyed) return;
 
-            // Calculate and apply melee damage for forward dash slashes
-            float damageMultiplier = 1.0f; // Standard weapon damage for each slash
+            // Apply friendly fire protection for pawns
+            if (target is Pawn pawnTarget && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(pawn, pawnTarget))
+            {
+                return; // Skip friendly targets
+            }
+
+            // Calculate and apply melee damage for forward dash slashes with settings multiplier
+            float damageMultiplier = DMCAbilitiesMod.settings?.rapidSlashDamageMultiplier ?? 1.0f;
             var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(pawn, damageMultiplier);
             
             if (damageInfo.HasValue)
@@ -215,11 +222,11 @@ namespace DMCAbilities
             }
 
             // Apply stagger effect only to pawns (turrets don't have health hediffs)
-            if (target is Pawn pawnTarget && pawnTarget.health?.hediffSet != null)
+            if (target is Pawn targetPawn && targetPawn.health?.hediffSet != null)
             {
-                Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, pawnTarget);
+                Hediff stagger = HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_Stagger, targetPawn);
                 stagger.Severity = 0.4f; // Strong stagger from dash attack
-                pawnTarget.health.AddHediff(stagger);
+                targetPawn.health.AddHediff(stagger);
             }
 
             // Try to spawn spectral summoned sword above target
@@ -228,7 +235,7 @@ namespace DMCAbilities
             // Visual and sound effects
             CreateSlashEffects(target.Position);
 
-            Log.Message($"Rapid Slash: Forward dash hit {target.Label}");
+            // Dash strike hit
         }
 
         private void TrySpawnSpectralSword(Thing target)
@@ -242,7 +249,7 @@ namespace DMCAbilities
             if (Rand.Chance(totalChance))
             {
                 SpawnSpectralSword(target.Position);
-                Log.Message($"Rapid Slash: Spawned spectral sword above {target.Label} (chance: {totalChance:P1})");
+                // Spawned spectral sword
             }
         }
 

@@ -365,4 +365,52 @@ The Rapid Slash allows the user to dash to an enemy and unleash 3-8 increasingly
     <tickerType>Rare</tickerType>
   </ThingDef>
 
+  <!-- Red Hot Night Skillbook -->
+  <ThingDef>
+    <defName>DMC_SkillbookRedHotNight</defName>
+    <label>skillbook: red hot night</label>
+    <description>An ancient tome describing the legendary Red Hot Night technique - summoning colossal red orbs to rain destruction upon enemies. This ultimate ranged ability channels the power of infernal meteorites, growing stronger when charged and requiring exceptional shooting skill to master.
+
+Only those proficient with ranged weapons can harness this devastating power. The technique allows charging to increase the number of orbs, damage, and targeting precision.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookRedHotNight</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>80</MaxHitPoints>
+      <Mass>0.4</Mass>
+      <MarketValue>2500</MarketValue>
+      <Flammability>0.8</Flammability>
+      <DeteriorationRate>0.05</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_RedHotNightAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Learn Red Hot Night technique</useLabel>
+        <useDuration>600</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
 </Defs>

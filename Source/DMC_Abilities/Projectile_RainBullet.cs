@@ -56,8 +56,16 @@ namespace DMCAbilities
             if (target == null || target.Dead || casterPawn == null)
                 return;
 
-            // Calculate weapon-based ranged damage - each bullet should cause full damage
-            var damageInfo = WeaponDamageUtility.CalculateRangedDamage(casterPawn, 1f);
+            // Apply friendly fire protection
+            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(casterPawn, target))
+            {
+                return; // Skip friendly targets
+            }
+
+            // Calculate weapon-based ranged damage with settings multiplier
+            float multiplier = DMCAbilitiesMod.settings?.rainBulletDamageMultiplier ?? 1.0f;
+            var damageInfo = WeaponDamageUtility.CalculateRangedDamage(casterPawn, multiplier);
             if (damageInfo.HasValue)
             {
                 var gunDamage = damageInfo.Value;
@@ -77,7 +85,7 @@ namespace DMCAbilities
                     SoundStarter.PlayOneShot(SoundDefOf.BulletImpact_Ground, new TargetInfo(target.Position, target.Map));
                 }
 
-                Log.Message($"Rain Bullet: Applied {gunDamage.Amount} damage to {target.Label}");
+                // Applied bullet damage
             }
         }
 

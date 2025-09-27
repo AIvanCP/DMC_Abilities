@@ -7,7 +7,9 @@ namespace DMCAbilities
     public class DMCAbilitiesMod : Mod
     {
         public static DMCAbilitiesSettings settings;
-
+        private static Vector2 scrollPosition = Vector2.zero;
+        private const float ScrollViewHeight = 1100f; // Total content height (increased for all new settings)
+        
         public DMCAbilitiesMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<DMCAbilitiesSettings>();
@@ -15,77 +17,203 @@ namespace DMCAbilities
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            Listing_Standard listingStandard = new Listing_Standard();
-            listingStandard.Begin(inRect);
+            // Title
+            Text.Font = GameFont.Medium;
+            Widgets.Label(new Rect(0, 0, inRect.width, 35f), "DMC Abilities Settings");
+            Text.Font = GameFont.Small;
             
-            listingStandard.Label("DMC Abilities Settings");
-            listingStandard.Gap();
+            // Create scrollable area
+            Rect scrollViewRect = new Rect(0, 40f, inRect.width, inRect.height - 40f);
+            Rect scrollContentRect = new Rect(0, 0, inRect.width - 20f, ScrollViewHeight);
+            
+            Widgets.BeginScrollView(scrollViewRect, ref scrollPosition, scrollContentRect, true);
+            
+            Listing_Standard listingStandard = new Listing_Standard();
+            listingStandard.Begin(scrollContentRect);
+            
+            // === MAIN SETTINGS ===
+            DrawSectionHeader(listingStandard, "Main Settings");
             
             listingStandard.CheckboxLabeled("Enable mod (requires restart)", ref settings.modEnabled, 
                 "Toggle the entire mod on/off. Requires game restart to take effect.");
             
-            listingStandard.Gap();
-            listingStandard.Label("Ability Settings:");
-            
-            listingStandard.CheckboxLabeled("Enable Stinger ability", ref settings.stingerEnabled, 
-                "Enable or disable the Stinger dash attack ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Judgement Cut ability", ref settings.judgementCutEnabled,
-                "Enable or disable the Judgement Cut ranged slash ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Drive ability", ref settings.driveEnabled,
-                "Enable or disable the Drive projectile slash ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Void Slash ability", ref settings.voidSlashEnabled,
-                "Enable or disable the Void Slash debuffing area ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Gun Stinger ability", ref settings.gunStingerEnabled,
-                "Enable or disable the Gun Stinger shotgun dash ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Heavy Rain ability", ref settings.heavyRainEnabled,
-                "Enable or disable the Heavy Rain spectral sword storm ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Rain Bullet ability", ref settings.rainBulletEnabled,
-                "Enable or disable the Rain Bullet aerial shooting ability.");
-            
-            listingStandard.CheckboxLabeled("Enable Rapid Slash ability", ref settings.rapidSlashEnabled,
-                "Enable or disable the Rapid Slash combo attack ability.");
-            
-            listingStandard.Gap();
-            listingStandard.Label("Combat Settings:");
-            
             listingStandard.CheckboxLabeled("Disable friendly fire", ref settings.disableFriendlyFire,
-                "When enabled, abilities won't damage allied pawns, colonists, or tamed animals. Wild animals will still be targeted. Default: OFF (damage everyone)");
+                "When enabled, abilities won't damage allied pawns, colonists, or tamed animals.");
             
-            listingStandard.Gap();
-            listingStandard.Label("Balance Settings:");
+            // === ABILITY TOGGLES ===
+            DrawSectionHeader(listingStandard, "Ability Toggles");
             
-            listingStandard.Label($"Stinger damage multiplier: {settings.stingerDamageMultiplier:F1}x");
-            settings.stingerDamageMultiplier = listingStandard.Slider(settings.stingerDamageMultiplier, 0.5f, 3.0f);
+            CreateAbilityToggle(listingStandard, "Stinger", ref settings.stingerEnabled, 
+                "Lightning-fast dash attack with melee weapons");
+            CreateAbilityToggle(listingStandard, "Judgement Cut", ref settings.judgementCutEnabled,
+                "Ranged dimensional slash with melee weapons");
+            CreateAbilityToggle(listingStandard, "Drive", ref settings.driveEnabled,
+                "Vertical energy slash that creates projectiles");
+            CreateAbilityToggle(listingStandard, "Void Slash", ref settings.voidSlashEnabled,
+                "Cone-shaped melee attack with debuffing effects");
+            CreateAbilityToggle(listingStandard, "Gun Stinger", ref settings.gunStingerEnabled,
+                "Teleport behind target and shotgun blast (shotguns only)");
+            CreateAbilityToggle(listingStandard, "Heavy Rain", ref settings.heavyRainEnabled,
+                "Rain of spectral swords over large area");
+            CreateAbilityToggle(listingStandard, "Rain Bullet", ref settings.rainBulletEnabled,
+                "Aerial leap with continuous shooting (pistols/revolvers)");
+            CreateAbilityToggle(listingStandard, "Rapid Slash", ref settings.rapidSlashEnabled,
+                "Dash forward slashing everything in path");
+            CreateAbilityToggle(listingStandard, "Red Hot Night", ref settings.redHotNightEnabled,
+                "Devastating orb rain attack (ranged weapons only)");
             
-            listingStandard.Label($"Drive damage multiplier: {settings.driveDamageMultiplier:F1}x");
-            settings.driveDamageMultiplier = listingStandard.Slider(settings.driveDamageMultiplier, 0.5f, 3.0f);
+            // === DAMAGE MULTIPLIERS ===
+            DrawSectionHeader(listingStandard, "Damage Multipliers");
             
-            listingStandard.Label($"Gun Stinger damage multiplier: {settings.gunStingerDamageMultiplier:F1}x");
-            settings.gunStingerDamageMultiplier = listingStandard.Slider(settings.gunStingerDamageMultiplier, 0.5f, 3.0f);
+            CreateSliderSetting(listingStandard, "Stinger damage", ref settings.stingerDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Stinger dash attacks");
+            CreateSliderSetting(listingStandard, "Judgement Cut damage", ref settings.judgementCutDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Judgement Cut dimensional slashes");
+            CreateSliderSetting(listingStandard, "Drive damage", ref settings.driveDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Drive projectiles");
+            CreateSliderSetting(listingStandard, "Void Slash damage", ref settings.voidSlashDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Void Slash cone attacks");
+            CreateSliderSetting(listingStandard, "Gun Stinger damage", ref settings.gunStingerDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Gun Stinger shotgun blasts");
+            CreateSliderSetting(listingStandard, "Heavy Rain damage", ref settings.heavyRainDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Heavy Rain spectral swords");
+            CreateSliderSetting(listingStandard, "Rain Bullet damage", ref settings.rainBulletDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Rain Bullet pistol shots");
+            CreateSliderSetting(listingStandard, "Rapid Slash damage", ref settings.rapidSlashDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Rapid Slash dash attacks");
+            CreateSliderSetting(listingStandard, "Red Hot Night damage", ref settings.redHotNightDamageMultiplier, 
+                0.5f, 3.0f, "x", "Damage multiplier for Red Hot Night orb explosions");
+            CreateSliderSetting(listingStandard, "Sword damage bonus", ref settings.swordDamageBonus, 
+                0f, 50f, "%", "Extra damage bonus when using sword weapons");
             
-            listingStandard.Label($"Sword damage bonus: {settings.swordDamageBonus:F0}%");
-            settings.swordDamageBonus = listingStandard.Slider(settings.swordDamageBonus, 0f, 50f);
+            // === PERFORMANCE SETTINGS ===
+            DrawSectionHeader(listingStandard, "Performance Settings");
             
-            listingStandard.Gap();
-            listingStandard.Label("Trader Settings:");
+            listingStandard.Label($"Max Red Hot Night orbs: {settings.maxRedHotOrbs}");
+            settings.maxRedHotOrbs = (int)listingStandard.Slider(settings.maxRedHotOrbs, 5, 50);
+            listingStandard.Gap(5f);
             
-            listingStandard.Label($"Stinger skillbook trade chance: {settings.stingerTradeChance:F1}%");
-            settings.stingerTradeChance = listingStandard.Slider(settings.stingerTradeChance, 0f, 20f);
+            // === SKILLBOOK TRADER CHANCES ===
+            DrawSectionHeader(listingStandard, "Skillbook Trader Chances");
+            Text.Font = GameFont.Tiny;
+            listingStandard.Label("Adjust how often skillbooks appear in trader inventories:");
+            Text.Font = GameFont.Small;
+            listingStandard.Gap(5f);
             
-            listingStandard.Label($"Judgement Cut skillbook trade chance: {settings.judgementCutTradeChance:F1}%");
-            settings.judgementCutTradeChance = listingStandard.Slider(settings.judgementCutTradeChance, 0f, 15f);
+            CreateSliderSetting(listingStandard, "Stinger book", ref settings.stingerTradeChance, 
+                0f, 20f, "%", "Chance for Stinger skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Judgement Cut book", ref settings.judgementCutTradeChance, 
+                0f, 15f, "%", "Chance for Judgement Cut skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Drive book", ref settings.driveTradeChance, 
+                0f, 15f, "%", "Chance for Drive skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Void Slash book", ref settings.voidSlashTradeChance, 
+                0f, 15f, "%", "Chance for Void Slash skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Gun Stinger book", ref settings.gunStingerTradeChance, 
+                0f, 15f, "%", "Chance for Gun Stinger skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Heavy Rain book", ref settings.heavyRainTradeChance, 
+                0f, 15f, "%", "Chance for Heavy Rain skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Rain Bullet book", ref settings.rainBulletTradeChance, 
+                0f, 15f, "%", "Chance for Rain Bullet skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Rapid Slash book", ref settings.rapidSlashTradeChance, 
+                0f, 15f, "%", "Chance for Rapid Slash skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Red Hot Night book", ref settings.redHotNightTradeChance, 
+                0f, 15f, "%", "Chance for Red Hot Night skillbook to appear in trader stock");
             
-            listingStandard.Label($"Void Slash skillbook trade chance: {settings.voidSlashTradeChance:F1}%");
-            settings.voidSlashTradeChance = listingStandard.Slider(settings.voidSlashTradeChance, 0f, 15f);
+            // Reset button
+            listingStandard.Gap(20f);
+            if (listingStandard.ButtonText("Reset All to Defaults"))
+            {
+                ResetToDefaults();
+            }
+            
+            listingStandard.Gap(10f);
+            Text.Font = GameFont.Tiny;
+            listingStandard.Label("DMC Abilities v1.6+ - All abilities are inspired by Devil May Cry series");
+            Text.Font = GameFont.Small;
             
             listingStandard.End();
+            Widgets.EndScrollView();
+            
             base.DoSettingsWindowContents(inRect);
+        }
+        
+        private void DrawSectionHeader(Listing_Standard listing, string title)
+        {
+            listing.Gap(15f);
+            
+            // Draw a separator line
+            Rect lineRect = listing.GetRect(1f);
+            lineRect.width *= 0.8f;
+            Widgets.DrawLineHorizontal(lineRect.x, lineRect.y, lineRect.width);
+            
+            listing.Gap(8f);
+            Text.Font = GameFont.Medium;
+            GUI.color = new Color(0.8f, 0.9f, 1.0f); // Light blue tint
+            listing.Label(title);
+            GUI.color = Color.white;
+            Text.Font = GameFont.Small;
+            listing.Gap(8f);
+        }
+        
+        private void CreateAbilityToggle(Listing_Standard listing, string name, ref bool setting, string tooltip)
+        {
+            listing.CheckboxLabeled($"Enable {name}", ref setting, tooltip);
+        }
+        
+        private void CreateSliderSetting(Listing_Standard listing, string name, ref float setting, 
+            float min, float max, string suffix, string tooltip = null)
+        {
+            listing.Label($"{name}: {setting:F1}{suffix}");
+            setting = listing.Slider(setting, min, max);
+            if (!string.IsNullOrEmpty(tooltip))
+            {
+                TooltipHandler.TipRegion(listing.GetRect(0f), tooltip);
+            }
+            listing.Gap(3f);
+        }
+        
+        private void ResetToDefaults()
+        {
+            // Main settings
+            settings.modEnabled = true;
+            settings.disableFriendlyFire = false;
+            
+            // Ability toggles
+            settings.stingerEnabled = true;
+            settings.judgementCutEnabled = true;
+            settings.driveEnabled = true;
+            settings.voidSlashEnabled = true;
+            settings.gunStingerEnabled = true;
+            settings.heavyRainEnabled = true;
+            settings.rainBulletEnabled = true;
+            settings.rapidSlashEnabled = true;
+            settings.redHotNightEnabled = true;
+            
+            // Performance
+            settings.maxRedHotOrbs = 20;
+            
+            // Damage multipliers
+            settings.stingerDamageMultiplier = 1.2f;
+            settings.judgementCutDamageMultiplier = 1.0f;
+            settings.driveDamageMultiplier = 1.0f;
+            settings.voidSlashDamageMultiplier = 1.0f;
+            settings.gunStingerDamageMultiplier = 1.5f;
+            settings.heavyRainDamageMultiplier = 1.0f;
+            settings.rainBulletDamageMultiplier = 1.0f;
+            settings.rapidSlashDamageMultiplier = 1.0f;
+            settings.redHotNightDamageMultiplier = 1.0f;
+            settings.swordDamageBonus = 10f;
+            
+            // Trader chances
+            settings.stingerTradeChance = 5f;
+            settings.judgementCutTradeChance = 3f;
+            settings.driveTradeChance = 4f;
+            settings.voidSlashTradeChance = 4f;
+            settings.gunStingerTradeChance = 4f;
+            settings.heavyRainTradeChance = 2f;
+            settings.rainBulletTradeChance = 4f;
+            settings.rapidSlashTradeChance = 3f;
+            settings.redHotNightTradeChance = 2f;
         }
 
         public override string SettingsCategory()
@@ -96,7 +224,11 @@ namespace DMCAbilities
 
     public class DMCAbilitiesSettings : ModSettings
     {
+        // Main settings
         public bool modEnabled = true;
+        public bool disableFriendlyFire = false;
+        
+        // Ability toggles
         public bool stingerEnabled = true;
         public bool judgementCutEnabled = true;
         public bool driveEnabled = true;
@@ -105,11 +237,24 @@ namespace DMCAbilities
         public bool heavyRainEnabled = true;
         public bool rainBulletEnabled = true;
         public bool rapidSlashEnabled = true;
-        public bool disableFriendlyFire = false; // Default: OFF (still damage everyone)
+        public bool redHotNightEnabled = true;
+        
+        // Performance settings
+        public int maxRedHotOrbs = 20;
+        
+        // Damage multipliers
         public float stingerDamageMultiplier = 1.2f;
         public float driveDamageMultiplier = 1.0f;
         public float gunStingerDamageMultiplier = 1.5f;
+        public float judgementCutDamageMultiplier = 1.0f;
+        public float voidSlashDamageMultiplier = 1.0f;
+        public float heavyRainDamageMultiplier = 1.0f;
+        public float rainBulletDamageMultiplier = 1.0f;
+        public float rapidSlashDamageMultiplier = 1.0f;
+        public float redHotNightDamageMultiplier = 1.0f;
         public float swordDamageBonus = 10f;
+        
+        // Trader chances for skillbooks
         public float stingerTradeChance = 5f;
         public float judgementCutTradeChance = 3f;
         public float driveTradeChance = 4f;
@@ -118,10 +263,15 @@ namespace DMCAbilities
         public float heavyRainTradeChance = 2f;
         public float rainBulletTradeChance = 4f;
         public float rapidSlashTradeChance = 3f;
+        public float redHotNightTradeChance = 2f;
 
         public override void ExposeData()
         {
+            // Main settings
             Scribe_Values.Look(ref modEnabled, "modEnabled", true);
+            Scribe_Values.Look(ref disableFriendlyFire, "disableFriendlyFire", false);
+            
+            // Ability toggles
             Scribe_Values.Look(ref stingerEnabled, "stingerEnabled", true);
             Scribe_Values.Look(ref judgementCutEnabled, "judgementCutEnabled", true);
             Scribe_Values.Look(ref driveEnabled, "driveEnabled", true);
@@ -130,11 +280,24 @@ namespace DMCAbilities
             Scribe_Values.Look(ref heavyRainEnabled, "heavyRainEnabled", true);
             Scribe_Values.Look(ref rainBulletEnabled, "rainBulletEnabled", true);
             Scribe_Values.Look(ref rapidSlashEnabled, "rapidSlashEnabled", true);
-            Scribe_Values.Look(ref disableFriendlyFire, "disableFriendlyFire", false);
+            Scribe_Values.Look(ref redHotNightEnabled, "redHotNightEnabled", true);
+            
+            // Performance settings
+            Scribe_Values.Look(ref maxRedHotOrbs, "maxRedHotOrbs", 20);
+            
+            // Damage multipliers
             Scribe_Values.Look(ref stingerDamageMultiplier, "stingerDamageMultiplier", 1.2f);
             Scribe_Values.Look(ref driveDamageMultiplier, "driveDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref gunStingerDamageMultiplier, "gunStingerDamageMultiplier", 1.5f);
+            Scribe_Values.Look(ref judgementCutDamageMultiplier, "judgementCutDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref voidSlashDamageMultiplier, "voidSlashDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref heavyRainDamageMultiplier, "heavyRainDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref rainBulletDamageMultiplier, "rainBulletDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref rapidSlashDamageMultiplier, "rapidSlashDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref redHotNightDamageMultiplier, "redHotNightDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref swordDamageBonus, "swordDamageBonus", 10f);
+            
+            // Trader chances
             Scribe_Values.Look(ref stingerTradeChance, "stingerTradeChance", 5f);
             Scribe_Values.Look(ref judgementCutTradeChance, "judgementCutTradeChance", 3f);
             Scribe_Values.Look(ref driveTradeChance, "driveTradeChance", 4f);
@@ -143,6 +306,8 @@ namespace DMCAbilities
             Scribe_Values.Look(ref heavyRainTradeChance, "heavyRainTradeChance", 2f);
             Scribe_Values.Look(ref rainBulletTradeChance, "rainBulletTradeChance", 4f);
             Scribe_Values.Look(ref rapidSlashTradeChance, "rapidSlashTradeChance", 3f);
+            Scribe_Values.Look(ref redHotNightTradeChance, "redHotNightTradeChance", 2f);
+            
             base.ExposeData();
         }
     }

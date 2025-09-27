@@ -121,8 +121,16 @@ namespace DMCAbilities
                 if ((thing is Pawn targetPawn && targetPawn != CasterPawn) ||
                     (thing.def.building?.IsTurret == true))
                 {
-                    // Calculate damage without multiplier (base weapon damage)
-                    var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(CasterPawn, 1f);
+                    // Apply friendly fire protection for pawns
+                    if (thing is Pawn pawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                        !WeaponDamageUtility.ShouldTargetPawn(CasterPawn, pawn))
+                    {
+                        continue; // Skip friendly targets
+                    }
+                    
+                    // Calculate damage with settings multiplier
+                    float multiplier = DMCAbilitiesMod.settings?.judgementCutDamageMultiplier ?? 1.0f;
+                    var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(CasterPawn, multiplier);
                     if (damageInfo.HasValue)
                     {
                         // Apply damage

@@ -27,7 +27,7 @@ namespace DMCAbilities
                 return false;
             }
 
-            Log.Message($"Rain Bullet: Starting cast job for {CasterPawn} at target {CurrentTarget}");
+            // Starting Rain Bullet cast
 
             var job = JobMaker.MakeJob(DMC_JobDefOf.DMC_RainBulletCast, CurrentTarget);
             job.verbToUse = this;
@@ -83,7 +83,7 @@ namespace DMCAbilities
                 FireRainBulletAt(targetCell, map, projectileDef, true);
             }
 
-            Log.Message($"Rain Bullet: Path damage through {teleportPath.Count} cells, {destinationBullets} bullets at destination");
+            // Calculating path damage and bullets
         }
 
         private IntVec3 GetSmartTargetCell(IntVec3 center, float radius, Map map)
@@ -152,7 +152,7 @@ namespace DMCAbilities
             var rainStormToil = new Toil();
             rainStormToil.initAction = () =>
             {
-                Log.Message($"Rain Bullet: Starting DMC Rainstorm - teleport and shoot downward");
+                // Starting DMC Rainstorm
                 
                 // Store original position before teleporting
                 originalPosition = pawn.Position;
@@ -161,7 +161,7 @@ namespace DMCAbilities
                 if (WeaponDamageUtility.SafeTeleportPawn(pawn, TargetA.Cell))
                 {
                     hasTeleported = true;
-                    Log.Message($"Rain Bullet: Teleported from {originalPosition} to {TargetA.Cell}");
+                    // Teleported to destination
                 }
                 else
                 {
@@ -194,7 +194,7 @@ namespace DMCAbilities
                 // Wait a moment then end
                 if (bulletStormFired && Find.TickManager.TicksGame % 60 == 0)
                 {
-                    Log.Message($"Rain Bullet: Rainstorm complete");
+                    // Rainstorm complete
                     EndJobWith(JobCondition.Succeeded);
                 }
             };

@@ -12,6 +12,7 @@ namespace DMCAbilities
         public static JobDef DMC_RapidSlashCast;
         public static JobDef DMC_StingerCast;
         public static JobDef DMC_GunStingerCast;
+        public static JobDef DMC_RedHotNightCast;
 
         static DMC_JobDefOf()
         {
@@ -36,6 +37,8 @@ namespace DMCAbilities
         public static HediffDef DMC_SpectralStun;
         public static HediffDef DMC_SpectralShock;
         public static HediffDef DMC_Stagger;
+        public static HediffDef DMC_RedHotNightAbility;
+        public static HediffDef DMC_RedHotBurn;
 
         static DMC_HediffDefOf()
         {
@@ -54,6 +57,7 @@ namespace DMCAbilities
         public static AbilityDef DMC_HeavyRain;
         public static AbilityDef DMC_RainBullet;
         public static AbilityDef DMC_RapidSlash;
+        public static AbilityDef DMC_RedHotNight;
 
         static DMC_AbilityDefOf()
         {
@@ -69,6 +73,7 @@ namespace DMCAbilities
         public static ThingDef DMC_SpectralSwordSpecialProjectile;
         public static ThingDef DMC_SpectralSwordRapidSlashProjectile;
         public static ThingDef DMC_RainBulletProjectile;
+        public static ThingDef DMC_RedOrbProjectile;
 
         static DMC_ThingDefOf()
         {

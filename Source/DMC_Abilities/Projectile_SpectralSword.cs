@@ -78,6 +78,13 @@ namespace DMCAbilities
                 hitPart: null
             );
 
+            // Apply friendly fire protection
+            if (target is Pawn targetPawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(casterPawn, targetPawn))
+            {
+                return; // Skip friendly targets
+            }
+            
             target.TakeDamage(damageInfo);
 
             // Check if target already has spectral wound (for stun chance)
@@ -221,6 +228,13 @@ namespace DMCAbilities
                 hitPart: null
             );
 
+            // Apply friendly fire protection for legendary sword
+            if (target is Pawn targetPawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(casterPawn, targetPawn))
+            {
+                return; // Skip friendly targets
+            }
+            
             target.TakeDamage(damageInfo);
 
             // Apply stronger Spectral Wound (double duration)
@@ -391,6 +405,13 @@ namespace DMCAbilities
                 DamageInfo.SourceCategory.ThingOrUnknown
             );
 
+            // Apply friendly fire protection for spectral explosion
+            if (target is Pawn targetPawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(originalCaster, targetPawn))
+            {
+                return; // Skip friendly targets
+            }
+            
             target.TakeDamage(damageInfo);
 
             // Apply Spectral Shock debuff to pawns only
@@ -402,7 +423,7 @@ namespace DMCAbilities
             // Visual effect at impact
             FleckMaker.ThrowDustPuffThick(target.Position.ToVector3Shifted(), Map, 0.8f, UnityEngine.Color.blue);
 
-            Log.Message($"Spectral Sword Explosion: Hit {target.Label} for {damage:F1} damage");
+            // Spectral sword explosion hit
         }
 
         private void ApplySpectralShock(Pawn target)

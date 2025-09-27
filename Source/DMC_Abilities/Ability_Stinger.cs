@@ -81,6 +81,13 @@ namespace DMCAbilities
             if (DMCAbilitiesMod.settings != null && !DMCAbilitiesMod.settings.stingerEnabled)
                 return;
 
+            // Apply friendly fire protection
+            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(caster, target))
+            {
+                return; // Skip friendly targets
+            }
+
             // Calculate damage with configurable multiplier
             float multiplier = DMCAbilitiesMod.settings?.stingerDamageMultiplier ?? 1.2f;
             var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(caster, multiplier);
@@ -159,7 +166,7 @@ namespace DMCAbilities
                 // Face the target
                 pawn.rotationTracker.FaceTarget(TargetA);
 
-                Log.Message($"Stinger: Starting dash to target through {dashPath.Count} cells");
+                // Starting Stinger dash
             };
 
             stingerDashToil.tickAction = () =>
@@ -189,7 +196,7 @@ namespace DMCAbilities
                     
                     // Force dash through obstacles (trees, walls, etc.)
                     WeaponDamageUtility.ForceTeleportPawn(pawn, nextCell);
-                    Log.Message($"Stinger: Bypassing obstacles, dashing to {nextCell} ({currentPathIndex + 1}/{dashPath.Count})");
+                    // Dashing through obstacles
                     
                     // Check if we're adjacent to target for the strike
                     if (TargetA.HasThing && TargetA.Thing is Pawn target && 
@@ -249,12 +256,19 @@ namespace DMCAbilities
                 }
             }
 
-            Log.Message($"Stinger: Dash path calculated with {dashPath.Count} cells (stops adjacent to target)");
+            // Dash path calculated
         }
 
         private void PerformStingerStrike(Pawn target)
         {
             if (target == null || target.Dead) return;
+
+            // Apply friendly fire protection
+            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(pawn, target))
+            {
+                return; // Skip friendly targets
+            }
 
             // Calculate enhanced damage for stinger strike
             float multiplier = DMCAbilitiesMod.settings?.stingerDamageMultiplier ?? 1.2f;
@@ -275,7 +289,7 @@ namespace DMCAbilities
                 // Create impact effects
                 CreateStingerImpactEffects(target.Position);
                 
-                Log.Message($"Stinger: Strike hit {target.Label}");
+                // Stinger strike hit
             }
         }
 

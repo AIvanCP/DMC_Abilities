@@ -54,10 +54,18 @@ namespace DMCAbilities
             if (target == null || target.Dead || target == launcher || hitPawns.Contains(target))
                 return; // Don't hit null, dead, same pawn twice or the caster
 
+            // Apply friendly fire protection
+            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(launcher as Pawn, target))
+            {
+                return; // Skip friendly targets
+            }
+
             hitPawns.Add(target);
 
-            // Calculate damage based on weapon
-            var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(launcher as Pawn, extraDamageMultiplier);
+            // Calculate damage based on weapon with settings multiplier
+            float multiplier = (DMCAbilitiesMod.settings?.driveDamageMultiplier ?? 1.0f) * extraDamageMultiplier;
+            var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(launcher as Pawn, multiplier);
             if (damageInfo.HasValue)
             {
                 // Apply main damage
@@ -66,7 +74,8 @@ namespace DMCAbilities
                 // Visual and sound effects with null safety
                 if (target.Map != null)
                 {
-                    FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 1.8f);
+                    // Use safe fleck that definitely exists
+                    FleckMaker.ThrowDustPuff(target.Position.ToVector3Shifted(), target.Map, 1.8f);
                     SoundStarter.PlayOneShot(SoundDefOf.Pawn_Melee_Punch_HitPawn, new TargetInfo(target.Position, target.Map));
                 }
 
@@ -85,8 +94,12 @@ namespace DMCAbilities
             burnHediff.InitializeBurn(launcher as Pawn, 60, extraDamageMultiplier * 0.3f); // 1 second, 30% of hit damage per tick
             target.health.AddHediff(burnHediff);
 
-            // Extra visual effect for continuous damage
-            FleckMaker.Static(target.Position, target.Map, FleckDefOf.PsycastAreaEffect, 2.5f);
+            // Extra visual effect for continuous damage with null safety
+            if (target.Map != null)
+            {
+                // Use a safe fleck def that definitely exists
+                FleckMaker.ThrowDustPuff(target.Position.ToVector3Shifted(), target.Map, 2.5f);
+            }
         }
 
         protected override void Tick()
@@ -106,7 +119,7 @@ namespace DMCAbilities
                 // Extra effects for final projectile
                 if (isFinalProjectile && base.Map != null)
                 {
-                    FleckMaker.Static(this.Position, base.Map, FleckDefOf.PsycastAreaEffect, 1.2f);
+                    FleckMaker.ThrowDustPuff(this.Position.ToVector3Shifted(), base.Map, 1.2f);
                 }
             }
 
@@ -166,6 +179,13 @@ namespace DMCAbilities
             // Apply damage every 10 ticks (avoid spam)
             if (remainingTicks % 10 == 0 && damageSource != null)
             {
+                // Apply friendly fire protection for burn damage
+                if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                    !WeaponDamageUtility.ShouldTargetPawn(damageSource, this.pawn))
+                {
+                    return; // Skip friendly targets for burn damage
+                }
+                
                 var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(damageSource, damagePerTick);
                 if (damageInfo.HasValue)
                 {

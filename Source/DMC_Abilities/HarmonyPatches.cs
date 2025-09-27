@@ -62,6 +62,26 @@ namespace DMCAbilities
                 {
                     __result = true;
                 }
+                else if (__instance.def.defName == "DMC_RedHotNight" && !DMCAbilitiesMod.settings.redHotNightEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_GunStinger" && !DMCAbilitiesMod.settings.gunStingerEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_HeavyRain" && !DMCAbilitiesMod.settings.heavyRainEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_RainBullet" && !DMCAbilitiesMod.settings.rainBulletEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_RapidSlash" && !DMCAbilitiesMod.settings.rapidSlashEnabled)
+                {
+                    __result = true;
+                }
             }
         }
     }

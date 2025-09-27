@@ -166,6 +166,14 @@
     <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
   </JobDef>
 
+  <!-- Job definition for Red Hot Night casting -->
+  <JobDef>
+    <defName>DMC_RedHotNightCast</defName>
+    <driverClass>DMCAbilities.JobDriver_RedHotNightCast</driverClass>
+    <reportString>summoning red orbs</reportString>
+    <allowOpportunisticPrefix>false</allowOpportunisticPrefix>
+  </JobDef>
+
   <!-- Projectile definition for Drive slash -->
   <ThingDef ParentName="BaseBullet">
     <defName>DMC_DriveSlashProjectile</defName>
@@ -372,6 +380,55 @@
       <damageAmountBase>10</damageAmountBase>
       <speed>25</speed>
       <range>8</range>
+    </projectile>
+  </ThingDef>
+
+  <!-- Red Hot Night Ability -->
+  <AbilityDef>
+    <defName>DMC_RedHotNight</defName>
+    <label>red hot night</label>
+    <description>Summon a swarm of colossal Red Orbs to slam down on enemies from above. Cast time determines number of orbs. Can be interrupted for fewer orbs. Scales with shooting skill. RANGED WEAPONS ONLY.</description>
+    <iconPath>UI/Abilities/RedHotNight</iconPath>
+    <cooldownTicksRange>480</cooldownTicksRange> <!-- 8 seconds -->
+    <aiCanUse>true</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_RedHotNight</verbClass>
+      <range>25</range>
+      <warmupTime>3.0</warmupTime>
+      <soundCast>Psycast_Skip_Pulse</soundCast>
+      <targetParams>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetSelf>false</canTargetSelf>
+        <showRangeOnSelect>true</showRangeOnSelect>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnCell</jobDef>
+  </AbilityDef>
+
+  <!-- Red Orb Projectile -->
+  <ThingDef ParentName="BaseBullet">
+    <defName>DMC_RedOrbProjectile</defName>
+    <label>red orb</label>
+    <graphicData>
+      <texPath>Things/projectiles/red_hot_night_projectile</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>TransparentPostLight</shaderType>
+      <drawSize>1.2</drawSize>
+    </graphicData>
+    <thingClass>DMCAbilities.Projectile_RedOrb</thingClass>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>false</useHitPoints>
+    <neverMultiSelect>true</neverMultiSelect>
+    <projectile>
+      <damageDef>Burn</damageDef>
+      <damageAmountBase>25</damageAmountBase>
+      <explosionRadius>2.5</explosionRadius>
+      <speed>0</speed>
+      <soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>
+      <soundExplode>Explosion_Bomb</soundExplode>
     </projectile>
   </ThingDef>
 

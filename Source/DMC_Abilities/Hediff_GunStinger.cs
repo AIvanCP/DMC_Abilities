@@ -7,13 +7,13 @@ namespace DMCAbilities
         public override void PostMake()
         {
             base.PostMake();
-            Log.Message($"[DMC] Gun Stinger hediff applied to {pawn?.Name}");
+            // Gun Stinger hediff applied
         }
 
         public override void PostRemoved()
         {
             base.PostRemoved();
-            Log.Message($"[DMC] Gun Stinger hediff removed from {pawn?.Name}");
+            // Gun Stinger hediff removed
         }
     }
 }

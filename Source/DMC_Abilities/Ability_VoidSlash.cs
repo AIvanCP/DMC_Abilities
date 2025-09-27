@@ -112,10 +112,20 @@ namespace DMCAbilities
             if (target == null || target.Destroyed || target.Map == null)
                 return;
 
-            // Apply initial slash damage
+            // Apply friendly fire protection for pawns
+            if (target is Pawn targetPawn && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
+                !WeaponDamageUtility.ShouldTargetPawn(CasterPawn, targetPawn))
+            {
+                return; // Skip friendly targets
+            }
+
+            // Apply initial slash damage with settings multiplier
+            float multiplier = DMCAbilitiesMod.settings?.voidSlashDamageMultiplier ?? 1.0f;
+            float finalDamage = BaseDamage * multiplier;
+            
             DamageInfo slashDamage = new DamageInfo(
                 def: DamageDefOf.Cut,
-                amount: BaseDamage,
+                amount: finalDamage,
                 armorPenetration: 0.1f,
                 angle: 0f,
                 instigator: CasterPawn
@@ -169,8 +179,7 @@ namespace DMCAbilities
             }
 
             // Play void slash sound
-            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, 
-                new TargetInfo(origin, map));
+            SoundStarter.PlayOneShot(SoundDefOf.Psycast_Skip_Pulse, new TargetInfo(origin, map));
         }
 
         public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
