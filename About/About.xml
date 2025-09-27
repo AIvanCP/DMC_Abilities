@@ -1,40 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>DMC Abilities - Devil May Cry Inspired Melee Skills</name>
-	<author>YourName</author>
+	<name>DMC Abilities - Complete Devil May Cry Combat System</name>
+	<author>AIvanCP</author>
 	<supportedVersions>
-		<li>1.4</li>
-		<li>1.5</li>
 		<li>1.6</li>
 	</supportedVersions>
-	<description>Adds two Devil May Cry-inspired melee abilities to RimWorld:
+	<description>A comprehensive Devil May Cry combat system adding NINE iconic abilities to RimWorld with advanced mechanics and extensive customization.
 
-• Stinger - A fast dash attack that teleports you to an enemy and strikes instantly
-• Judgement Cut - A ranged slash attack that creates area-of-effect damage
+🗡️ MELEE ABILITIES (Scale with Melee skill):
+• Stinger - Lightning dash + strike with precise positioning and knockback
+• Rapid Slash - Multi-hit dash summoning explosive spectral swords (15% chance)
+• Void Slash - 75° cone attack with void debuffs and guaranteed stagger
+• Judgement Cut - Dimensional slash creating 1-3 AoE cuts with spectral wounds
+• Drive - Piercing projectile with stagger immunity and armor penetration
 
-Both abilities work with any modded melee weapons and are learned through consumable skillbooks found in trader inventories.
+🔫 RANGED ABILITIES (Scale with Shooting skill):
+• Gun Stinger - Shotgun dash with point-blank blast + 90° cone damage
+• Rain Bullet - Teleporting bullet storm damaging path and destination
+• Red Hot Night - Falling fire orbs with explosive damage and burn debuffs
+• Heavy Rain - Ultimate spectral sword rain (legendary ability)
 
-Features:
-- Full compatibility with modded melee weapons
-- Weapon-based damage scaling with sword bonuses
-- Visual effects using existing RimWorld motes
-- Memory-safe implementation that can be safely removed mid-save
-- Configurable trader stock chances
+✨ ADVANCED FEATURES:
+- Skill-based scaling (uncapped, beyond level 20) with weapon integration
+- Comprehensive friendly fire protection (toggle for all abilities)
+- Individual damage multipliers (0.5x-3.0x) for perfect balance
+- Smart targeting system prioritizing enemies (70% chance)
+- Obstacle bypassing for tactical positioning
+- Universal compatibility with all weapon and combat mods
+- Performance optimized with clean logging
+- Robust null safety preventing crashes
 
-Requirements: None (uses base game mechanics only)</description>
+📚 ACQUISITION: Learn abilities through rare skillbooks found in trader inventories, with balanced rarity tiers from common (4%) to legendary (1%).
+
+Requirements: RimWorld 1.6+ (Harmony included)</description>
 	<packageId>dmcabilities.rimworld.devilmaycry</packageId>
+	<modVersion>2.0.0</modVersion>
 	<modDependencies>
 		<li>
 			<packageId>ludeon.rimworld</packageId>
 			<displayName>RimWorld Core</displayName>
 			<steamWorkshopUrl>steam://url/CommunityFilePage/294100</steamWorkshopUrl>
 		</li>
+		<li>
+			<packageId>brrainz.harmony</packageId>
+			<displayName>Harmony</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+		</li>
 	</modDependencies>
 	<incompatibleWith>
 	</incompatibleWith>
-	<url></url>
+	<url>https://github.com/AIvanCP/DMC_Abilities</url>
 	<loadAfter>
 		<li>Ludeon.RimWorld</li>
 		<li>Ludeon.RimWorld.Royalty</li>
+		<li>Ludeon.RimWorld.Ideology</li>
+		<li>Ludeon.RimWorld.Biotech</li>
+		<li>Ludeon.RimWorld.Anomaly</li>
+		<li>brrainz.harmony</li>
 	</loadAfter>
 </ModMetaData>
