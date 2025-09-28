@@ -9,53 +9,63 @@ namespace DMCAbilities
     public static class WeaponDamageUtility
     {
         /// <summary>
-        /// Calculates melee damage from the equipped weapon, supporting modded weapons
+        /// Enhanced melee damage calculation with extensive modded weapon support
         /// </summary>
         /// <param name="pawn">The pawn using the weapon</param>
         /// <param name="multiplier">Damage multiplier to apply</param>
         /// <returns>DamageInfo for the attack, or null if no valid melee weapon</returns>
         public static DamageInfo? CalculateMeleeDamage(Pawn pawn, float multiplier = 1f)
         {
-            if (pawn?.equipment?.Primary == null)
-                return null;
-
-            ThingWithComps weapon = pawn.equipment.Primary;
-            
-            // Check if weapon has any melee verbs
-            var meleeVerb = GetMeleeVerb(weapon);
-            if (meleeVerb == null)
-                return null;
-
-            // Get base damage from the weapon
-            float baseDamage = GetWeaponBaseDamage(weapon, meleeVerb);
-            if (baseDamage <= 0)
+            try
             {
-                // Fallback - if we can't get weapon damage, use a small default
-                baseDamage = 8f; // Reasonable fallback damage
-            }
+                if (pawn?.equipment?.Primary == null)
+                    return null;
 
-            // Apply sword bonus (configurable via mod settings)
-            if (IsSword(weapon))
+                ThingWithComps weapon = pawn.equipment.Primary;
+                
+                // Enhanced weapon validation for better mod compatibility
+                var meleeVerb = GetMeleeVerb(weapon);
+                if (meleeVerb == null)
+                    return null;
+
+                // Enhanced base damage calculation with fallbacks for modded weapons
+                float baseDamage = GetWeaponBaseDamage(weapon, meleeVerb);
+                if (baseDamage <= 0)
+                {
+                    // Smart fallback based on weapon type for unknown modded weapons
+                    baseDamage = GetFallbackDamageForUnknownWeapon(weapon);
+                }
+
+                // Enhanced weapon type bonuses (works with modded weapons)
+                if (IsSword(weapon) || IsBladeWeapon(weapon))
+                {
+                    float swordBonusMultiplier = 1f + (DMCAbilitiesMod.settings?.swordDamageBonus ?? 10f) / 100f;
+                    baseDamage *= swordBonusMultiplier;
+                }
+
+                // Apply ability multiplier
+                baseDamage *= multiplier;
+
+                // Enhanced damage type detection for modded weapons
+                DamageDef damageDef = GetWeaponDamageType(weapon, meleeVerb) ?? DamageDefOf.Cut;
+
+                // Create damage info with enhanced compatibility
+                return new DamageInfo(
+                    damageDef,
+                    (int)baseDamage,
+                    0.1f, // armor penetration
+                    -1f, // angle
+                    pawn, // instigator
+                    null, // hitPart - let system determine
+                    weapon.def // weapon
+                );
+            }
+            catch (System.Exception ex)
             {
-                float swordBonusMultiplier = 1f + (DMCAbilitiesMod.settings?.swordDamageBonus ?? 10f) / 100f;
-                baseDamage *= swordBonusMultiplier;
+                // Graceful fallback if weapon analysis fails with modded weapons
+                Log.Warning($"[DMC Abilities] Error calculating melee damage for modded weapon: {ex.Message}");
+                return new DamageInfo(DamageDefOf.Cut, (int)(multiplier * 8f), 0.1f, 0f, pawn);
             }
-
-            // Apply ability multiplier
-            baseDamage *= multiplier;
-
-            // Get damage type from weapon or use Cut as fallback
-            DamageDef damageDef = GetWeaponDamageType(weapon, meleeVerb);
-
-            // Create damage info (simplified for RimWorld 1.6 compatibility)
-            return new DamageInfo(
-                def: damageDef,
-                amount: (int)baseDamage,
-                armorPenetration: 0.1f, // Use a reasonable default
-                angle: 0f,
-                instigator: pawn,
-                weapon: weapon.def
-            );
         }
 
         /// <summary>
@@ -798,34 +808,183 @@ namespace DMCAbilities
         }
 
         /// <summary>
-        /// Checks if a pawn should be targeted based on friendly fire settings
+        /// Enhanced targeting system with comprehensive modded race and faction compatibility
         /// </summary>
         /// <param name="caster">The pawn using the ability</param>
         /// <param name="target">The potential target pawn</param>
         /// <returns>True if should be targeted, false if should be avoided</returns>
         public static bool ShouldTargetPawn(Pawn caster, Pawn target)
         {
-            if (caster == null || target == null || target.Dead) return false;
-            if (caster == target) return false; // Never target self
-            
-            // If friendly fire is disabled, check relationships
-            if (DMCAbilitiesMod.settings?.disableFriendlyFire == true)
+            try
             {
-                // Don't target colonists or allies
-                if (target.IsColonist || caster.IsColonistPlayerControlled && target.IsColonistPlayerControlled)
-                    return false;
+                // Basic null and validity checks
+                if (caster == null || target == null || target.Dead || target.Downed) return false;
+                if (caster == target) return false; // Never target self
+                
+                // If friendly fire is disabled, perform comprehensive relationship checks
+                if (DMCAbilitiesMod.settings?.disableFriendlyFire == true)
+                {
+                    // Enhanced colonist protection (works with modded human-like races)
+                    if (IsColonistOrAlliedPawn(caster, target))
+                        return false;
                     
-                // Don't target faction allies
-                if (caster.Faction != null && target.Faction != null && 
-                    !caster.Faction.HostileTo(target.Faction))
-                    return false;
+                    // Enhanced faction relationship checks (works with modded factions)
+                    if (AreAlliedFactions(caster, target))
+                        return false;
                     
-                // Don't target tamed animals (but wild animals are fair game)
-                if (target.RaceProps.Animal && target.Faction == caster.Faction)
-                    return false;
+                    // Enhanced animal checks (works with modded creatures)
+                    if (IsProtectedAnimal(caster, target))
+                        return false;
+                        
+                    // Additional protection for special relationships
+                    if (HasSpecialProtection(caster, target))
+                        return false;
+                }
+                
+                // Additional checks for unconscious, sleeping, or otherwise non-threatening targets
+                if (target.InMentalState == false && target.NonHumanlikeOrWildMan() == false)
+                {
+                    if (target.Downed || target.InBed() || target.jobs?.curJob?.def?.defName?.Contains("Sleep") == true)
+                    {
+                        // Only target sleeping/downed enemies, not neutrals
+                        if (caster.Faction != null && target.Faction != null && 
+                            caster.Faction.HostileTo(target.Faction))
+                        {
+                            return true; // Hostile sleeping target is valid
+                        }
+                        return false; // Don't target sleeping neutrals
+                    }
+                }
+                
+                return true; // Target is valid for attack
+            }
+            catch (System.Exception ex)
+            {
+                // Graceful degradation for mod compatibility
+                Log.Warning($"[DMC Abilities] Error in targeting system: {ex.Message}");
+                // Conservative fallback - only target if explicitly hostile
+                return caster?.Faction?.HostileTo(target?.Faction) == true;
+            }
+        }
+        
+        /// <summary>
+        /// Enhanced colonist detection for modded races and scenarios
+        /// </summary>
+        private static bool IsColonistOrAlliedPawn(Pawn caster, Pawn target)
+        {
+            // Standard colonist checks
+            if (target.IsColonist) return true;
+            if (caster.IsColonistPlayerControlled && target.IsColonistPlayerControlled) return true;
+            
+            // Check for player-controlled factions (supports modded scenarios)
+            if (caster.Faction?.IsPlayer == true && target.Faction?.IsPlayer == true) return true;
+            
+            // Check for humanlike allies (covers modded human-like races)
+            if (target.RaceProps?.Humanlike == true && target.Faction == caster.Faction) return true;
+            
+            // Check for guest/prisoner protection
+            if (target.GuestStatus == GuestStatus.Guest || target.IsPrisonerOfColony) return true;
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// Enhanced faction relationship checks for modded factions
+        /// </summary>
+        private static bool AreAlliedFactions(Pawn caster, Pawn target)
+        {
+            if (caster.Faction == null || target.Faction == null) return false;
+            
+            // Same faction
+            if (caster.Faction == target.Faction) return true;
+            
+            // Not hostile = allied (covers neutral and friendly)
+            if (!caster.Faction.HostileTo(target.Faction)) return true;
+            
+            // Check for specific alliance relationships (modded factions may use this)
+            if (caster.Faction.def?.permanentEnemy == false && 
+                target.Faction.def?.permanentEnemy == false)
+            {
+                // Both are non-permanently-enemy factions, err on side of caution
+                var goodwill = caster.Faction.GoodwillWith(target.Faction);
+                if (goodwill >= -10) return true; // Near-neutral or better
             }
             
-            return true; // Target is valid
+            return false;
+        }
+        
+        /// <summary>
+        /// Enhanced animal protection for modded creatures
+        /// </summary>
+        private static bool IsProtectedAnimal(Pawn caster, Pawn target)
+        {
+            if (!target.RaceProps?.Animal == true) return false;
+            
+            // Same faction animals (tamed pets, etc.)
+            if (target.Faction == caster.Faction) return true;
+            
+            // Player-owned animals
+            if (target.Faction?.IsPlayer == true) return true;
+            
+            // Bonded animals (even if different faction)
+            if (target.relations?.DirectRelationExists(PawnRelationDefOf.Bond, caster) == true) return true;
+            
+            // Check for special animal categories that might be protected
+            if (target.RaceProps != null)
+            {
+                // Pack animals - check if they can carry items
+                if (target.RaceProps.packAnimal && target.Faction == caster.Faction) return true;
+                
+                // Trainable animals that are trained (likely pets/working animals)
+                if (target.training != null && target.Faction == caster.Faction) return true;
+            }
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// Additional protection checks for special relationships and modded content
+        /// </summary>
+        private static bool HasSpecialProtection(Pawn caster, Pawn target)
+        {
+            try
+            {
+                // Family relationships
+                if (caster.relations?.DirectRelationExists(PawnRelationDefOf.Spouse, target) == true ||
+                    caster.relations?.DirectRelationExists(PawnRelationDefOf.Parent, target) == true ||
+                    caster.relations?.DirectRelationExists(PawnRelationDefOf.Child, target) == true ||
+                    caster.relations?.DirectRelationExists(PawnRelationDefOf.Sibling, target) == true)
+                {
+                    return true;
+                }
+                
+                // Lovers (Friend relation may not exist in all RimWorld versions)
+                if (caster.relations?.DirectRelationExists(PawnRelationDefOf.Lover, target) == true)
+                {
+                    return true;
+                }
+                
+                // Check for modded relationship types that should be protected
+                if (caster.relations?.DirectRelations != null)
+                {
+                    foreach (var relation in caster.relations.DirectRelations)
+                    {
+                        if (relation.otherPawn == target && relation.def != null)
+                        {
+                            // Any positive relationship should be considered protective
+                            if (relation.def.opinionOffset > 0)
+                                return true;
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            catch (System.Exception)
+            {
+                // If relationship checks fail, err on side of caution
+                return false;
+            }
         }
 
         /// <summary>
@@ -866,6 +1025,61 @@ namespace DMCAbilities
                 weapon: null, // NULL weapon = shows ability name instead
                 category: DamageInfo.SourceCategory.ThingOrUnknown
             );
+        }
+
+        /// <summary>
+        /// Enhanced weapon compatibility methods for modded weapons
+        /// </summary>
+        
+        private static float GetFallbackDamageForUnknownWeapon(ThingWithComps weapon)
+        {
+            // Smart fallback based on weapon properties for unknown modded weapons
+            if (weapon?.def == null) return 8f;
+            
+            // Check weapon market value as damage indicator
+            float marketValue = weapon.def.BaseMarketValue;
+            if (marketValue > 0)
+            {
+                // Simple min/max without GenMath complexity
+                float damageFactor = marketValue / 100f;
+                if (damageFactor < 0.1f) damageFactor = 0.1f;
+                if (damageFactor > 2.0f) damageFactor = 2.0f;
+                return 8f * damageFactor; // Scale base damage by market value
+            }
+            
+            // Check weapon mass as another indicator
+            float mass = weapon.def.BaseMass;
+            if (mass > 0)
+            {
+                float massDamage = 8f + (mass * 2f);
+                if (massDamage < 5f) massDamage = 5f;
+                if (massDamage > 25f) massDamage = 25f;
+                return massDamage; // Heavier = more damage
+            }
+            
+            // Check weapon tech level
+            if (weapon.def.techLevel >= TechLevel.Industrial)
+            {
+                return 12f; // Higher tech = more damage
+            }
+            
+            return 8f; // Safe fallback
+        }
+        
+        private static bool IsBladeWeapon(ThingWithComps weapon)
+        {
+            if (weapon?.def?.defName == null) return false;
+            
+            string defName = weapon.def.defName.ToLower();
+            string[] bladePatterns = {
+                "blade", "sword", "katana", "saber", "rapier", "cutlass", "scimitar",
+                "machete", "cleaver", "knife", "dagger", "stiletto", "dirk",
+                "gladius", "falchion", "broadsword", "longsword", "greatsword",
+                "claymore", "flamberge", "zweihander", "nodachi", "wakizashi",
+                "tanto", "ninjato", "dao", "jian"
+            };
+            
+            return bladePatterns.Any(pattern => defName.Contains(pattern));
         }
 
         // DMC dialogue system removed per user request - floating text was too complex

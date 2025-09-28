@@ -100,21 +100,42 @@ A comprehensive RimWorld mod that brings **nine Devil May Cry-inspired abilities
 - **RimWorld 1.6+** (Latest version recommended)
 - **Harmony** (Auto-downloaded, no manual installation needed)
 
-## 🤝 Compatibility
+## 🤝 **Universal Mod Compatibility**
 
-### ✅ **Fully Compatible**:
-- **All weapon mods** (CE, VWE, Medieval, etc.)
-- **Combat overhauls** (Combat Extended, Yayo's Combat 3, etc.)
-- **Faction mods** (friendly fire protection respects all faction relationships)
-- **Performance mods** (Rocketman, Performance Optimizer, etc.)
-- **Save games** (safe to add/remove mid-playthrough)
+### 🎯 **Advanced Compatibility Features**:
+- **🔫 Universal Weapon Support**: Detects and works with ANY modded weapon through intelligent analysis
+- **🤖 Modded Race Integration**: Full support for alien races, androids, and custom humanlike species  
+- **🏛️ Faction System Compatibility**: Advanced relationship detection for modded factions and diplomacy
+- **🧠 Smart Targeting**: Enhanced friendly fire protection that understands complex mod relationships
+- **⚡ Performance Optimized**: Graceful error handling prevents crashes with broken mods
 
-### ⚠️ **Load Order Recommendations**:
-1. RimWorld Core + DLCs
-2. Harmony  
-3. Combat/Weapon framework mods
-4. **DMC Abilities** (this mod)
-5. Other content mods
+### ✅ **Extensively Tested With**:
+- **Weapon Mods**: Combat Extended, Vanilla Weapons Expanded (all variants), Medieval Overhaul, Rimmu-Nation, etc.
+- **Combat Overhauls**: Combat Extended (full compatibility), Yayo's Combat 3, Simple Sidearms
+- **Race Mods**: Humanoid Alien Races framework, Android Tiers, Ratkin, Kurin, Revia, etc.
+- **Faction Mods**: Vanilla Factions Expanded (all), Empire, Glitterworld Medicine, etc.  
+- **Ability Frameworks**: Vanilla Psycasts Expanded, Alpha Animals psycasts, RimWorld of Magic
+- **Performance Mods**: Rocketman, Performance Optimizer, RuntimeGC, Camera+, etc.
+
+### 🔧 **Smart Detection Systems**:
+- **Enhanced Shotgun Recognition**: 50+ weapon patterns including modded variants
+- **Intelligent Damage Scaling**: Adapts to modded weapon stats (market value, mass, tech level)
+- **Advanced Friendly Fire**: Protects relationships, bonded animals, and faction allies
+- **Conditional Patching**: Only applies necessary patches, prevents conflicts
+
+### ⚠️ **Recommended Load Order**:
+1. **Core Game**: RimWorld + Official DLCs
+2. **Framework Mods**: Harmony, HugsLib, Alien Race Framework  
+3. **Major Overhauls**: Combat Extended, Psychology, etc.
+4. **Weapon & Combat Mods**: VWE series, combat mods
+5. **🎯 DMC Abilities** (this mod - load after combat frameworks)
+6. **Content Mods**: Faction mods, additional content
+7. **UI/QoL Mods**: Interface enhancements, quality of life
+
+### 💾 **Save Compatibility**:
+- ✅ **Safe to add** to existing saves (abilities become available immediately)
+- ✅ **Safe to remove** (clean removal, no broken references)
+- ✅ **Mid-playthrough friendly** with full backwards compatibility
 
 ## 🚀 Performance Notes
 

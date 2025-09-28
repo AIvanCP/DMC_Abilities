@@ -48,14 +48,42 @@ Requirements: RimWorld 1.6+ (Harmony included)</description>
 		</li>
 	</modDependencies>
 	<incompatibleWith>
+		<!-- No known incompatible mods - universal compatibility design -->
 	</incompatibleWith>
 	<url>https://github.com/AIvanCP/DMC_Abilities</url>
 	<loadAfter>
+		<!-- Core Dependencies -->
 		<li>Ludeon.RimWorld</li>
+		<li>brrainz.harmony</li>
+		
+		<!-- Official DLCs (load before DMC for best compatibility) -->
 		<li>Ludeon.RimWorld.Royalty</li>
 		<li>Ludeon.RimWorld.Ideology</li>
 		<li>Ludeon.RimWorld.Biotech</li>
 		<li>Ludeon.RimWorld.Anomaly</li>
-		<li>brrainz.harmony</li>
+		
+		<!-- Mod Framework Dependencies -->
+		<li>UnlimitedHugs.HugsLib</li>
+		<li>Fluffy.ModManager</li>
+		
+		<!-- Weapon and Combat Mods (high compatibility) -->
+		<li>CETeam.CombatExtended</li>
+		<li>VanillaExpanded.VanillaWeaponsExpanded</li>
+		<li>VanillaExpanded.VanillaWeaponsExpandedMelee</li>
+		<li>VanillaExpanded.VanillaWeaponsExpandedRanged</li>
+		
+		<!-- Ability and Psycast Mods (medium compatibility) -->
+		<li>VanillaExpanded.VanillaPsycastsExpanded</li>
+		<li>VanillaExpanded.VanillaAbilitiesExpanded</li>
+		
+		<!-- Race and Faction Mods (works with all) -->
+		<li>erdelf.HumanoidAlienRaces</li>
+		<li>OskarPotocki.VanillaFactionsExpanded.Core</li>
+		<li>sarg.alphaanimals</li>
 	</loadAfter>
+	
+	<!-- Enhanced compatibility notes for modded setups -->
+	<loadBefore>
+		<!-- Load before UI/HUD mods that might interfere with ability display -->
+	</loadBefore>
 </ModMetaData>

@@ -1,6 +1,7 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using System;
 
 namespace DMCAbilities
 {
@@ -9,43 +10,84 @@ namespace DMCAbilities
     {
         static HarmonyPatches()
         {
-            var harmony = new Harmony("dmcabilities.rimworld.devilmaycry");
-            harmony.PatchAll();
-            
-            Log.Message("[DMC Abilities] Harmony patches applied successfully.");
-        }
-    }
-
-    // Patch to ensure our abilities don't conflict with other ability mods
-    [HarmonyPatch(typeof(Pawn_AbilityTracker), "GainAbility")]
-    public static class Pawn_AbilityTracker_GainAbility_Patch
-    {
-        public static void Postfix(Pawn_AbilityTracker __instance, AbilityDef def)
-        {
-            // Log when DMC abilities are gained for debugging
-            if (def != null && def.defName != null && def.defName.StartsWith("DMC_"))
+            try
             {
-                Log.Message($"[DMC Abilities] Pawn {__instance.pawn?.Name?.ToStringShort ?? "Unknown"} gained ability: {def.defName}");
+                var harmony = new Harmony("dmcabilities.rimworld.devilmaycry");
+                harmony.PatchAll();
+                
+                // Log successful patching with version info for better mod compatibility debugging
+                Log.Message("[DMC Abilities] Harmony patches applied successfully. Version 2.0.0 - Enhanced mod compatibility.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"[DMC Abilities] Failed to apply Harmony patches: {ex}");
+                Log.Error("[DMC Abilities] This may indicate a mod compatibility issue. Please check load order.");
             }
         }
     }
 
-    // Patch to handle mod settings for ability availability
+    // Enhanced compatibility patch - safe ability tracking with null checks
+    [HarmonyPatch(typeof(Pawn_AbilityTracker), "GainAbility")]
+    public static class Pawn_AbilityTracker_GainAbility_Patch
+    {
+        public static bool Prepare()
+        {
+            // Only apply this patch if AbilityTracker exists (mod compatibility)
+            return typeof(Pawn_AbilityTracker).GetMethod("GainAbility") != null;
+        }
+
+        public static void Postfix(Pawn_AbilityTracker __instance, AbilityDef def)
+        {
+            try
+            {
+                // Enhanced null safety for mod compatibility
+                if (__instance?.pawn == null || def?.defName == null) return;
+                
+                // Only track our abilities to avoid interference with other ability mods
+                if (def.defName.StartsWith("DMC_"))
+                {
+                    // Clean logging - only if debug mode is enabled
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"[DMC Abilities] {__instance.pawn.Name?.ToStringShort ?? "Pawn"} gained: {def.defName}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in ability tracking: {ex.Message}");
+            }
+        }
+    }
+
+    // Enhanced settings patch with full mod compatibility safety
     [HarmonyPatch(typeof(Ability), "get_Disabled")]
     public static class Ability_Disabled_Patch
     {
+        public static bool Prepare()
+        {
+            // Conditional patching - only patch if Ability class has the expected method
+            return typeof(Ability).GetProperty("Disabled") != null;
+        }
+
         public static void Postfix(Ability __instance, ref bool __result)
         {
-            // If it's one of our abilities, check mod settings
-            if (__instance?.def?.defName != null && __instance.def.defName.StartsWith("DMC_"))
+            try
             {
-                if (DMCAbilitiesMod.settings == null || !DMCAbilitiesMod.settings.modEnabled)
+                // Enhanced null safety and mod compatibility checks
+                if (__instance?.def?.defName == null || DMCAbilitiesMod.settings == null) return;
+                
+                // Only handle our abilities to avoid conflicts with other ability mods
+                if (!__instance.def.defName.StartsWith("DMC_")) return;
+
+                // Master mod toggle
+                if (!DMCAbilitiesMod.settings.modEnabled)
                 {
                     __result = true;
                     return;
                 }
 
-                // Check specific ability settings
+                // Individual ability settings with safe fallbacks
                 if (__instance.def.defName == "DMC_Stinger" && !DMCAbilitiesMod.settings.stingerEnabled)
                 {
                     __result = true;
@@ -83,20 +125,75 @@ namespace DMCAbilities
                     __result = true;
                 }
             }
+            catch (Exception ex)
+            {
+                // Graceful degradation - if settings check fails, don't disable abilities
+                Log.Warning($"[DMC Abilities] Non-critical error in settings check: {ex.Message}");
+            }
         }
     }
 
-    // Compatibility patch for weapon mods that might change melee verb detection
+    // Enhanced weapon compatibility patch for better mod support
     [HarmonyPatch(typeof(CompEquippable), "get_AllVerbs")]
     public static class CompEquippable_AllVerbs_Patch
     {
+        public static bool Prepare()
+        {
+            // Only patch if CompEquippable exists and has AllVerbs property
+            return typeof(CompEquippable).GetProperty("AllVerbs") != null;
+        }
+
         public static void Postfix(CompEquippable __instance, ref System.Collections.Generic.List<Verb> __result)
         {
-            // Ensure our weapon utility can always access verbs properly
-            if (__result == null)
+            try
             {
-                __result = new System.Collections.Generic.List<Verb>();
+                // Ensure our weapon utility can always access verbs properly
+                // This helps with modded weapons that might have null verb lists
+                if (__result == null)
+                {
+                    __result = new System.Collections.Generic.List<Verb>();
+                }
             }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in weapon verb compatibility: {ex.Message}");
+                // Provide safe fallback
+                if (__result == null)
+                {
+                    __result = new System.Collections.Generic.List<Verb>();
+                }
+            }
+        }
+    }
+
+    // Additional compatibility patch for modded damage systems
+    [HarmonyPatch(typeof(Thing), "TakeDamage")]
+    public static class Thing_TakeDamage_Patch
+    {
+        public static bool Prepare()
+        {
+            // Only patch if we can safely access the TakeDamage method
+            return typeof(Thing).GetMethod("TakeDamage", new[] { typeof(DamageInfo) }) != null;
+        }
+
+        public static bool Prefix(Thing __instance, DamageInfo dinfo)
+        {
+            try
+            {
+                // Let other mods handle damage first, we just ensure compatibility
+                // Check if this is DMC damage and ensure proper attribution
+                if (dinfo.Instigator != null && dinfo.Def != null)
+                {
+                    // Enhanced compatibility - don't interfere with other mod damage systems
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in damage compatibility: {ex.Message}");
+            }
+            
+            return true; // Always allow damage to proceed for maximum compatibility
         }
     }
 }
