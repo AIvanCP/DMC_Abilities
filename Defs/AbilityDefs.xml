@@ -442,18 +442,9 @@
     <aiCanUse>false</aiCanUse>
     <verbProperties>
       <verbClass>DMCAbilities.Verb_DevilTrigger</verbClass>
-      <range>0</range>
       <warmupTime>1.0</warmupTime>
       <soundCast>PsycastPsychicEffect</soundCast>
-      <targetParams>
-        <canTargetPawns>false</canTargetPawns>
-        <canTargetBuildings>false</canTargetBuildings>
-        <canTargetItems>false</canTargetItems>
-        <canTargetLocations>false</canTargetLocations>
-        <canTargetSelf>true</canTargetSelf>
-      </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnThing</jobDef>
   </AbilityDef>
 
   <!-- Sin Devil Trigger Ability -->
@@ -466,18 +457,9 @@
     <aiCanUse>false</aiCanUse>
     <verbProperties>
       <verbClass>DMCAbilities.Verb_SinDevilTrigger</verbClass>
-      <range>0</range>
       <warmupTime>1.5</warmupTime>
       <soundCast>PsycastPsychicPulse</soundCast>
-      <targetParams>
-        <canTargetPawns>false</canTargetPawns>
-        <canTargetBuildings>false</canTargetBuildings>
-        <canTargetItems>false</canTargetItems>
-        <canTargetLocations>false</canTargetLocations>
-        <canTargetSelf>true</canTargetSelf>
-      </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnThing</jobDef>
   </AbilityDef>
 
 </Defs>
