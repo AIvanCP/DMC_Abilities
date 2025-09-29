@@ -7,6 +7,11 @@ namespace DMCAbilities
 {
     public class Verb_SinDevilTrigger : Verb_CastAbility
     {
+        public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+        {
+            return true; // Always valid since we self-target
+        }
+
         protected override bool TryCastShot()
         {
             // Check if mod and ability are enabled
@@ -19,11 +24,10 @@ namespace DMCAbilities
             Pawn caster = CasterPawn;
             if (caster == null || caster.Map == null) return false;
 
-            // Check if already in any transformation state
-            if (caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger) ||
-                caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger))
+            // Check if already in SDT state (but allow if only DT is active - SDT can upgrade from DT)
+            if (caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger))
             {
-                Messages.Message("Already in transformation state!", caster, MessageTypeDefOf.RejectInput);
+                Messages.Message("Sin Devil Trigger already active!", caster, MessageTypeDefOf.RejectInput);
                 return false;
             }
 

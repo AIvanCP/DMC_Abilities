@@ -293,4 +293,47 @@ namespace DMCAbilities
             }
         }
     }
+
+    // Patch for terrain immunity in Sin Devil Trigger - using a different approach
+    [HarmonyPatch(typeof(Pawn), "TicksPerMoveCardinal", MethodType.Getter)]
+    public static class Pawn_TicksPerMoveCardinal_Patch
+    {
+        public static void Postfix(Pawn __instance, ref float __result)
+        {
+            try
+            {
+                // Check if pawn has Sin Devil Trigger active
+                if (__instance?.health?.hediffSet?.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_SinDevilTrigger) != null)
+                {
+                    // SDT provides super fast movement regardless of terrain
+                    __result = Math.Min(__result, 13f); // Fast movement (13 ticks = very fast)
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in SDT movement: {ex.Message}");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn), "TicksPerMoveDiagonal", MethodType.Getter)]
+    public static class Pawn_TicksPerMoveDiagonal_Patch
+    {
+        public static void Postfix(Pawn __instance, ref float __result)
+        {
+            try
+            {
+                // Check if pawn has Sin Devil Trigger active
+                if (__instance?.health?.hediffSet?.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_SinDevilTrigger) != null)
+                {
+                    // SDT provides super fast movement regardless of terrain
+                    __result = Math.Min(__result, 18f); // Fast diagonal movement
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in SDT diagonal movement: {ex.Message}");
+            }
+        }
+    }
 }

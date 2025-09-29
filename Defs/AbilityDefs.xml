@@ -440,10 +440,19 @@
     <iconPath>UI/Abilities/DT</iconPath>
     <cooldownTicksRange>9000</cooldownTicksRange> <!-- 2.5 minutes base -->
     <aiCanUse>false</aiCanUse>
+    <targetRequired>false</targetRequired>
     <verbProperties>
       <verbClass>DMCAbilities.Verb_DevilTrigger</verbClass>
       <warmupTime>1.0</warmupTime>
       <soundCast>PsycastPsychicEffect</soundCast>
+      <range>0</range>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+      </targetParams>
     </verbProperties>
   </AbilityDef>
 
@@ -455,10 +464,19 @@
     <iconPath>UI/Abilities/SDT</iconPath>
     <cooldownTicksRange>18000</cooldownTicksRange> <!-- 5 minutes base -->
     <aiCanUse>false</aiCanUse>
+    <targetRequired>false</targetRequired>
     <verbProperties>
       <verbClass>DMCAbilities.Verb_SinDevilTrigger</verbClass>
       <warmupTime>1.5</warmupTime>
       <soundCast>PsycastPsychicPulse</soundCast>
+      <range>0</range>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+      </targetParams>
     </verbProperties>
   </AbilityDef>
 

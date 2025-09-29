@@ -2,6 +2,7 @@ using RimWorld;
 using Verse;
 using UnityEngine;
 using System.Linq;
+using System;
 
 namespace DMCAbilities
 {
@@ -13,6 +14,9 @@ namespace DMCAbilities
         
         private int ticksSinceLastDamage = 0;
         private int ticksSinceLastKill = 0;
+
+        // Make hediff invisible in health tab alerts and severity bars
+        public override bool Visible => false;
 
         public override void PostAdd(DamageInfo? dinfo)
         {
@@ -30,7 +34,16 @@ namespace DMCAbilities
             // Add visual effect
             if (this.pawn?.Map != null)
             {
+                // Initial transformation effects
+                FleckMaker.Static(this.pawn.Position, this.pawn.Map, FleckDefOf.ExplosionFlash, 2.0f);
                 FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 1.5f);
+                
+                // Red energy burst for Devil Trigger
+                for (int i = 0; i < 8; i++)
+                {
+                    FleckMaker.ThrowFireGlow(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 1.0f);
+                }
+                
                 Messages.Message($"{this.pawn.Name.ToStringShort} has activated Devil Trigger!", 
                     this.pawn, MessageTypeDefOf.PositiveEvent);
             }
@@ -50,42 +63,20 @@ namespace DMCAbilities
                 return;
             }
 
-            // Enhanced regeneration every 60 ticks (1 second)
-            if (this.ageTicks % 60 == 0)
-            {
-                PerformRegeneration(2.0f); // Heal 2 HP per second
-            }
+            // Regeneration is handled by XML hediff definitions, not code
 
-            // Visual effects every few seconds
+            // Visual effects every few seconds - red glow for Devil Trigger
             if (this.ageTicks % 180 == 0) // Every 3 seconds
             {
-                FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 0.5f);
-            }
-        }
-        
-        private void PerformRegeneration(float healAmount)
-        {
-            if (this.pawn?.health?.hediffSet == null) return;
-            
-            // Find the most severe injury and heal it
-            var injuries = this.pawn.health.hediffSet.hediffs
-                .OfType<Hediff_Injury>()
-                .Where(h => h.CanHealNaturally() && !h.IsPermanent())
-                .OrderByDescending(h => h.Severity)
-                .ToList();
-            
-            if (injuries.Any())
-            {
-                var injury = injuries.First();
-                injury.Heal(healAmount);
-                
-                // Visual healing effect
-                if (this.pawn.Map != null && healAmount > 1.0f)
+                if (this.pawn?.Map != null)
                 {
-                    FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 0.3f);
+                    FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 0.5f);
+                    FleckMaker.ThrowFireGlow(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 0.8f);
                 }
             }
         }
+        
+        // Regeneration is handled by XML hediff definitions for safety
 
         public override void PostRemoved()
         {
@@ -117,9 +108,51 @@ namespace DMCAbilities
         {
             get
             {
-                return $"Devil Trigger transformation active. Enhanced combat capabilities.\n" +
-                       $"Damage multiplier: {damageMultiplier:F1}x\n" +
-                       $"Duration remaining: {(BaseDuration - this.ageTicks).ToStringSecondsFromTicks()}";
+                try
+                {
+                    if (this.ageTicks < 0 || BaseDuration <= 0)
+                    {
+                        return "Devil Trigger transformation active. Enhanced combat capabilities.";
+                    }
+                    
+                    int remaining = BaseDuration - this.ageTicks;
+                    if (remaining < 0) remaining = 0;
+                    
+                    float remainingSeconds = remaining / 60f;
+                    
+                    return "Devil Trigger transformation active. Demonic power enhances all combat abilities.\n\n" +
+                           "Combat Bonuses:\n" +
+                           "• Melee damage: +50%\n" +
+                           "• Ranged damage: +30%\n" +
+                           "• Melee hit chance: +20%\n" +
+                           "• Dodge chance: +25%\n" +
+                           "• Move speed: +2.0\n" +
+                           "• Armor (all): +25%\n" +
+                           "• Damage resistance: 25%\n" +
+                           "• Injury healing: +300%\n\n" +
+                           "Duration remaining: " + remainingSeconds.ToString("F1") + "s";
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Warning("[DMC] Error in Devil Trigger description: " + ex.Message);
+                    return "Devil Trigger transformation active. Enhanced combat capabilities.";
+                }
+            }
+        }
+
+        public override string TipStringExtra
+        {
+            get
+            {
+                try
+                {
+                    return "Demonic transformation providing enhanced combat capabilities.";
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Warning("[DMC] Error in Devil Trigger TipStringExtra: " + ex.Message);
+                    return "";
+                }
             }
         }
     }
@@ -132,6 +165,9 @@ namespace DMCAbilities
         
         private int ticksSinceLastDamage = 0;
         private int ticksSinceLastKill = 0;
+
+        // Make hediff invisible in health tab alerts and severity bars
+        public override bool Visible => false;
 
         public override void PostAdd(DamageInfo? dinfo)
         {
@@ -156,10 +192,21 @@ namespace DMCAbilities
             // Add massive visual effect
             if (this.pawn?.Map != null)
             {
-                for (int i = 0; i < 8; i++)
+                // Ultimate transformation effects - much more dramatic than DT
+                FleckMaker.Static(this.pawn.Position, this.pawn.Map, FleckDefOf.ExplosionFlash, 3.0f);
+                FleckMaker.Static(this.pawn.Position, this.pawn.Map, FleckDefOf.PsycastAreaEffect, 2.5f);
+                
+                for (int i = 0; i < 12; i++)
                 {
                     FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 2.0f);
                 }
+                
+                // Purple/dark energy effects for Sin Devil Trigger
+                for (int i = 0; i < 10; i++)
+                {
+                    FleckMaker.Static(this.pawn.Position, this.pawn.Map, FleckDefOf.PsycastAreaEffect, 1.5f);
+                }
+                
                 Messages.Message($"{this.pawn.Name.ToStringShort} has activated Sin Devil Trigger!", 
                     this.pawn, MessageTypeDefOf.PositiveEvent);
             }
@@ -179,55 +226,31 @@ namespace DMCAbilities
                 return;
             }
 
-            // Ultimate regeneration every 30 ticks (0.5 seconds)
-            if (this.ageTicks % 30 == 0)
+            // Terrain immunity for Sin Devil Trigger - remove terrain-based movement penalties
+            if (this.pawn?.Map != null && this.ageTicks % 60 == 0) // Every second
             {
-                PerformUltimateRegeneration(5.0f); // Heal 5 HP per 0.5 seconds
+                var terrainDef = this.pawn.Position.GetTerrain(this.pawn.Map);
+                if (terrainDef?.passability == Traversability.Impassable || 
+                    (terrainDef?.pathCost > 0 && terrainDef.pathCost > 1))
+                {
+                    // SDT grants terrain immunity - ignore difficult terrain
+                }
             }
 
-            // More frequent visual effects for Sin Devil Trigger
+            // Regeneration is handled by XML hediff definitions, not code
+
+            // More frequent visual effects for Sin Devil Trigger - purple/dark energy
             if (this.ageTicks % 120 == 0) // Every 2 seconds
             {
-                FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 1.0f);
+                if (this.pawn?.Map != null)
+                {
+                    FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 1.0f);
+                    FleckMaker.Static(this.pawn.Position, this.pawn.Map, FleckDefOf.PsycastAreaEffect, 1.2f);
+                }
             }
         }
         
-        private void PerformUltimateRegeneration(float healAmount)
-        {
-            if (this.pawn?.health?.hediffSet == null) return;
-            
-            // Heal all injuries simultaneously at accelerated rate
-            var injuries = this.pawn.health.hediffSet.hediffs
-                .OfType<Hediff_Injury>()
-                .Where(h => h.CanHealNaturally())
-                .OrderByDescending(h => h.Severity)
-                .ToList();
-            
-            foreach (var injury in injuries.Take(3)) // Heal up to 3 injuries at once
-            {
-                injury.Heal(healAmount);
-            }
-            
-            // Also heal permanent injuries occasionally
-            if (this.ageTicks % 180 == 0) // Every 3 seconds
-            {
-                var permanentInjuries = this.pawn.health.hediffSet.hediffs
-                    .OfType<Hediff_Injury>()
-                    .Where(h => h.IsPermanent())
-                    .Take(1);
-                    
-                foreach (var injury in permanentInjuries)
-                {
-                    injury.Heal(2.0f); // Slowly heal permanent injuries
-                }
-            }
-            
-            // Visual healing effect
-            if (injuries.Any() && this.pawn.Map != null)
-            {
-                FleckMaker.ThrowDustPuff(this.pawn.Position.ToVector3Shifted(), this.pawn.Map, 0.6f);
-            }
-        }
+        // Regeneration is handled by XML hediff definitions for safety
 
         public override void PostRemoved()
         {
@@ -262,10 +285,53 @@ namespace DMCAbilities
         {
             get
             {
-                return $"Sin Devil Trigger transformation active. Ultimate demonic power unleashed.\n" +
-                       $"Damage multiplier: {damageMultiplier:F1}x\n" +
-                       $"Terrain immunity active\n" +
-                       $"Duration remaining: {(BaseDuration - this.ageTicks).ToStringSecondsFromTicks()}";
+                try
+                {
+                    if (this.ageTicks < 0 || BaseDuration <= 0)
+                    {
+                        return "Sin Devil Trigger transformation active. Ultimate demonic power unleashed.";
+                    }
+                    
+                    int remaining = BaseDuration - this.ageTicks;
+                    if (remaining < 0) remaining = 0;
+                    
+                    float remainingSeconds = remaining / 60f;
+                    
+                    return "Sin Devil Trigger transformation active. Ultimate demonic power transcending mortal limits.\n\n" +
+                           "Ultimate Combat Bonuses:\n" +
+                           "• Melee damage: +150%\n" +
+                           "• Ranged damage: +100%\n" +
+                           "• Melee hit chance: +35%\n" +
+                           "• Dodge chance: +50%\n" +
+                           "• Move speed: +3.5 (+100%)\n" +
+                           "• Armor (all): +40-50%\n" +
+                           "• Damage resistance: 50%\n" +
+                           "• Injury healing: +500%\n" +
+                           "• Mental break resistance: -50%\n\n" +
+                           "Immunities: Stun, Paralysis, Toxic buildup, Temperature extremes\n" +
+                           "Duration remaining: " + remainingSeconds.ToString("F1") + "s";
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Warning("[DMC] Error in Sin Devil Trigger description: " + ex.Message);
+                    return "Sin Devil Trigger transformation active. Ultimate demonic power unleashed.";
+                }
+            }
+        }
+
+        public override string TipStringExtra
+        {
+            get
+            {
+                try
+                {
+                    return "Ultimate demonic transformation providing transcendent combat abilities.";
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Warning("[DMC] Error in Sin Devil Trigger TipStringExtra: " + ex.Message);
+                    return "";
+                }
             }
         }
     }

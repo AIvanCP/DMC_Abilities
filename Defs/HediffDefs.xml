@@ -352,6 +352,14 @@
     <hediffClass>DMCAbilities.Hediff_DevilTrigger</hediffClass>
     <defaultLabelColor>(1.0, 0.3, 0.3)</defaultLabelColor>
     <isBad>false</isBad>
+    <everCurableByItem>false</everCurableByItem>
+    <makesSickThought>false</makesSickThought>
+    <lethalSeverity>-1</lethalSeverity>
+    <tendable>false</tendable>
+    <displayWound>false</displayWound>
+    <chronical>false</chronical>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <becomeVisible>false</becomeVisible>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
@@ -375,6 +383,7 @@
           <IncomingDamageFactor>0.75</IncomingDamageFactor>
           <StaggerDurationFactor>0.5</StaggerDurationFactor>
         </statFactors>
+        <becomeVisible>false</becomeVisible>
         <capMods>
           <li>
             <capacity>Consciousness</capacity>
@@ -393,12 +402,6 @@
             <offset>0.10</offset>
           </li>
         </capMods>
-        <hediffGivers>
-          <li Class="HediffGiver_Random">
-            <hediff>DMC_DevilTriggerRegen</hediff>
-            <mtbDays>0.01</mtbDays>
-          </li>
-        </hediffGivers>
       </li>
     </stages>
   </HediffDef>
@@ -411,6 +414,14 @@
     <hediffClass>DMCAbilities.Hediff_SinDevilTrigger</hediffClass>
     <defaultLabelColor>(0.8, 0.1, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
+    <everCurableByItem>false</everCurableByItem>
+    <makesSickThought>false</makesSickThought>
+    <lethalSeverity>-1</lethalSeverity>
+    <tendable>false</tendable>
+    <displayWound>false</displayWound>
+    <chronical>false</chronical>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <becomeVisible>false</becomeVisible>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
@@ -418,13 +429,14 @@
         <statOffsets>
           <MeleeHitChance>35</MeleeHitChance>
           <MeleeDodgeChance>50</MeleeDodgeChance>
-          <MoveSpeed>3.5</MoveSpeed>
+          <MoveSpeed>6.0</MoveSpeed>
           <ArmorRating_Sharp>0.40</ArmorRating_Sharp>
           <ArmorRating_Blunt>0.40</ArmorRating_Blunt>
           <ArmorRating_Heat>0.50</ArmorRating_Heat>
           <PainShockThreshold>0.60</PainShockThreshold>
           <InjuryHealingFactor>5.0</InjuryHealingFactor>
           <MentalBreakThreshold>-0.50</MentalBreakThreshold>
+          <PathAvoidGrid>-100</PathAvoidGrid>
         </statOffsets>
         <statFactors>
           <MeleeDamageFactor>2.5</MeleeDamageFactor>
@@ -436,6 +448,7 @@
           <StaggerDurationFactor>0.2</StaggerDurationFactor>
           <MoveSpeed>2.0</MoveSpeed>
         </statFactors>
+        <becomeVisible>false</becomeVisible>
         <capMods>
           <li>
             <capacity>Consciousness</capacity>
@@ -458,12 +471,6 @@
             <offset>0.20</offset>
           </li>
         </capMods>
-        <hediffGivers>
-          <li Class="HediffGiver_Random">
-            <hediff>DMC_SinDevilTriggerRegen</hediff>
-            <mtbDays>0.005</mtbDays>
-          </li>
-        </hediffGivers>
         <immuneTo>
           <li>Stun</li>
           <li>Paralyze</li>
@@ -471,6 +478,7 @@
           <li>Hypothermia</li>
           <li>Heatstroke</li>
         </immuneTo>
+        <preventDiseases>true</preventDiseases>
       </li>
     </stages>
   </HediffDef>
@@ -514,18 +522,25 @@
     <defName>DMC_DevilTriggerRegen</defName>
     <label>demonic regeneration</label>
     <description>Rapid healing powered by demonic energy. Wounds close quickly and vitality is restored continuously.</description>
-    <hediffClass>Hediff_Injury</hediffClass>
-    <defaultLabelColor>(1.0, 0.6, 0.6)</defaultLabelColor>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.4, 1.0, 0.4)</defaultLabelColor>
     <isBad>false</isBad>
+    <everCurableByItem>false</everCurableByItem>
+    <makesSickThought>false</makesSickThought>
+    <lethalSeverity>-1</lethalSeverity>
+    <tendable>false</tendable>
+    <displayWound>false</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <initialSeverity>1.0</initialSeverity>
     <stages>
       <li>
         <minSeverity>0.01</minSeverity>
-        <naturalHealingFactor>8.0</naturalHealingFactor>
         <statOffsets>
-          <InjuryHealingFactor>5.0</InjuryHealingFactor>
+          <InjuryHealingFactor>8.0</InjuryHealingFactor>
         </statOffsets>
+        <statFactors>
+          <InjuryHealingFactor>3.0</InjuryHealingFactor>
+        </statFactors>
         <capMods>
           <li>
             <capacity>BloodFiltration</capacity>
@@ -553,18 +568,25 @@
     <defName>DMC_SinDevilTriggerRegen</defName>
     <label>ultimate regeneration</label>
     <description>Divine-level healing that approaches immortality. Even the most grievous wounds heal almost instantly, and the body transcends normal biological limitations.</description>
-    <hediffClass>Hediff_Injury</hediffClass>
-    <defaultLabelColor>(0.9, 0.4, 1.0)</defaultLabelColor>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.4, 0.9, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
+    <everCurableByItem>false</everCurableByItem>
+    <makesSickThought>false</makesSickThought>
+    <lethalSeverity>-1</lethalSeverity>
+    <tendable>false</tendable>
+    <displayWound>false</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <initialSeverity>1.0</initialSeverity>
     <stages>
       <li>
         <minSeverity>0.01</minSeverity>
-        <naturalHealingFactor>15.0</naturalHealingFactor>
         <statOffsets>
-          <InjuryHealingFactor>10.0</InjuryHealingFactor>
+          <InjuryHealingFactor>15.0</InjuryHealingFactor>
         </statOffsets>
+        <statFactors>
+          <InjuryHealingFactor>5.0</InjuryHealingFactor>
+        </statFactors>
         <capMods>
           <li>
             <capacity>BloodFiltration</capacity>

@@ -7,6 +7,11 @@ namespace DMCAbilities
 {
     public class Verb_DevilTrigger : Verb_CastAbility
     {
+        public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+        {
+            return true; // Always valid since we self-target
+        }
+
         protected override bool TryCastShot()
         {
             // Check if mod and ability are enabled
@@ -20,10 +25,15 @@ namespace DMCAbilities
             if (caster == null || caster.Map == null) return false;
 
             // Check if already in any transformation state
-            if (caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger) ||
-                caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger))
+            if (caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger))
             {
-                Messages.Message("Already in transformation state!", caster, MessageTypeDefOf.RejectInput);
+                Messages.Message("Devil Trigger already active!", caster, MessageTypeDefOf.RejectInput);
+                return false;
+            }
+            
+            if (caster.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger))
+            {
+                Messages.Message("Sin Devil Trigger is active! Cannot downgrade to regular Devil Trigger.", caster, MessageTypeDefOf.RejectInput);
                 return false;
             }
 
