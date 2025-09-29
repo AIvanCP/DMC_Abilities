@@ -39,6 +39,10 @@ namespace DMCAbilities
         public static HediffDef DMC_Stagger;
         public static HediffDef DMC_RedHotNightAbility;
         public static HediffDef DMC_RedHotBurn;
+        public static HediffDef DMC_DevilTrigger;
+        public static HediffDef DMC_SinDevilTrigger;
+        public static HediffDef DMC_DevilTriggerAbility;
+        public static HediffDef DMC_SinDevilTriggerAbility;
 
         static DMC_HediffDefOf()
         {
@@ -58,6 +62,8 @@ namespace DMCAbilities
         public static AbilityDef DMC_RainBullet;
         public static AbilityDef DMC_RapidSlash;
         public static AbilityDef DMC_RedHotNight;
+        public static AbilityDef DMC_DevilTrigger;
+        public static AbilityDef DMC_SinDevilTrigger;
 
         static DMC_AbilityDefOf()
         {

@@ -171,6 +171,38 @@
           </li>
         </customCountChances>
       </li>
+      <!-- Devil Trigger skillbook (LEGENDARY RARE) -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_DevilTriggerBook</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>8000-12000</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.995</chance> <!-- 99.5% chance for 0 (0.5% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.005</chance> <!-- 0.5% chance for 1 - LEGENDARY RARE -->
+          </li>
+        </customCountChances>
+      </li>
+      <!-- Sin Devil Trigger skillbook (MYTHICAL RARE) -->
+      <li Class="StockGenerator_SingleDef">
+        <thingDef>DMC_SinDevilTriggerBook</thingDef>
+        <countRange>0-1</countRange>
+        <totalPriceRange>15000-25000</totalPriceRange>
+        <customCountChances>
+          <li>
+            <count>0</count>
+            <chance>0.998</chance> <!-- 99.8% chance for 0 (0.2% chance to appear) -->
+          </li>
+          <li>
+            <count>1</count>
+            <chance>0.002</chance> <!-- 0.2% chance for 1 - MYTHICAL RARE -->
+          </li>
+        </customCountChances>
+      </li>
     </stockGenerators>
   </TraderKindDef>
 

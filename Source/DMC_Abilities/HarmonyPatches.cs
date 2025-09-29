@@ -2,6 +2,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 using System;
+using UnityEngine;
 
 namespace DMCAbilities
 {
@@ -176,24 +177,120 @@ namespace DMCAbilities
             return typeof(Thing).GetMethod("TakeDamage", new[] { typeof(DamageInfo) }) != null;
         }
 
-        public static bool Prefix(Thing __instance, DamageInfo dinfo)
+        public static void Postfix(Thing __instance, DamageInfo dinfo, ref DamageWorker.DamageResult __result)
         {
             try
             {
-                // Let other mods handle damage first, we just ensure compatibility
-                // Check if this is DMC damage and ensure proper attribution
-                if (dinfo.Instigator != null && dinfo.Def != null)
+                // Handle cooldown reduction for Devil Trigger abilities
+                if (dinfo.Instigator is Pawn attacker && __result.totalDamageDealt > 0)
                 {
-                    // Enhanced compatibility - don't interfere with other mod damage systems
-                    return true;
+                    ReduceDevilTriggerCooldowns(attacker, 0.1f); // 0.1 seconds per damage dealt
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning($"[DMC Abilities] Non-critical error in damage compatibility: {ex.Message}");
+                Log.Warning($"[DMC Abilities] Non-critical error in damage cooldown reduction: {ex.Message}");
             }
+        }
+        
+        private static void ReduceDevilTriggerCooldowns(Pawn pawn, float reduction)
+        {
+            if (pawn?.abilities?.abilities == null) return;
             
-            return true; // Always allow damage to proceed for maximum compatibility
+            foreach (var ability in pawn.abilities.abilities)
+            {
+                if (ability.def.defName == "DMC_DevilTrigger" || ability.def.defName == "DMC_SinDevilTrigger")
+                {
+                    if (ability.CooldownTicksRemaining > 0)
+                    {
+                        int tickReduction = Mathf.FloorToInt(reduction * 60f); // Convert to ticks
+                        ability.StartCooldown(Math.Max(0, ability.CooldownTicksRemaining - tickReduction));
+                    }
+                }
+            }
+        }
+    }
+
+    // Patch for kill-based cooldown reduction
+    [HarmonyPatch(typeof(Pawn), "Kill")]
+    public static class Pawn_Kill_Patch
+    {
+        public static bool Prepare()
+        {
+            return typeof(Pawn).GetMethod("Kill", new[] { typeof(DamageInfo?), typeof(Hediff) }) != null;
+        }
+
+        public static void Postfix(Pawn __instance, DamageInfo? dinfo)
+        {
+            try
+            {
+                // Handle cooldown reduction when a pawn is killed by Devil Trigger user
+                if (dinfo.HasValue && dinfo.Value.Instigator is Pawn killer)
+                {
+                    ReduceDevilTriggerCooldowns(killer, 0.5f); // 0.5 seconds per kill
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in kill cooldown reduction: {ex.Message}");
+            }
+        }
+        
+        private static void ReduceDevilTriggerCooldowns(Pawn pawn, float reduction)
+        {
+            if (pawn?.abilities?.abilities == null) return;
+            
+            foreach (var ability in pawn.abilities.abilities)
+            {
+                if (ability.def.defName == "DMC_DevilTrigger" || ability.def.defName == "DMC_SinDevilTrigger")
+                {
+                    if (ability.CooldownTicksRemaining > 0)
+                    {
+                        int tickReduction = Mathf.FloorToInt(reduction * 60f); // Convert to ticks
+                        ability.StartCooldown(Math.Max(0, ability.CooldownTicksRemaining - tickReduction));
+                    }
+                }
+            }
+        }
+    }
+
+    // Enhanced ability settings patch to include Devil Trigger abilities
+    [HarmonyPatch(typeof(Ability), "get_Disabled")]
+    public static class DevilTrigger_Disabled_Patch
+    {
+        public static bool Prepare()
+        {
+            return typeof(Ability).GetProperty("Disabled") != null;
+        }
+
+        public static void Postfix(Ability __instance, ref bool __result)
+        {
+            try
+            {
+                if (__instance?.def?.defName == null || DMCAbilitiesMod.settings == null) return;
+                
+                if (!__instance.def.defName.StartsWith("DMC_")) return;
+
+                if (!DMCAbilitiesMod.settings.modEnabled)
+                {
+                    __result = true;
+                    return;
+                }
+
+                // Additional checks for Devil Trigger abilities
+                if (__instance.def.defName == "DMC_DevilTrigger" && !DMCAbilitiesMod.settings.devilTriggerEnabled)
+                {
+                    __result = true;
+                }
+                else if (__instance.def.defName == "DMC_SinDevilTrigger" && !DMCAbilitiesMod.settings.sinDevilTriggerEnabled)
+                {
+                    __result = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in Devil Trigger settings check: {ex.Message}");
+            }
         }
     }
 }

@@ -404,9 +404,107 @@ Only those proficient with ranged weapons can harness this devastating power. Th
         <hediffToAdd>DMC_RedHotNightAbility</hediffToAdd>
       </li>
       <li Class="CompProperties_Usable">
-        <useJob>UseItem</useJob>
+        <useJob>UseJob</useJob>
         <useLabel>Learn Red Hot Night technique</useLabel>
         <useDuration>600</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
+  <!-- Devil Trigger Skillbook -->
+  <ThingDef>
+    <defName>DMC_DevilTriggerBook</defName>
+    <label>skillbook: devil trigger awakening</label>
+    <description>An ancient demonic tome bound in crimson leather and sealed with infernal script. This forbidden book contains the knowledge to awaken the Devil Trigger - a transformation that channels demonic power to enhance all combat capabilities. Reading this book will grant the ability to temporarily assume a partial demon form, but the book will be consumed in the process.
+
+The Devil Trigger dramatically increases damage output, healing factor, and movement speed for a limited duration. This powerful transformation comes with a significant cooldown, but grows stronger as the user deals damage and defeats enemies.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookDT</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+      <color>(0.8, 0.2, 0.2)</color>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>100</MaxHitPoints>
+      <Mass>0.5</Mass>
+      <MarketValue>3000</MarketValue>
+      <Flammability>0.5</Flammability>
+      <DeteriorationRate>0.05</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_DevilTriggerAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Awaken Devil Trigger</useLabel>
+        <useDuration>900</useDuration>
+      </li>
+      <li Class="CompProperties_UseEffectDestroySelf" />
+    </comps>
+    <tickerType>Rare</tickerType>
+  </ThingDef>
+
+  <!-- Sin Devil Trigger Skillbook -->
+  <ThingDef>
+    <defName>DMC_SinDevilTriggerBook</defName>
+    <label>skillbook: sin devil trigger mastery</label>
+    <description>A legendary grimoire of ultimate darkness, bound in scales and written in the blood of ancient demons. This is the most forbidden knowledge in existence - the secret to achieving Sin Devil Trigger, the ultimate demonic transformation that transcends mortal limitations. Only those who have already mastered the Devil Trigger can hope to comprehend its contents. Reading this book will grant the power to assume the perfect demon form, but the book will be consumed in the process.
+
+The Sin Devil Trigger represents the pinnacle of demonic power, providing massive combat bonuses, immunity to terrain movement penalties, and regenerative abilities that defy natural law. This ultimate transformation has an extended duration and devastating combat potential, though it requires an extraordinary cooldown period.</description>
+    <thingClass>ThingWithComps</thingClass>
+    <category>Item</category>
+    <selectable>true</selectable>
+    <altitudeLayer>Item</altitudeLayer>
+    <pathCost>14</pathCost>
+    <resourceReadoutPriority>Last</resourceReadoutPriority>
+    <graphicData>
+      <texPath>Things/Item/Misc/SkillbookSDT</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(0.75, 0.75)</drawSize>
+      <color>(0.2, 0.1, 0.4)</color>
+    </graphicData>
+    <soundInteract>Standard_Drop</soundInteract>
+    <soundDrop>Standard_Drop</soundDrop>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MaxHitPoints>120</MaxHitPoints>
+      <Mass>0.8</Mass>
+      <MarketValue>5000</MarketValue>
+      <Flammability>0.2</Flammability>
+      <DeteriorationRate>0.02</DeteriorationRate>
+    </statBases>
+    <thingCategories>
+      <li>Books</li>
+    </thingCategories>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
+        <hediffToAdd>DMC_SinDevilTriggerAbility</hediffToAdd>
+      </li>
+      <li Class="CompProperties_Usable">
+        <useJob>UseItem</useJob>
+        <useLabel>Master Sin Devil Trigger</useLabel>
+        <useDuration>1200</useDuration>
       </li>
       <li Class="CompProperties_UseEffectDestroySelf" />
     </comps>

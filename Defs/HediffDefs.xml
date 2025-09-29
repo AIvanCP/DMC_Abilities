@@ -344,4 +344,251 @@
     </comps>
   </HediffDef>
 
+  <!-- Devil Trigger Transformation -->
+  <HediffDef>
+    <defName>DMC_DevilTrigger</defName>
+    <label>devil trigger</label>
+    <description>Devil Trigger transformation active. Demonic power flows through the user, providing enhanced combat capabilities, rapid health regeneration, damage reduction, and supernatural resilience. The user's body becomes partially demonic, granting inhuman fighting prowess.</description>
+    <hediffClass>DMCAbilities.Hediff_DevilTrigger</hediffClass>
+    <defaultLabelColor>(1.0, 0.3, 0.3)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <stages>
+      <li>
+        <minSeverity>0.01</minSeverity>
+        <statOffsets>
+          <MeleeHitChance>20</MeleeHitChance>
+          <MeleeDodgeChance>25</MeleeDodgeChance>
+          <MoveSpeed>2.0</MoveSpeed>
+          <ArmorRating_Sharp>0.25</ArmorRating_Sharp>
+          <ArmorRating_Blunt>0.25</ArmorRating_Blunt>
+          <ArmorRating_Heat>0.20</ArmorRating_Heat>
+          <PainShockThreshold>0.30</PainShockThreshold>
+          <InjuryHealingFactor>3.0</InjuryHealingFactor>
+        </statOffsets>
+        <statFactors>
+          <MeleeDamageFactor>1.5</MeleeDamageFactor>
+          <RangedDamageFactor>1.3</RangedDamageFactor>
+          <AccuracyShort>1.3</AccuracyShort>
+          <AccuracyMedium>1.3</AccuracyMedium>
+          <AccuracyLong>1.2</AccuracyLong>
+          <IncomingDamageFactor>0.75</IncomingDamageFactor>
+          <StaggerDurationFactor>0.5</StaggerDurationFactor>
+        </statFactors>
+        <capMods>
+          <li>
+            <capacity>Consciousness</capacity>
+            <offset>0.15</offset>
+          </li>
+          <li>
+            <capacity>Moving</capacity>
+            <offset>0.20</offset>
+          </li>
+          <li>
+            <capacity>Manipulation</capacity>
+            <offset>0.15</offset>
+          </li>
+          <li>
+            <capacity>Sight</capacity>
+            <offset>0.10</offset>
+          </li>
+        </capMods>
+        <hediffGivers>
+          <li Class="HediffGiver_Random">
+            <hediff>DMC_DevilTriggerRegen</hediff>
+            <mtbDays>0.01</mtbDays>
+          </li>
+        </hediffGivers>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Sin Devil Trigger Transformation -->
+  <HediffDef>
+    <defName>DMC_SinDevilTrigger</defName>
+    <label>sin devil trigger</label>
+    <description>Sin Devil Trigger transformation active. Ultimate demonic power unleashed transcending all mortal limitations. Massive combat enhancements, extreme regeneration, near-immunity to damage, terrain immunity, and supernatural dominance. The user becomes a living weapon of divine destruction.</description>
+    <hediffClass>DMCAbilities.Hediff_SinDevilTrigger</hediffClass>
+    <defaultLabelColor>(0.8, 0.1, 1.0)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <stages>
+      <li>
+        <minSeverity>0.01</minSeverity>
+        <statOffsets>
+          <MeleeHitChance>35</MeleeHitChance>
+          <MeleeDodgeChance>50</MeleeDodgeChance>
+          <MoveSpeed>3.5</MoveSpeed>
+          <ArmorRating_Sharp>0.40</ArmorRating_Sharp>
+          <ArmorRating_Blunt>0.40</ArmorRating_Blunt>
+          <ArmorRating_Heat>0.50</ArmorRating_Heat>
+          <PainShockThreshold>0.60</PainShockThreshold>
+          <InjuryHealingFactor>5.0</InjuryHealingFactor>
+          <MentalBreakThreshold>-0.50</MentalBreakThreshold>
+        </statOffsets>
+        <statFactors>
+          <MeleeDamageFactor>2.5</MeleeDamageFactor>
+          <RangedDamageFactor>2.0</RangedDamageFactor>
+          <AccuracyShort>1.6</AccuracyShort>
+          <AccuracyMedium>1.6</AccuracyMedium>
+          <AccuracyLong>1.5</AccuracyLong>
+          <IncomingDamageFactor>0.50</IncomingDamageFactor>
+          <StaggerDurationFactor>0.2</StaggerDurationFactor>
+          <MoveSpeed>2.0</MoveSpeed>
+        </statFactors>
+        <capMods>
+          <li>
+            <capacity>Consciousness</capacity>
+            <offset>0.30</offset>
+          </li>
+          <li>
+            <capacity>Moving</capacity>
+            <offset>0.40</offset>
+          </li>
+          <li>
+            <capacity>Manipulation</capacity>
+            <offset>0.30</offset>
+          </li>
+          <li>
+            <capacity>Sight</capacity>
+            <offset>0.25</offset>
+          </li>
+          <li>
+            <capacity>Hearing</capacity>
+            <offset>0.20</offset>
+          </li>
+        </capMods>
+        <hediffGivers>
+          <li Class="HediffGiver_Random">
+            <hediff>DMC_SinDevilTriggerRegen</hediff>
+            <mtbDays>0.005</mtbDays>
+          </li>
+        </hediffGivers>
+        <immuneTo>
+          <li>Stun</li>
+          <li>Paralyze</li>
+          <li>ToxicBuildup</li>
+          <li>Hypothermia</li>
+          <li>Heatstroke</li>
+        </immuneTo>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Devil Trigger Ability Hediff (grants the ability to cast Devil Trigger) -->
+  <HediffDef>
+    <defName>DMC_DevilTriggerAbility</defName>
+    <label>devil trigger mastery</label>
+    <description>Knowledge of how to activate Devil Trigger transformation. Grants access to the Devil Trigger ability.</description>
+    <hediffClass>Hediff</hediffClass>
+    <defaultLabelColor>(1.0, 0.5, 0.5)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_DevilTrigger</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Sin Devil Trigger Ability Hediff (grants the ability to cast Sin Devil Trigger) -->
+  <HediffDef>
+    <defName>DMC_SinDevilTriggerAbility</defName>
+    <label>sin devil trigger mastery</label>
+    <description>Ultimate knowledge of demonic transformation. Grants access to the Sin Devil Trigger ability.</description>
+    <hediffClass>Hediff</hediffClass>
+    <defaultLabelColor>(0.8, 0.3, 1.0)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <comps>
+      <li Class="HediffCompProperties_GiveAbility">
+        <abilityDef>DMC_SinDevilTrigger</abilityDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Devil Trigger Regeneration -->
+  <HediffDef>
+    <defName>DMC_DevilTriggerRegen</defName>
+    <label>demonic regeneration</label>
+    <description>Rapid healing powered by demonic energy. Wounds close quickly and vitality is restored continuously.</description>
+    <hediffClass>Hediff_Injury</hediffClass>
+    <defaultLabelColor>(1.0, 0.6, 0.6)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <stages>
+      <li>
+        <minSeverity>0.01</minSeverity>
+        <naturalHealingFactor>8.0</naturalHealingFactor>
+        <statOffsets>
+          <InjuryHealingFactor>5.0</InjuryHealingFactor>
+        </statOffsets>
+        <capMods>
+          <li>
+            <capacity>BloodFiltration</capacity>
+            <offset>0.50</offset>
+          </li>
+          <li>
+            <capacity>BloodPumping</capacity>
+            <offset>0.30</offset>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+    <comps>
+      <li Class="HediffCompProperties_HealPermanentWounds">
+        <healingQuality>2</healingQuality>
+      </li>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>1800</disappearsAfterTicks> <!-- 30 seconds -->
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Sin Devil Trigger Regeneration -->
+  <HediffDef>
+    <defName>DMC_SinDevilTriggerRegen</defName>
+    <label>ultimate regeneration</label>
+    <description>Divine-level healing that approaches immortality. Even the most grievous wounds heal almost instantly, and the body transcends normal biological limitations.</description>
+    <hediffClass>Hediff_Injury</hediffClass>
+    <defaultLabelColor>(0.9, 0.4, 1.0)</defaultLabelColor>
+    <isBad>false</isBad>
+    <maxSeverity>1.0</maxSeverity>
+    <initialSeverity>1.0</initialSeverity>
+    <stages>
+      <li>
+        <minSeverity>0.01</minSeverity>
+        <naturalHealingFactor>15.0</naturalHealingFactor>
+        <statOffsets>
+          <InjuryHealingFactor>10.0</InjuryHealingFactor>
+        </statOffsets>
+        <capMods>
+          <li>
+            <capacity>BloodFiltration</capacity>
+            <offset>1.0</offset>
+          </li>
+          <li>
+            <capacity>BloodPumping</capacity>
+            <offset>0.60</offset>
+          </li>
+          <li>
+            <capacity>Breathing</capacity>
+            <offset>0.50</offset>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+    <comps>
+      <li Class="HediffCompProperties_HealPermanentWounds">
+        <healingQuality>3</healingQuality>
+      </li>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>3600</disappearsAfterTicks> <!-- 60 seconds -->
+      </li>
+    </comps>
+  </HediffDef>
+
 </Defs>

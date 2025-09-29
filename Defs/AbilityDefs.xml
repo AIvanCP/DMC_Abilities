@@ -432,4 +432,52 @@
     </projectile>
   </ThingDef>
 
+  <!-- Devil Trigger Ability -->
+  <AbilityDef>
+    <defName>DMC_DevilTrigger</defName>
+    <label>devil trigger</label>
+    <description>Transform into a demonic state, greatly enhancing combat capabilities for 30 seconds. Increases damage, accuracy, movement speed, and defense. Long cooldown that reduces by 0.1 seconds per damage dealt and 0.5 seconds per kill. Cannot be used while already transformed.</description>
+    <iconPath>UI/Abilities/DT</iconPath>
+    <cooldownTicksRange>9000</cooldownTicksRange> <!-- 2.5 minutes base -->
+    <aiCanUse>false</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_DevilTrigger</verbClass>
+      <range>0</range>
+      <warmupTime>1.0</warmupTime>
+      <soundCast>PsycastPsychicEffect</soundCast>
+      <targetParams>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnThing</jobDef>
+  </AbilityDef>
+
+  <!-- Sin Devil Trigger Ability -->
+  <AbilityDef>
+    <defName>DMC_SinDevilTrigger</defName>
+    <label>sin devil trigger</label>
+    <description>Ultimate transformation unleashing maximum demonic power for 60 seconds. Massive combat enhancements plus immunity to terrain movement penalties. Very long cooldown that reduces by 0.1 seconds per damage dealt and 0.5 seconds per kill. Cannot be used while already transformed.</description>
+    <iconPath>UI/Abilities/SDT</iconPath>
+    <cooldownTicksRange>18000</cooldownTicksRange> <!-- 5 minutes base -->
+    <aiCanUse>false</aiCanUse>
+    <verbProperties>
+      <verbClass>DMCAbilities.Verb_SinDevilTrigger</verbClass>
+      <range>0</range>
+      <warmupTime>1.5</warmupTime>
+      <soundCast>PsycastPsychicPulse</soundCast>
+      <targetParams>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetLocations>false</canTargetLocations>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <jobDef>CastAbilityOnThing</jobDef>
+  </AbilityDef>
+
 </Defs>

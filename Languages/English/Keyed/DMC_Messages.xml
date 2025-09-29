@@ -13,4 +13,20 @@
   <DMC_LearnedAbility>{0} has learned {1}!</DMC_LearnedAbility>
   <DMC_AlreadyKnowsAbility>{0} already knows {1}</DMC_AlreadyKnowsAbility>
 
+  <!-- Devil Trigger Messages -->
+  <DMC_DevilTriggerActivated>{0} has activated Devil Trigger!</DMC_DevilTriggerActivated>
+  <DMC_SinDevilTriggerActivated>{0} has activated Sin Devil Trigger!</DMC_SinDevilTriggerActivated>
+  <DMC_DevilTriggerEnded>{0}'s Devil Trigger has ended.</DMC_DevilTriggerEnded>
+  <DMC_SinDevilTriggerEnded>{0}'s Sin Devil Trigger has ended.</DMC_SinDevilTriggerEnded>
+  <DMC_DevilTriggerCooldownReduced>Devil Trigger cooldown reduced!</DMC_DevilTriggerCooldownReduced>
+
+  <!-- Ability Descriptions -->
+  <DMC_DevilTriggerDesc>Activates Devil Trigger transformation: enhanced combat capabilities, rapid regeneration, damage reduction, and supernatural resilience. The user's body becomes partially demonic.</DMC_DevilTriggerDesc>
+  <DMC_SinDevilTriggerDesc>Activates Sin Devil Trigger: ultimate transformation with massive combat bonuses, extreme regeneration, near-immunity to damage, terrain immunity, and immunity to most debuffs. Transcends mortal limitations.</DMC_SinDevilTriggerDesc>
+
+  <!-- Enhanced Features Messages -->
+  <DMC_RegenerationActive>Demonic regeneration healing wounds...</DMC_RegenerationActive>
+  <DMC_UltimateRegenerationActive>Ultimate regeneration restoring vitality...</DMC_UltimateRegenerationActive>
+  <DMC_DamageReduced>Demonic resilience reduces incoming damage!</DMC_DamageReduced>
+
 </LanguageData>

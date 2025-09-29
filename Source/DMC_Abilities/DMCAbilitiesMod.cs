@@ -61,6 +61,10 @@ namespace DMCAbilities
                 "Dash forward slashing everything in path");
             CreateAbilityToggle(listingStandard, "Red Hot Night", ref settings.redHotNightEnabled,
                 "Devastating orb rain attack (ranged weapons only)");
+            CreateAbilityToggle(listingStandard, "Devil Trigger", ref settings.devilTriggerEnabled,
+                "Transform to enhance combat abilities (long cooldown)");
+            CreateAbilityToggle(listingStandard, "Sin Devil Trigger", ref settings.sinDevilTriggerEnabled,
+                "Ultimate transformation with terrain immunity (very long cooldown)");
             
             // === DAMAGE MULTIPLIERS ===
             DrawSectionHeader(listingStandard, "Damage Multipliers");
@@ -83,6 +87,10 @@ namespace DMCAbilities
                 0.5f, 3.0f, "x", "Damage multiplier for Rapid Slash dash attacks");
             CreateSliderSetting(listingStandard, "Red Hot Night damage", ref settings.redHotNightDamageMultiplier, 
                 0.5f, 3.0f, "x", "Damage multiplier for Red Hot Night orb explosions");
+            CreateSliderSetting(listingStandard, "Devil Trigger damage", ref settings.devilTriggerDamageMultiplier, 
+                1.0f, 4.0f, "x", "Damage multiplier during Devil Trigger transformation");
+            CreateSliderSetting(listingStandard, "Sin Devil Trigger damage", ref settings.sinDevilTriggerDamageMultiplier, 
+                1.0f, 5.0f, "x", "Damage multiplier during Sin Devil Trigger transformation");
             CreateSliderSetting(listingStandard, "Sword damage bonus", ref settings.swordDamageBonus, 
                 0f, 50f, "%", "Extra damage bonus when using sword weapons");
             
@@ -118,6 +126,10 @@ namespace DMCAbilities
                 0f, 15f, "%", "Chance for Rapid Slash skillbook to appear in trader stock");
             CreateSliderSetting(listingStandard, "Red Hot Night book", ref settings.redHotNightTradeChance, 
                 0f, 15f, "%", "Chance for Red Hot Night skillbook to appear in trader stock");
+            CreateSliderSetting(listingStandard, "Devil Trigger book", ref settings.devilTriggerTradeChance, 
+                0f, 5f, "%", "Chance for Devil Trigger skillbook to appear in trader stock (very rare)");
+            CreateSliderSetting(listingStandard, "Sin Devil Trigger book", ref settings.sinDevilTriggerTradeChance, 
+                0f, 2f, "%", "Chance for Sin Devil Trigger skillbook to appear in trader stock (extremely rare)");
             
             // Reset button
             listingStandard.Gap(20f);
@@ -238,6 +250,8 @@ namespace DMCAbilities
         public bool rainBulletEnabled = true;
         public bool rapidSlashEnabled = true;
         public bool redHotNightEnabled = true;
+        public bool devilTriggerEnabled = true;
+        public bool sinDevilTriggerEnabled = true;
         
         // Performance settings
         public int maxRedHotOrbs = 20;
@@ -252,6 +266,8 @@ namespace DMCAbilities
         public float rainBulletDamageMultiplier = 1.0f;
         public float rapidSlashDamageMultiplier = 1.0f;
         public float redHotNightDamageMultiplier = 1.0f;
+        public float devilTriggerDamageMultiplier = 1.5f;
+        public float sinDevilTriggerDamageMultiplier = 2.0f;
         public float swordDamageBonus = 10f;
         
         // Trader chances for skillbooks
@@ -264,6 +280,8 @@ namespace DMCAbilities
         public float rainBulletTradeChance = 4f;
         public float rapidSlashTradeChance = 3f;
         public float redHotNightTradeChance = 2f;
+        public float devilTriggerTradeChance = 1f; // Very rare
+        public float sinDevilTriggerTradeChance = 0.5f; // Extremely rare
 
         public override void ExposeData()
         {
@@ -281,6 +299,8 @@ namespace DMCAbilities
             Scribe_Values.Look(ref rainBulletEnabled, "rainBulletEnabled", true);
             Scribe_Values.Look(ref rapidSlashEnabled, "rapidSlashEnabled", true);
             Scribe_Values.Look(ref redHotNightEnabled, "redHotNightEnabled", true);
+            Scribe_Values.Look(ref devilTriggerEnabled, "devilTriggerEnabled", true);
+            Scribe_Values.Look(ref sinDevilTriggerEnabled, "sinDevilTriggerEnabled", true);
             
             // Performance settings
             Scribe_Values.Look(ref maxRedHotOrbs, "maxRedHotOrbs", 20);
@@ -295,6 +315,8 @@ namespace DMCAbilities
             Scribe_Values.Look(ref rainBulletDamageMultiplier, "rainBulletDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref rapidSlashDamageMultiplier, "rapidSlashDamageMultiplier", 1.0f);
             Scribe_Values.Look(ref redHotNightDamageMultiplier, "redHotNightDamageMultiplier", 1.0f);
+            Scribe_Values.Look(ref devilTriggerDamageMultiplier, "devilTriggerDamageMultiplier", 1.5f);
+            Scribe_Values.Look(ref sinDevilTriggerDamageMultiplier, "sinDevilTriggerDamageMultiplier", 2.0f);
             Scribe_Values.Look(ref swordDamageBonus, "swordDamageBonus", 10f);
             
             // Trader chances
@@ -307,6 +329,8 @@ namespace DMCAbilities
             Scribe_Values.Look(ref rainBulletTradeChance, "rainBulletTradeChance", 4f);
             Scribe_Values.Look(ref rapidSlashTradeChance, "rapidSlashTradeChance", 3f);
             Scribe_Values.Look(ref redHotNightTradeChance, "redHotNightTradeChance", 2f);
+            Scribe_Values.Look(ref devilTriggerTradeChance, "devilTriggerTradeChance", 1f);
+            Scribe_Values.Look(ref sinDevilTriggerTradeChance, "sinDevilTriggerTradeChance", 0.5f);
             
             base.ExposeData();
         }
