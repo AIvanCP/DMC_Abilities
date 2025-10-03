@@ -212,6 +212,9 @@ namespace DMCAbilities
                 return; // Skip friendly targets
             }
 
+            // Show Rapid Slash callout when hitting enemies
+            DMCSpeechUtility.TryShowCallout(pawn, "DMC_RapidSlashActivation", 0.25f);
+
             // Calculate and apply melee damage for forward dash slashes with settings multiplier
             float damageMultiplier = DMCAbilitiesMod.settings?.rapidSlashDamageMultiplier ?? 1.0f;
             var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(pawn, damageMultiplier);

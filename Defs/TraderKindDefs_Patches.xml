@@ -7,8 +7,11 @@
     <stockGenerators>
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookStinger</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>800-1200</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>800~1200</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -30,8 +33,11 @@
       <!-- Stinger skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookStinger</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>800-1200</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>800~1200</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -46,8 +52,11 @@
       <!-- Judgement Cut skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookJudgementCut</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>2000-3000</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>2000~3000</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -62,8 +71,11 @@
       <!-- Drive skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookDrive</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>1500-2250</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>1500~2250</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -78,8 +90,11 @@
       <!-- Void Slash skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookVoidSlash</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>1600-2400</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>1600~2400</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -94,8 +109,11 @@
       <!-- Gun Stinger skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_GunStingerSkillbook</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>1700-2550</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>1700~2550</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -110,8 +128,11 @@
       <!-- Rain Bullet skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookRainBullet</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>950-1425</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>950~1425</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -126,8 +147,11 @@
       <!-- Rapid Slash skillbook -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookRapidSlash</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>2200-3000</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>2200~3000</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -142,8 +166,11 @@
       <!-- Heavy Rain skillbook (EXTREMELY RARE) -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_HeavyRainSkillbook</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>4000-6000</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>4000~6000</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -158,8 +185,11 @@
       <!-- Red Hot Night skillbook (RARE) -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SkillbookRedHotNight</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>2500-3500</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>2500~3500</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -174,8 +204,11 @@
       <!-- Devil Trigger skillbook (LEGENDARY RARE) -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_DevilTriggerBook</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>8000-12000</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>8000~12000</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>
@@ -190,8 +223,11 @@
       <!-- Sin Devil Trigger skillbook (MYTHICAL RARE) -->
       <li Class="StockGenerator_SingleDef">
         <thingDef>DMC_SinDevilTriggerBook</thingDef>
-        <countRange>0-1</countRange>
-        <totalPriceRange>15000-25000</totalPriceRange>
+        <countRange>
+          <min>0</min>
+          <max>1</max>
+        </countRange>
+        <totalPriceRange>15000~25000</totalPriceRange>
         <customCountChances>
           <li>
             <count>0</count>

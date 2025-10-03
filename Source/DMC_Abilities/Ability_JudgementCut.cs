@@ -35,6 +35,9 @@ namespace DMCAbilities
             if (CasterPawn == null || CasterPawn.Map == null || !currentTarget.IsValid)
                 return;
 
+            // Show Judgement Cut callout
+            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_JudgementCutActivation", (DMCAbilitiesMod.settings?.calloutChance ?? 75f) * 0.9f);
+
             IntVec3 targetPosition = currentTarget.Cell;
 
             // Additional safety check - make sure pawn is still alive and conscious

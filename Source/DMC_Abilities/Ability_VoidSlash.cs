@@ -119,6 +119,9 @@ namespace DMCAbilities
                 return; // Skip friendly targets
             }
 
+            // Show Void Slash callout when hitting enemies
+            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_VoidSlashActivation", 0.25f);
+
             // Apply initial slash damage with settings multiplier
             float multiplier = DMCAbilitiesMod.settings?.voidSlashDamageMultiplier ?? 1.0f;
             float finalDamage = BaseDamage * multiplier;

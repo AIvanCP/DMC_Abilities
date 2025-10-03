@@ -146,6 +146,9 @@ namespace DMCAbilities
             IntVec3 targetCenter = job.targetA.Cell;
             IntVec3 spawnCell;
 
+            // Show Heavy Rain callout occasionally (since it spawns many projectiles)
+            DMCSpeechUtility.TryShowCallout(pawn, "DMC_HeavyRainActivation", 0.1f);
+
             // 70% chance to target enemies, 30% chance for random placement
             if (Rand.Chance(0.7f))
             {

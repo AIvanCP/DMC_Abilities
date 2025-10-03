@@ -274,6 +274,9 @@ namespace DMCAbilities
             float multiplier = DMCAbilitiesMod.settings?.stingerDamageMultiplier ?? 1.2f;
             var damageInfo = WeaponDamageUtility.CalculateMeleeDamage(pawn, multiplier);
             
+            // Show Stinger callout
+            DMCSpeechUtility.TryShowCallout(pawn, "DMC_StingerActivation", (DMCAbilitiesMod.settings?.calloutChance ?? 75f) * 0.8f);
+            
             if (damageInfo.HasValue)
             {
                 target.TakeDamage(damageInfo.Value);

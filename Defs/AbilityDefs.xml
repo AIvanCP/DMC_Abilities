@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
   
+  <!-- DMC Abilities Category Definition -->
+  <AbilityCategoryDef>
+    <defName>DMCAbilities</defName>
+    <label>DMC abilities</label>
+    <displayOrder>100</displayOrder>
+  </AbilityCategoryDef>
+  
   <!-- Stinger Ability -->
   <AbilityDef>
     <defName>DMC_Stinger</defName>
@@ -20,10 +27,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>false</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnThing</jobDef>
   </AbilityDef>
 
   <!-- Judgement Cut Ability -->
@@ -45,10 +50,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
   <!-- Drive Ability -->
@@ -70,10 +73,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
   <!-- Void Slash Ability Definition -->
@@ -91,7 +92,6 @@
         <canTargetLocations>true</canTargetLocations>
         <canTargetPawns>false</canTargetPawns>
         <canTargetBuildings>false</canTargetBuildings>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
     <gizmoClass>Command_Ability</gizmoClass>
@@ -119,10 +119,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>false</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnThing</jobDef>
   </AbilityDef>
 
   <!-- Heavy Rain Ability -->
@@ -144,10 +142,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
   <!-- Job definition for Drive delayed launch -->
@@ -194,7 +190,6 @@
       <damageDef>Cut</damageDef>
       <damageAmountBase>1</damageAmountBase>
       <speed>40</speed>
-      <range>25</range>
       <flyOverhead>false</flyOverhead>
     </projectile>
   </ThingDef>
@@ -219,7 +214,6 @@
       <damageDef>Cut</damageDef>
       <damageAmountBase>18</damageAmountBase>
       <speed>30</speed>
-      <range>10</range>
       <flyOverhead>true</flyOverhead>
     </projectile>
   </ThingDef>
@@ -245,7 +239,6 @@
       <damageDef>Cut</damageDef>
       <damageAmountBase>35</damageAmountBase>
       <speed>25</speed>
-      <range>15</range>
       <flyOverhead>true</flyOverhead>
       <explosionRadius>4</explosionRadius>
     </projectile>
@@ -271,10 +264,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
   <!-- Job definition for Rain Bullet casting -->
@@ -305,7 +296,6 @@
       <damageDef>Bullet</damageDef>
       <damageAmountBase>1</damageAmountBase>
       <speed>50</speed>
-      <range>15</range>
       <flyOverhead>true</flyOverhead>
     </projectile>
   </ThingDef>
@@ -329,10 +319,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnThingOrLocation</jobDef>
   </AbilityDef>
 
   <!-- Job definition for Rapid Slash casting -->
@@ -379,7 +367,6 @@
       <damageDef>Cut</damageDef>
       <damageAmountBase>10</damageAmountBase>
       <speed>25</speed>
-      <range>8</range>
     </projectile>
   </ThingDef>
 
@@ -402,10 +389,8 @@
         <canTargetItems>false</canTargetItems>
         <canTargetLocations>true</canTargetLocations>
         <canTargetSelf>false</canTargetSelf>
-        <showRangeOnSelect>true</showRangeOnSelect>
       </targetParams>
     </verbProperties>
-    <jobDef>CastAbilityOnCell</jobDef>
   </AbilityDef>
 
   <!-- Red Orb Projectile -->

@@ -81,6 +81,12 @@ namespace DMCAbilities
             projectilesLaunched++;
             bool isFinalProjectile = (projectileIndex == projectilesToLaunch - 1) && projectilesToLaunch >= 2;
 
+            // Show Drive callout when launching projectiles (only for first projectile to avoid spam)
+            if (projectileIndex == 0)
+            {
+                DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_DriveActivation", 0.3f);
+            }
+
             // Calculate launch direction
             Vector3 casterPos = CasterPawn.Position.ToVector3Shifted();
             Vector3 targetPos = targetPosition.ToVector3Shifted();

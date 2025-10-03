@@ -244,6 +244,9 @@ namespace DMCAbilities
             var targetCell = job.targetA.Cell;
             var map = pawn.Map;
 
+            // Show Red Hot Night callout occasionally (since it spawns multiple orbs)
+            DMCSpeechUtility.TryShowCallout(pawn, "DMC_RedHotNightActivation", 0.15f);
+
             // Calculate cast completion ratio for damage scaling
             float castProgress = Mathf.Clamp01((float)castTicks / FullCastTime);
             

@@ -450,6 +450,9 @@ namespace DMCAbilities
         {
             if (target == null || target.Dead) return;
 
+            // Show Gun Stinger callout when performing the shot
+            DMCSpeechUtility.TryShowCallout(pawn, "DMC_GunStingerActivation", 0.3f);
+
             // Calculate enhanced shotgun damage for point-blank shot
             float multiplier = DMCAbilitiesMod.settings?.gunStingerDamageMultiplier ?? 1.5f;
             var damageInfo = WeaponDamageUtility.CalculateRangedDamage(pawn, multiplier);

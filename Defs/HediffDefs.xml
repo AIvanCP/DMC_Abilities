@@ -153,8 +153,6 @@
         <statOffsets>
           <MoveSpeed>-0.3</MoveSpeed>
           <MeleeDodgeChance>-0.10</MeleeDodgeChance>
-          <RangedDodgeChance>-0.10</RangedDodgeChance>
-          <ManipulationCapacity>-0.15</ManipulationCapacity>
         </statOffsets>
       </li>
     </stages>
@@ -219,7 +217,6 @@
         <statOffsets>
           <MoveSpeed>-0.2</MoveSpeed>
           <MeleeDodgeChance>-0.05</MeleeDodgeChance>
-          <RangedDodgeChance>-0.05</RangedDodgeChance>
         </statOffsets>
       </li>
     </stages>
@@ -357,9 +354,6 @@
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
     <displayWound>false</displayWound>
-    <chronical>false</chronical>
-    <scenarioCanAdd>false</scenarioCanAdd>
-    <becomeVisible>false</becomeVisible>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
@@ -419,9 +413,6 @@
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
     <displayWound>false</displayWound>
-    <chronical>false</chronical>
-    <scenarioCanAdd>false</scenarioCanAdd>
-    <becomeVisible>false</becomeVisible>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
@@ -471,14 +462,6 @@
             <offset>0.20</offset>
           </li>
         </capMods>
-        <immuneTo>
-          <li>Stun</li>
-          <li>Paralyze</li>
-          <li>ToxicBuildup</li>
-          <li>Hypothermia</li>
-          <li>Heatstroke</li>
-        </immuneTo>
-        <preventDiseases>true</preventDiseases>
       </li>
     </stages>
   </HediffDef>
@@ -488,7 +471,7 @@
     <defName>DMC_DevilTriggerAbility</defName>
     <label>devil trigger mastery</label>
     <description>Knowledge of how to activate Devil Trigger transformation. Grants access to the Devil Trigger ability.</description>
-    <hediffClass>Hediff</hediffClass>
+    <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(1.0, 0.5, 0.5)</defaultLabelColor>
     <isBad>false</isBad>
     <maxSeverity>1.0</maxSeverity>
@@ -505,7 +488,7 @@
     <defName>DMC_SinDevilTriggerAbility</defName>
     <label>sin devil trigger mastery</label>
     <description>Ultimate knowledge of demonic transformation. Grants access to the Sin Devil Trigger ability.</description>
-    <hediffClass>Hediff</hediffClass>
+    <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(0.8, 0.3, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
     <maxSeverity>1.0</maxSeverity>
@@ -555,7 +538,6 @@
     </stages>
     <comps>
       <li Class="HediffCompProperties_HealPermanentWounds">
-        <healingQuality>2</healingQuality>
       </li>
       <li Class="HediffCompProperties_Disappears">
         <disappearsAfterTicks>1800</disappearsAfterTicks> <!-- 30 seconds -->
@@ -605,7 +587,6 @@
     </stages>
     <comps>
       <li Class="HediffCompProperties_HealPermanentWounds">
-        <healingQuality>3</healingQuality>
       </li>
       <li Class="HediffCompProperties_Disappears">
         <disappearsAfterTicks>3600</disappearsAfterTicks> <!-- 60 seconds -->

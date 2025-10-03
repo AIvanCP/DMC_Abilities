@@ -131,6 +131,25 @@ namespace DMCAbilities
             CreateSliderSetting(listingStandard, "Sin Devil Trigger book", ref settings.sinDevilTriggerTradeChance, 
                 0f, 2f, "%", "Chance for Sin Devil Trigger skillbook to appear in trader stock (extremely rare)");
             
+            // === DMC CALLOUTS ===
+            DrawSectionHeader(listingStandard, "DMC Callouts & Speech");
+            Text.Font = GameFont.Tiny;
+            listingStandard.Label("Pawns will say iconic Devil May Cry quotes when using abilities:");
+            Text.Font = GameFont.Small;
+            listingStandard.Gap(5f);
+            
+            // Enable/disable callouts
+            listingStandard.CheckboxLabeled("Enable callouts", ref settings.calloutsEnabled,
+                "Show floating text with Devil May Cry quotes when using abilities");
+            
+            // Show in message log too
+            listingStandard.CheckboxLabeled("Show callouts in message log", ref settings.calloutMessagesEnabled,
+                "Also display callout text in the message log (bottom left)");
+            
+            // Callout frequency
+            CreateSliderSetting(listingStandard, "Callout frequency", ref settings.calloutChance, 
+                0f, 100f, "%", "How often callouts appear when using abilities");
+            
             // Reset button
             listingStandard.Gap(20f);
             if (listingStandard.ButtonText("Reset All to Defaults"))
@@ -226,6 +245,13 @@ namespace DMCAbilities
             settings.rainBulletTradeChance = 4f;
             settings.rapidSlashTradeChance = 3f;
             settings.redHotNightTradeChance = 2f;
+            settings.devilTriggerTradeChance = 1f;
+            settings.sinDevilTriggerTradeChance = 0.5f;
+            
+            // Speech/Callout settings
+            settings.calloutsEnabled = true;
+            settings.calloutMessagesEnabled = false;
+            settings.calloutChance = 75f;
         }
 
         public override string SettingsCategory()
@@ -282,6 +308,11 @@ namespace DMCAbilities
         public float redHotNightTradeChance = 2f;
         public float devilTriggerTradeChance = 1f; // Very rare
         public float sinDevilTriggerTradeChance = 0.5f; // Extremely rare
+        
+        // Speech/Callout settings
+        public bool calloutsEnabled = true;
+        public bool calloutMessagesEnabled = false;
+        public float calloutChance = 75f; // Default 75% chance
 
         public override void ExposeData()
         {
@@ -331,6 +362,11 @@ namespace DMCAbilities
             Scribe_Values.Look(ref redHotNightTradeChance, "redHotNightTradeChance", 2f);
             Scribe_Values.Look(ref devilTriggerTradeChance, "devilTriggerTradeChance", 1f);
             Scribe_Values.Look(ref sinDevilTriggerTradeChance, "sinDevilTriggerTradeChance", 0.5f);
+            
+            // Speech/Callout settings
+            Scribe_Values.Look(ref calloutsEnabled, "calloutsEnabled", true);
+            Scribe_Values.Look(ref calloutMessagesEnabled, "calloutMessagesEnabled", false);
+            Scribe_Values.Look(ref calloutChance, "calloutChance", 75f);
             
             base.ExposeData();
         }

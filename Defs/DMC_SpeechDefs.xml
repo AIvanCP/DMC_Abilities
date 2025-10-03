@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- Devil Trigger Activation Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_DevilTriggerActivation</defName>
+    <phrases>
+      <li>Don't fuck with me!</li>
+      <li>Time to get serious!</li>
+      <li>Watch this!</li>
+      <li>This party's getting crazy!</li>
+      <li>I need more power!</li>
+      <li>Showtime!</li>
+      <li>Now I'm motivated!</li>
+      <li>Let's dance!</li>
+    </phrases>
+    <color>(1.0, 0.3, 0.3)</color> <!-- Red color for Devil Trigger -->
+  </DMC_SpeechCategoryDef>
+
+  <!-- Sin Devil Trigger Activation Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_SinDevilTriggerActivation</defName>
+    <phrases>
+      <li>Your nightmare begins here!</li>
+      <li>My turn now!</li>
+      <li>Foolishness!</li>
+      <li>No Not Yet!</li>
+      <li>This Is Power!</li>
+      <li>Power! Give me more power!</li>
+    </phrases>
+    <color>(0.8, 0.1, 1.0)</color> <!-- Purple color for Sin Devil Trigger -->
+  </DMC_SpeechCategoryDef>
+
+  <!-- Combat Success Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_CombatSuccess</defName>
+    <phrases>
+      <li>Scum!</li>
+      <li>Too easy!</li>
+      <li>Piece of cake!</li>
+      <li>Don't get cocky!</li>
+      <li>Stand Aside!</li>
+      <li>Pointless!</li>
+      <li>You Wretch!</li>
+      <li>Outta My Sight!</li>
+      <li>Be Gone!</li>
+    </phrases>
+    <color>(1.0, 0.8, 0.0)</color> <!-- Gold color for success -->
+  </DMC_SpeechCategoryDef>
+
+  <!-- Ability Activation Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_StingerActivation</defName>
+    <phrases>
+      <li>EEIIYYAAHH!</li>
+      <li>EEIIYYDDAAHH!</li>
+      <li>HYYAAHH!</li>
+    </phrases>
+    <color>(0.7, 0.7, 1.0)</color> <!-- Light blue -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_JudgementCutActivation</defName>
+    <phrases>
+      <li>Cut You Down!</li>
+      <li>Kneel Before Me!</li>
+      <li>You're Finished!</li>
+      <li>Don't Move!</li>
+    </phrases>
+    <color>(1.0, 0.8, 0.8)</color> <!-- Light red -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_RapidSlashActivation</defName>
+    <phrases>
+      <li>Too Slow!</li>
+      <li>Clean Cut!</li>
+      <li>Go To Hell!</li>
+    </phrases>
+    <color>(0.9, 1.0, 0.8)</color> <!-- Light green -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_VoidSlashActivation</defName>
+    <phrases>
+      <li>Pathetic!</li>
+      <li>Exhilarating!</li>
+      <li>Slice through!</li>
+    </phrases>
+    <color>(0.4, 0.1, 0.8)</color> <!-- Dark purple for void -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_GunStingerActivation</defName>
+    <phrases>
+      <li>Hell Yeah!</li>
+      <li>Bang bang!</li>
+      <li>Blast!</li>
+      <li>Eat this!</li>
+    </phrases>
+    <color>(1.0, 0.6, 0.0)</color> <!-- Orange for gunfire -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_HeavyRainActivation</defName>
+    <phrases>
+      <li>Watch The Sky!</li>
+      <li>Eat This!</li>
+      <li>Dodge This!</li>
+    </phrases>
+    <color>(0.6, 0.8, 1.0)</color> <!-- Light blue for spectral swords -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_RainBulletActivation</defName>
+    <phrases>
+      <li>Rainning Bullet!</li>
+      <li>Payday!</li>
+      <li>Hell Yeah!</li>
+    </phrases>
+    <color>(0.8, 0.8, 0.6)</color> <!-- Yellow-gray for bullets -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_DriveActivation</defName>
+    <phrases>
+      <li>Blast!</li>
+      <li>Outta My Sight!</li>
+      <li>Drive!</li>
+      <li>Go To Hell!</li>
+      <li>It's Over!</li>
+    </phrases>
+    <color>(0.0, 0.8, 1.0)</color> <!-- Cyan for energy -->
+  </DMC_SpeechCategoryDef>
+
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_RedHotNightActivation</defName>
+    <phrases>
+      <li>Outrun This!</li>
+      <li>Red Hot!</li>
+      <li>Gettin' hype!</li>
+      <li>I'll Show You What I Got!</li>
+      <li>Locked on!</li>
+    </phrases>
+    <color>(1.0, 0.4, 0.1)</color> <!-- Red-orange for fire -->
+  </DMC_SpeechCategoryDef>
+
+  <!-- Taking Damage Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_TakingDamage</defName>
+    <phrases>
+      <li>Is that all?</li>
+      <li>Not even close!</li>
+      <li>You'll have to try harder!</li>
+      <li>Tch!</li>
+      <li>Not Bad!</li>
+    </phrases>
+    <color>(1.0, 0.5, 0.0)</color> <!-- Orange for defiance -->
+  </DMC_SpeechCategoryDef>
+
+  <!-- Low Health Quotes -->
+  <DMC_SpeechCategoryDef>
+    <defName>DMC_LowHealth</defName>
+    <phrases>
+      <li>I won't lose!</li>
+      <li>Not yet!</li>
+      <li>I'm Getting Old!</li>
+      <li>This isn't over!</li>
+    </phrases>
+    <color>(1.0, 0.2, 0.2)</color> <!-- Bright red for danger -->
+  </DMC_SpeechCategoryDef>
+
+</Defs>
