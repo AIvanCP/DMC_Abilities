@@ -53,7 +53,7 @@ namespace DMCAbilities
             }
 
             // Show Rain Bullet callout when starting the bullet storm
-            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_RainBulletActivation", 0.4f);
+            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_RainBulletActivation", 30f);
 
             // Calculate bullets based on skills (3-6 per area)
             int meleeSkill = CasterPawn?.skills?.GetSkill(SkillDefOf.Melee)?.Level ?? 0;

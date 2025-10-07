@@ -57,7 +57,7 @@ namespace DMCAbilities
                 SoundDefOf.PsycastPsychicEffect?.PlayOneShot(new TargetInfo(caster.Position, caster.Map));
 
                 // Show Devil Trigger callout
-                DMCSpeechUtility.TryShowCallout(caster, "DMC_DevilTriggerActivation", DMCAbilitiesMod.settings?.calloutChance ?? 75f);
+                DMCSpeechUtility.TryShowCallout(caster, "DMC_DevilTriggerActivation", 100f);
 
                 // Add Devil Trigger hediff with enhanced stats
                 Hediff_DevilTrigger dtHediff = (Hediff_DevilTrigger)HediffMaker.MakeHediff(DMC_HediffDefOf.DMC_DevilTrigger, caster);

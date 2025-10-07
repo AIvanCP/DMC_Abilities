@@ -57,7 +57,7 @@ namespace DMCAbilities
                 SoundDefOf.PsycastPsychicPulse?.PlayOneShot(new TargetInfo(caster.Position, caster.Map));
 
                 // Show Sin Devil Trigger callout
-                DMCSpeechUtility.TryShowCallout(caster, "DMC_SinDevilTriggerActivation", DMCAbilitiesMod.settings?.calloutChance ?? 75f);
+                DMCSpeechUtility.TryShowCallout(caster, "DMC_SinDevilTriggerActivation", 100f);
 
                 // Remove any existing Devil Trigger first
                 Hediff existingDT = caster.health.hediffSet.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_DevilTrigger);

@@ -36,7 +36,7 @@ namespace DMCAbilities
                 return;
 
             // Show Judgement Cut callout
-            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_JudgementCutActivation", (DMCAbilitiesMod.settings?.calloutChance ?? 75f) * 0.9f);
+            DMCSpeechUtility.TryShowCallout(CasterPawn, "DMC_JudgementCutActivation", 100f);
 
             IntVec3 targetPosition = currentTarget.Cell;
 
