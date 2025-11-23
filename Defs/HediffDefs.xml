@@ -1,67 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
 
-  <!-- Stinger Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_StingerAbility</defName>
-    <label>stinger technique</label>
-    <description>Knowledge of the Stinger technique - a lightning-fast dash attack. This combat skill allows the user to instantly close distance and strike with devastating precision.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.8, 0.8, 1.0)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_Stinger</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
+  <!-- 
+    NOTE: Mastery/technique hediffs REMOVED. 
+    Abilities are now granted DIRECTLY via pawn.abilities.GainAbility().
+    This file only contains active buff/debuff hediffs that show during gameplay.
+  -->
 
-  <!-- Judgement Cut Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_JudgementCutAbility</defName>
-    <label>judgement cut technique</label>
-    <description>Mastery of the Judgement Cut - a ranged dimensional slash. This advanced combat technique allows the user to cut through space itself, striking distant enemies with phantom blades.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(1.0, 0.8, 0.8)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_JudgementCut</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
+  <!-- ═══ DEBUFFS ═══ -->
 
-  <!-- Drive Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_DriveAbility</defName>
-    <label>drive technique</label>
-    <description>Knowledge of the Drive technique - a vertical energy slash that creates projectiles. This advanced combat technique allows the user to launch energy projectiles that pass through obstacles and strike distant enemies.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.9, 1.0, 0.8)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_Drive</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Drive Burn DOT Effect -->
   <HediffDef>
     <defName>DMC_DriveBurn</defName>
     <label>drive burn</label>
@@ -73,27 +20,6 @@
     <tendable>false</tendable>
   </HediffDef>
 
-  <!-- Void Slash Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_VoidSlashAbility</defName>
-    <label>void slash mastery</label>
-    <description>This character has learned the Void Slash technique, allowing them to unleash debuffing cone attacks.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.5, 0.2, 0.8)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_VoidSlash</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Void Slash Debuff Hediff -->
   <HediffDef>
     <defName>DMC_VoidSlashDebuff</defName>
     <label>void slash debuff</label>
@@ -121,51 +47,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Gun Stinger Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_GunStingerHediff</defName>
-    <label>gun stinger technique</label>
-    <description>Mastery of the Gun Stinger technique - a teleporting shotgun attack. This advanced combat technique allows the user to instantly appear behind enemies and deliver devastating point-blank shotgun blasts.</description>
-    <hediffClass>DMCAbilities.Hediff_GunStinger</hediffClass>
-    <defaultLabelColor>(0.6, 0.6, 1.0)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_GunStinger</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Heavy Rain Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_HeavyRainAbility</defName>
-    <label>heavy rain mastery</label>
-    <description>This character has learned the Heavy Rain technique, allowing them to summon spectral sword storms over large areas.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.3, 0.5, 0.8)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_HeavyRain</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Spectral Wound Debuff -->
   <HediffDef>
     <defName>DMC_SpectralWound</defName>
     <label>spectral wound</label>
-    <description>Wounds inflicted by spectral swords that hinder movement and combat effectiveness. The ghostly nature of these wounds makes them particularly difficult to overcome.</description>
+    <description>Wounds inflicted by spectral swords that hinder movement and combat effectiveness.</description>
     <hediffClass>DMCAbilities.Hediff_SpectralWound</hediffClass>
     <defaultLabelColor>(0.4, 0.2, 0.6)</defaultLabelColor>
     <isBad>true</isBad>
@@ -182,11 +67,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Spectral Stun Hediff -->
   <HediffDef>
     <defName>DMC_SpectralStun</defName>
     <label>spectral paralysis</label>
-    <description>Paralyzed by the overwhelming force of spectral energy. The affected pawn is temporarily unable to move or act.</description>
+    <description>Paralyzed by the overwhelming force of spectral energy.</description>
     <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(0.2, 0.1, 0.4)</defaultLabelColor>
     <isBad>true</isBad>
@@ -209,31 +93,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Rain Bullet Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_RainBulletAbility</defName>
-    <label>rain bullet technique</label>
-    <description>Mastery of the Rain Bullet technique - an aerial shooting maneuver. This advanced gunslinging technique allows the user to leap into the air and rain down precision shots on targets using pistols and revolvers.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.9, 0.7, 0.2)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_RainBullet</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Stagger Effect Hediff -->
   <HediffDef>
     <defName>DMC_Stagger</defName>
     <label>staggered</label>
-    <description>Momentarily staggered by a precise shot. Movement and reaction speed are temporarily reduced.</description>
+    <description>Momentarily staggered by a precise shot.</description>
     <hediffClass>DMCAbilities.Hediff_Stagger</hediffClass>
     <defaultLabelColor>(0.7, 0.4, 0.1)</defaultLabelColor>
     <isBad>true</isBad>
@@ -250,31 +113,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Rapid Slash Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_RapidSlashAbility</defName>
-    <label>rapid slash technique</label>
-    <description>Mastery of the Rapid Slash - a devastating multi-hit combo attack. This advanced combat technique allows the user to dash to enemies and unleash a flurry of increasingly powerful strikes, ending with a spectacular explosion.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(1.0, 0.5, 0.8)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_RapidSlash</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Spectral Shock Debuff -->
   <HediffDef>
     <defName>DMC_SpectralShock</defName>
     <label>spectral shock</label>
-    <description>Shocked by spectral energy from an exploding summoned sword. Manipulation is reduced and aiming is impaired due to the lingering effects of otherworldly energy.</description>
+    <description>Shocked by spectral energy from an exploding summoned sword.</description>
     <hediffClass>DMCAbilities.Hediff_SpectralShock</hediffClass>
     <defaultLabelColor>(0.5, 0.3, 0.8)</defaultLabelColor>
     <isBad>true</isBad>
@@ -296,31 +138,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Red Hot Night Ability Hediff -->
-  <HediffDef>
-    <defName>DMC_RedHotNightAbility</defName>
-    <label>red hot night technique</label>
-    <description>Mastery of the legendary Red Hot Night - summoning colossal red orbs from above. This ultimate ranged technique channels infernal power to rain destruction upon enemies, growing stronger with charging and shooting skill.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(1.0, 0.3, 0.2)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_RedHotNight</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Red Hot Burn Debuff -->
   <HediffDef>
     <defName>DMC_RedHotBurn</defName>
     <label>red hot burn</label>
-    <description>Flesh is seared by infernal energy from red orbs. The burning heat deals continuous damage and reduces movement speed.</description>
+    <description>Flesh is seared by infernal energy from red orbs.</description>
     <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(1.0, 0.4, 0.2)</defaultLabelColor>
     <isBad>true</isBad>
@@ -377,11 +198,12 @@
     </comps>
   </HediffDef>
 
-  <!-- Devil Trigger Transformation -->
+  <!-- ═══ ACTIVE BUFFS (show when active) ═══ -->
+
   <HediffDef>
     <defName>DMC_DevilTrigger</defName>
     <label>devil trigger</label>
-    <description>Devil Trigger transformation active. Demonic power flows through the user, providing enhanced combat capabilities, rapid health regeneration, damage reduction, and supernatural resilience. The user's body becomes partially demonic, granting inhuman fighting prowess.</description>
+    <description>Devil Trigger transformation active. Demonic power flows through the user, providing enhanced combat capabilities, rapid health regeneration, damage reduction, and supernatural resilience.</description>
     <hediffClass>DMCAbilities.Hediff_DevilTrigger</hediffClass>
     <defaultLabelColor>(1.0, 0.3, 0.3)</defaultLabelColor>
     <isBad>false</isBad>
@@ -389,11 +211,12 @@
     <makesSickThought>false</makesSickThought>
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
-    <displayWound>false</displayWound>
+    <displayWound>true</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
         <minSeverity>0.01</minSeverity>
+        <label>transformed</label>
         <statOffsets>
           <MeleeHitChance>20</MeleeHitChance>
           <MeleeDodgeChance>25</MeleeDodgeChance>
@@ -413,7 +236,6 @@
           <IncomingDamageFactor>0.75</IncomingDamageFactor>
           <StaggerDurationFactor>0.5</StaggerDurationFactor>
         </statFactors>
-        <becomeVisible>false</becomeVisible>
         <capMods>
           <li>
             <capacity>Consciousness</capacity>
@@ -436,11 +258,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Sin Devil Trigger Transformation -->
   <HediffDef>
     <defName>DMC_SinDevilTrigger</defName>
     <label>sin devil trigger</label>
-    <description>Sin Devil Trigger transformation active. Ultimate demonic power unleashed transcending all mortal limitations. Massive combat enhancements, extreme regeneration, near-immunity to damage, terrain immunity, and supernatural dominance. The user becomes a living weapon of divine destruction.</description>
+    <description>Sin Devil Trigger transformation active. Ultimate demonic power unleashed transcending all mortal limitations.</description>
     <hediffClass>DMCAbilities.Hediff_SinDevilTrigger</hediffClass>
     <defaultLabelColor>(0.8, 0.1, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
@@ -448,11 +269,12 @@
     <makesSickThought>false</makesSickThought>
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
-    <displayWound>false</displayWound>
+    <displayWound>true</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <stages>
       <li>
         <minSeverity>0.01</minSeverity>
+        <label>ultimate form</label>
         <statOffsets>
           <MeleeHitChance>35</MeleeHitChance>
           <MeleeDodgeChance>50</MeleeDodgeChance>
@@ -475,7 +297,6 @@
           <StaggerDurationFactor>0.2</StaggerDurationFactor>
           <MoveSpeed>2.0</MoveSpeed>
         </statFactors>
-        <becomeVisible>false</becomeVisible>
         <capMods>
           <li>
             <capacity>Consciousness</capacity>
@@ -502,53 +323,10 @@
     </stages>
   </HediffDef>
 
-  <!-- Devil Trigger Ability Hediff (grants the ability to cast Devil Trigger) -->
-  <HediffDef>
-    <defName>DMC_DevilTriggerAbility</defName>
-    <label>devil trigger mastery</label>
-    <description>Knowledge of how to activate Devil Trigger transformation. Grants access to the Devil Trigger ability.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(1.0, 0.5, 0.5)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <initialSeverity>1.0</initialSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_DevilTrigger</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Sin Devil Trigger Ability Hediff (grants the ability to cast Sin Devil Trigger) -->
-  <HediffDef>
-    <defName>DMC_SinDevilTriggerAbility</defName>
-    <label>sin devil trigger mastery</label>
-    <description>Ultimate knowledge of demonic transformation. Grants access to the Sin Devil Trigger ability.</description>
-    <hediffClass>HediffWithComps</hediffClass>
-    <defaultLabelColor>(0.8, 0.3, 1.0)</defaultLabelColor>
-    <isBad>false</isBad>
-    <chronic>true</chronic>
-    <everCurableByItem>false</everCurableByItem>
-    <makesSickThought>false</makesSickThought>
-    <displayWound>false</displayWound>
-    <maxSeverity>1.0</maxSeverity>
-    <initialSeverity>1.0</initialSeverity>
-    <comps>
-      <li Class="HediffCompProperties_GiveAbility">
-        <abilityDef>DMC_SinDevilTrigger</abilityDef>
-      </li>
-    </comps>
-  </HediffDef>
-
-  <!-- Devil Trigger Regeneration -->
   <HediffDef>
     <defName>DMC_DevilTriggerRegen</defName>
     <label>demonic regeneration</label>
-    <description>Rapid healing powered by demonic energy. Wounds close quickly and vitality is restored continuously.</description>
+    <description>Rapid healing powered by demonic energy.</description>
     <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(0.4, 1.0, 0.4)</defaultLabelColor>
     <isBad>false</isBad>
@@ -556,7 +334,7 @@
     <makesSickThought>false</makesSickThought>
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
-    <displayWound>false</displayWound>
+    <displayWound>true</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <initialSeverity>1.0</initialSeverity>
     <stages>
@@ -584,16 +362,15 @@
       <li Class="HediffCompProperties_HealPermanentWounds">
       </li>
       <li Class="HediffCompProperties_Disappears">
-        <disappearsAfterTicks>1800</disappearsAfterTicks> <!-- 30 seconds -->
+        <disappearsAfterTicks>1800</disappearsAfterTicks>
       </li>
     </comps>
   </HediffDef>
 
-  <!-- Sin Devil Trigger Regeneration -->
   <HediffDef>
     <defName>DMC_SinDevilTriggerRegen</defName>
     <label>ultimate regeneration</label>
-    <description>Divine-level healing that approaches immortality. Even the most grievous wounds heal almost instantly, and the body transcends normal biological limitations.</description>
+    <description>Divine-level healing that approaches immortality.</description>
     <hediffClass>HediffWithComps</hediffClass>
     <defaultLabelColor>(0.4, 0.9, 1.0)</defaultLabelColor>
     <isBad>false</isBad>
@@ -601,7 +378,7 @@
     <makesSickThought>false</makesSickThought>
     <lethalSeverity>-1</lethalSeverity>
     <tendable>false</tendable>
-    <displayWound>false</displayWound>
+    <displayWound>true</displayWound>
     <maxSeverity>1.0</maxSeverity>
     <initialSeverity>1.0</initialSeverity>
     <stages>
@@ -633,7 +410,7 @@
       <li Class="HediffCompProperties_HealPermanentWounds">
       </li>
       <li Class="HediffCompProperties_Disappears">
-        <disappearsAfterTicks>3600</disappearsAfterTicks> <!-- 60 seconds -->
+        <disappearsAfterTicks>3600</disappearsAfterTicks>
       </li>
     </comps>
   </HediffDef>

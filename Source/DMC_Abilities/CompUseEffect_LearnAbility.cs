@@ -11,29 +11,51 @@ namespace DMCAbilities
         {
             base.DoEffect(usedBy);
 
-            if (usedBy == null || Props.hediffToAdd == null)
+            if (usedBy == null)
                 return;
 
-            // Check if pawn already has this hediff
-            if (usedBy.health.hediffSet.HasHediff(Props.hediffToAdd))
+            // NEW SYSTEM: Grant ability directly without hediff
+            if (!string.IsNullOrEmpty(Props.abilityDefName))
             {
-                Messages.Message("DMC_AlreadyKnowsAbility".Translate(usedBy.Name.ToStringShort, Props.hediffToAdd.label), 
-                    usedBy, MessageTypeDefOf.RejectInput, false);
+                if (!DMCAbilityUtility.TryUnlockAbility(usedBy, Props.abilityDefName, out string abilityLabel))
+                {
+                    Messages.Message("DMC_AlreadyKnowsAbility".Translate(usedBy.Name.ToStringShort, abilityLabel), 
+                        usedBy, MessageTypeDefOf.RejectInput, false);
+                    return;
+                }
+
+                // Success message
+                Messages.Message("DMC_LearnedAbility".Translate(usedBy.Name.ToStringShort, abilityLabel), 
+                    usedBy, MessageTypeDefOf.PositiveEvent, false);
+
+                // Add some XP to intellectual skill
+                if (usedBy.skills != null)
+                {
+                    usedBy.skills.Learn(SkillDefOf.Intellectual, 500f, false);
+                }
                 return;
             }
 
-            // Add the hediff that grants the ability
-            Hediff hediff = HediffMaker.MakeHediff(Props.hediffToAdd, usedBy);
-            usedBy.health.AddHediff(hediff);
-
-            // Success message
-            Messages.Message("DMC_LearnedAbility".Translate(usedBy.Name.ToStringShort, Props.hediffToAdd.label), 
-                usedBy, MessageTypeDefOf.PositiveEvent, false);
-
-            // Add some XP to intellectual skill
-            if (usedBy.skills != null)
+            // LEGACY FALLBACK: Old hediff system (kept for compatibility, but not used)
+            if (Props.hediffToAdd != null)
             {
-                usedBy.skills.Learn(SkillDefOf.Intellectual, 500f, false);
+                if (usedBy.health.hediffSet.HasHediff(Props.hediffToAdd))
+                {
+                    Messages.Message("DMC_AlreadyKnowsAbility".Translate(usedBy.Name.ToStringShort, Props.hediffToAdd.label), 
+                        usedBy, MessageTypeDefOf.RejectInput, false);
+                    return;
+                }
+
+                Hediff hediff = HediffMaker.MakeHediff(Props.hediffToAdd, usedBy);
+                usedBy.health.AddHediff(hediff);
+
+                Messages.Message("DMC_LearnedAbility".Translate(usedBy.Name.ToStringShort, Props.hediffToAdd.label), 
+                    usedBy, MessageTypeDefOf.PositiveEvent, false);
+
+                if (usedBy.skills != null)
+                {
+                    usedBy.skills.Learn(SkillDefOf.Intellectual, 500f, false);
+                }
             }
         }
 
@@ -43,6 +65,17 @@ namespace DMCAbilities
             if (!baseResult.Accepted)
                 return baseResult;
 
+            // NEW SYSTEM: Check if ability already known
+            if (!string.IsNullOrEmpty(Props.abilityDefName))
+            {
+                if (DMCAbilityUtility.HasAbility(p, Props.abilityDefName, out string abilityLabel))
+                {
+                    return "DMC_AlreadyKnowsAbility".Translate(p.Name.ToStringShort, abilityLabel);
+                }
+                return true;
+            }
+
+            // LEGACY FALLBACK
             if (Props.hediffToAdd == null)
             {
                 return "DMC_InvalidSkillbook".Translate();
@@ -59,7 +92,8 @@ namespace DMCAbilities
 
     public class CompProperties_UseEffect_LearnAbility : CompProperties_UseEffect
     {
-        public HediffDef hediffToAdd;
+        public HediffDef hediffToAdd; // Legacy - kept for compatibility
+        public string abilityDefName; // NEW - direct ability unlock
 
         public CompProperties_UseEffect_LearnAbility()
         {

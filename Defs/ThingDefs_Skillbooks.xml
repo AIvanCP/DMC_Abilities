@@ -34,7 +34,7 @@ The Stinger is a devastating melee ability that allows the user to instantly tel
     </thingCategories>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_StingerAbility</hediffToAdd>
+        <abilityDefName>DMC_Stinger</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -80,7 +80,7 @@ The Judgement Cut is a ranged area attack that creates multiple concentrated dim
     </thingCategories>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_JudgementCutAbility</hediffToAdd>
+        <abilityDefName>DMC_JudgementCut</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -126,7 +126,7 @@ The Drive creates 1-3 energy projectiles that travel in a straight line, passing
     </thingCategories>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_DriveAbility</hediffToAdd>
+        <abilityDefName>DMC_Drive</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -171,7 +171,7 @@ The Void Slash is a powerful melee ability that creates a cone of void energy in
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_VoidSlashAbility</hediffToAdd>
+        <abilityDefName>DMC_VoidSlash</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -215,7 +215,7 @@ The Gun Stinger allows the user to instantly teleport behind an enemy and fire t
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_GunStingerHediff</hediffToAdd>
+        <abilityDefName>DMC_GunStinger</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -260,7 +260,7 @@ The Heavy Rain is a devastating area-of-effect ability that summons multiple spe
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_HeavyRainAbility</hediffToAdd>
+        <abilityDefName>DMC_HeavyRain</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -304,7 +304,7 @@ The Rain Bullet allows the user to leap through the air toward a target, continu
     </thingCategories>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_RainBulletAbility</hediffToAdd>
+        <abilityDefName>DMC_RainBullet</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -353,7 +353,7 @@ The Rapid Slash allows the user to dash to an enemy and unleash 3-8 increasingly
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_RapidSlashAbility</hediffToAdd>
+        <abilityDefName>DMC_RapidSlash</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -401,7 +401,7 @@ Only those proficient with ranged weapons can harness this devastating power. Th
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_RedHotNightAbility</hediffToAdd>
+        <abilityDefName>DMC_RedHotNight</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseJob</useJob>
@@ -450,7 +450,7 @@ The Devil Trigger dramatically increases damage output, healing factor, and move
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_DevilTriggerAbility</hediffToAdd>
+        <abilityDefName>DMC_DevilTrigger</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
@@ -499,7 +499,7 @@ The Sin Devil Trigger represents the pinnacle of demonic power, providing massiv
     </tradeTags>
     <comps>
       <li Class="DMCAbilities.CompProperties_UseEffect_LearnAbility">
-        <hediffToAdd>DMC_SinDevilTriggerAbility</hediffToAdd>
+        <abilityDefName>DMC_SinDevilTrigger</abilityDefName>
       </li>
       <li Class="CompProperties_Usable">
         <useJob>UseItem</useJob>
