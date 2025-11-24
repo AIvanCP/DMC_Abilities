@@ -15,8 +15,8 @@ namespace DMCAbilities
         private int ticksSinceLastDamage = 0;
         private int ticksSinceLastKill = 0;
 
-        // Make hediff invisible in health tab alerts and severity bars
-        public override bool Visible => false;
+        // Make hediff VISIBLE in health tab when Devil Trigger is active
+        public override bool Visible => true;
 
         public override void PostAdd(DamageInfo? dinfo)
         {
@@ -166,8 +166,8 @@ namespace DMCAbilities
         private int ticksSinceLastDamage = 0;
         private int ticksSinceLastKill = 0;
 
-        // Make hediff invisible in health tab alerts and severity bars
-        public override bool Visible => false;
+        // Make hediff VISIBLE in health tab when Sin Devil Trigger is active
+        public override bool Visible => true;
 
         public override void PostAdd(DamageInfo? dinfo)
         {
