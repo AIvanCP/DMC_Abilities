@@ -1,6 +1,7 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using Verse.AI;
 using System;
 using UnityEngine;
 
@@ -294,7 +295,91 @@ namespace DMCAbilities
         }
     }
 
-    // Patch for terrain immunity in Sin Devil Trigger - using a different approach
+    // Patch for terrain immunity - DT and SDT ignore terrain movement penalties
+    [HarmonyPatch(typeof(Pawn_PathFollower), "CostToMoveIntoCell", new Type[] { typeof(Pawn), typeof(IntVec3) })]
+    public static class Pawn_PathFollower_CostToMoveIntoCell_Patch
+    {
+        public static bool Prepare()
+        {
+            // Only patch if the method exists (mod compatibility)
+            var method = typeof(Pawn_PathFollower).GetMethod("CostToMoveIntoCell", 
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            return method != null;
+        }
+
+        public static void Postfix(Pawn pawn, IntVec3 c, ref int __result)
+        {
+            try
+            {
+                // Null safety checks
+                if (pawn?.health?.hediffSet == null) return;
+
+                // Check if pawn has Devil Trigger or Sin Devil Trigger active
+                bool hasDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
+                bool hasSinDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+
+                if (hasDevilTrigger || hasSinDevilTrigger)
+                {
+                    // Devil Trigger/SDT ignore terrain costs - treat all terrain as normal ground
+                    // Base movement cost for normal terrain is typically around 12-13 ticks
+                    // We set it low to bypass mud, snow, marsh, etc.
+                    __result = 12; // Standard movement cost, ignoring terrain penalties
+                    
+                    if (Prefs.DevMode && Find.TickManager.TicksGame % 600 == 0) // Log once every 10 seconds in dev mode
+                    {
+                        Log.Message($"[DMC Abilities] {pawn.Name?.ToStringShort} ignoring terrain cost at {c} (DT/SDT active)");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in terrain immunity patch: {ex.Message}");
+            }
+        }
+    }
+
+    // Additional patch for pathfinding cost calculation to ensure terrain immunity works properly
+    [HarmonyPatch(typeof(PathFinder), "GetBuildingCost")]
+    public static class PathFinder_GetBuildingCost_Patch
+    {
+        public static bool Prepare()
+        {
+            // Only patch if PathFinder exists and has the method
+            var method = typeof(PathFinder).GetMethod("GetBuildingCost",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return method != null;
+        }
+
+        public static void Postfix(ref int __result, Pawn pawn)
+        {
+            try
+            {
+                // If pawn has DT/SDT, reduce building movement costs as well
+                if (pawn?.health?.hediffSet != null)
+                {
+                    bool hasDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
+                    bool hasSinDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+
+                    if (hasSinDevilTrigger)
+                    {
+                        // SDT can move through buildings more easily (like phasing)
+                        __result = Math.Min(__result, 20);
+                    }
+                    else if (hasDevilTrigger)
+                    {
+                        // DT gets reduced building cost
+                        __result = Math.Min(__result, 30);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[DMC Abilities] Non-critical error in building cost patch: {ex.Message}");
+            }
+        }
+    }
+
+    // Patch for enhanced movement speed during transformations
     [HarmonyPatch(typeof(Pawn), "TicksPerMoveCardinal", MethodType.Getter)]
     public static class Pawn_TicksPerMoveCardinal_Patch
     {
@@ -302,16 +387,20 @@ namespace DMCAbilities
         {
             try
             {
-                // Check if pawn has Sin Devil Trigger active
-                if (__instance?.health?.hediffSet?.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_SinDevilTrigger) != null)
+                // Check if pawn has transformations active
+                if (__instance?.health?.hediffSet == null) return;
+
+                bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+                
+                if (hasSinDevilTrigger)
                 {
                     // SDT provides super fast movement regardless of terrain
-                    __result = Math.Min(__result, 13f); // Fast movement (13 ticks = very fast)
+                    __result = Math.Min(__result, 10f); // Very fast movement (lower = faster)
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning($"[DMC Abilities] Non-critical error in SDT movement: {ex.Message}");
+                Log.Warning($"[DMC Abilities] Non-critical error in cardinal movement: {ex.Message}");
             }
         }
     }
@@ -323,16 +412,20 @@ namespace DMCAbilities
         {
             try
             {
-                // Check if pawn has Sin Devil Trigger active
-                if (__instance?.health?.hediffSet?.GetFirstHediffOfDef(DMC_HediffDefOf.DMC_SinDevilTrigger) != null)
+                // Check if pawn has transformations active
+                if (__instance?.health?.hediffSet == null) return;
+
+                bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+                
+                if (hasSinDevilTrigger)
                 {
-                    // SDT provides super fast movement regardless of terrain
-                    __result = Math.Min(__result, 18f); // Fast diagonal movement
+                    // SDT provides super fast diagonal movement
+                    __result = Math.Min(__result, 14f); // Fast diagonal movement
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning($"[DMC Abilities] Non-critical error in SDT diagonal movement: {ex.Message}");
+                Log.Warning($"[DMC Abilities] Non-critical error in diagonal movement: {ex.Message}");
             }
         }
     }
