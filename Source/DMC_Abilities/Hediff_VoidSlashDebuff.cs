@@ -28,10 +28,11 @@ namespace DMCAbilities
             base.Tick();
             
             // Null safety checks
-            if (pawn == null || pawn.Dead || pawn.health == null)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (pawn == null || pawn.Dead || pawn.Destroyed || !pawn.Spawned || pawn.health == null)
             {
                 // Remove the hediff if pawn is invalid
-                if (pawn?.health != null)
+                if (pawn?.health != null && !pawn.Destroyed)
                     pawn.health.RemoveHediff(this);
                 return;
             }
@@ -53,7 +54,8 @@ namespace DMCAbilities
 
         private void ApplyBleedingDamage()
         {
-            if (pawn?.health == null || pawn.Dead)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (pawn?.health == null || pawn.Dead || pawn.Destroyed || !pawn.Spawned)
                 return;
 
             DamageInfo bleedDamage = new DamageInfo(

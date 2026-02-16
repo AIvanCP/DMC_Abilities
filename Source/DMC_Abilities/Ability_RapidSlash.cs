@@ -203,7 +203,8 @@ namespace DMCAbilities
 
         private void PerformDashSlash(Thing target)
         {
-            if (target == null || target.Destroyed) return;
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Destroyed || !target.Spawned) return;
 
             // Apply friendly fire protection for pawns
             if (target is Pawn pawnTarget && DMCAbilitiesMod.settings?.disableFriendlyFire == true && 

@@ -120,6 +120,9 @@ namespace DMCAbilities
             
             foreach (Thing thing in GenRadial.RadialDistinctThingsAround(center, map, radius, true))
             {
+                // Enhanced null safety for endgame/heavy mod compatibility
+                if (thing == null || thing.Destroyed || !thing.Spawned) continue;
+                
                 // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
                 if ((thing is Pawn targetPawn && targetPawn != CasterPawn) ||
                     (thing.def.building?.IsTurret == true))

@@ -73,8 +73,8 @@ namespace DMCAbilities
 
         private void ApplyStingerDamage(Pawn caster, Pawn target)
         {
-            // Null safety checks
-            if (caster == null || target == null || target.Dead || target.Map == null)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (caster == null || target == null || target.Dead || target.Destroyed || !target.Spawned || target.Map == null)
                 return;
 
             // Check if Stinger is enabled in settings
@@ -261,7 +261,8 @@ namespace DMCAbilities
 
         private void PerformStingerStrike(Pawn target)
         {
-            if (target == null || target.Dead) return;
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Dead || target.Destroyed || !target.Spawned) return;
 
             // Apply friendly fire protection
             if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 

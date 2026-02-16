@@ -108,8 +108,8 @@ namespace DMCAbilities
 
         private void ApplyVoidSlashEffects(Thing target)
         {
-            // Null safety checks
-            if (target == null || target.Destroyed || target.Map == null)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Destroyed || !target.Spawned || target.Map == null)
                 return;
 
             // Apply friendly fire protection for pawns

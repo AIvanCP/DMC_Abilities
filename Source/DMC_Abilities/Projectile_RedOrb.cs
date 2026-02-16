@@ -250,7 +250,8 @@ namespace DMCAbilities
                 List<Thing> things = new List<Thing>(originalThings);
                 foreach (Thing thing in things)
                 {
-                    if (!(thing is Pawn pawn) || pawn.Dead || pawn.Destroyed) continue;
+                    // Enhanced null safety for endgame/heavy mod compatibility
+                    if (!(thing is Pawn pawn) || pawn.Dead || pawn.Destroyed || !pawn.Spawned) continue;
                     
                     // Apply friendly fire protection
                     if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
@@ -276,7 +277,11 @@ namespace DMCAbilities
                             weapon: null // Shows ability name
                         );
                         
-                        pawn.TakeDamage(damageInfo);
+                        // Final safety check before damage
+                        if (pawn.Spawned && !pawn.Destroyed)
+                        {
+                            pawn.TakeDamage(damageInfo);
+                        }
                     }
                 }
             }
@@ -295,7 +300,8 @@ namespace DMCAbilities
                 List<Thing> things = new List<Thing>(originalThings);
                 foreach (Thing thing in things)
                 {
-                    if (!(thing is Pawn pawn) || pawn.Dead || pawn.Destroyed) continue;
+                    // Enhanced null safety for endgame/heavy mod compatibility
+                    if (!(thing is Pawn pawn) || pawn.Dead || pawn.Destroyed || !pawn.Spawned) continue;
                     
                     // Check friendly fire settings
                     if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
@@ -403,6 +409,13 @@ namespace DMCAbilities
             // Apply damage every 20 ticks (1/3 second)
             if (remainingTicks % 20 == 0 && burnSource != null && damagePerTick > 0)
             {
+                // Enhanced null safety for endgame/heavy mod compatibility
+                if (this.pawn == null || this.pawn.Dead || this.pawn.Destroyed || !this.pawn.Spawned)
+                {
+                    this.pawn.health.RemoveHediff(this);
+                    return;
+                }
+                
                 // Create damage info
                 DamageInfo burnDamage = new DamageInfo(
                     def: DamageDefOf.Burn,

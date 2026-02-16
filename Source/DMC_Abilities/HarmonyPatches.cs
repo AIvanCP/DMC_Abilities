@@ -17,8 +17,11 @@ namespace DMCAbilities
                 var harmony = new Harmony("dmcabilities.rimworld.devilmaycry");
                 harmony.PatchAll();
                 
-                // Log successful patching with version info for better mod compatibility debugging
-                Log.Message("[DMC Abilities] Harmony patches applied successfully. Version 2.0.0 - Enhanced mod compatibility.");
+                // Log only in dev mode to reduce log spam
+                if (Prefs.DevMode)
+                {
+                    Log.Message("[DMC Abilities] Harmony patches applied successfully. Version 2.0.0");
+                }
             }
             catch (Exception ex)
             {
@@ -46,14 +49,7 @@ namespace DMCAbilities
                 if (__instance?.pawn == null || def?.defName == null) return;
                 
                 // Only track our abilities to avoid interference with other ability mods
-                if (def.defName.StartsWith("DMC_"))
-                {
-                    // Clean logging - only if debug mode is enabled
-                    if (Prefs.DevMode)
-                    {
-                        Log.Message($"[DMC Abilities] {__instance.pawn.Name?.ToStringShort ?? "Pawn"} gained: {def.defName}");
-                    }
-                }
+                // Silent tracking - no logging to reduce spam
             }
             catch (Exception ex)
             {
@@ -182,8 +178,11 @@ namespace DMCAbilities
         {
             try
             {
+                // Null safety and destroy check for endgame/heavy mod compatibility
+                if (__instance == null || __instance.Destroyed || __result == null) return;
+                
                 // Handle cooldown reduction for Devil Trigger abilities
-                if (dinfo.Instigator is Pawn attacker && __result.totalDamageDealt > 0)
+                if (dinfo.Instigator is Pawn attacker && attacker?.Spawned == true && __result.totalDamageDealt > 0)
                 {
                     ReduceDevilTriggerCooldowns(attacker, 0.1f); // 0.1 seconds per damage dealt
                 }
@@ -225,8 +224,11 @@ namespace DMCAbilities
         {
             try
             {
+                // Null safety for heavy mod compatibility
+                if (__instance == null) return;
+                
                 // Handle cooldown reduction when a pawn is killed by Devil Trigger user
-                if (dinfo.HasValue && dinfo.Value.Instigator is Pawn killer)
+                if (dinfo.HasValue && dinfo.Value.Instigator is Pawn killer && killer?.Spawned == true)
                 {
                     ReduceDevilTriggerCooldowns(killer, 0.5f); // 0.5 seconds per kill
                 }
@@ -296,23 +298,18 @@ namespace DMCAbilities
     }
 
     // Patch for terrain immunity - DT and SDT ignore terrain movement penalties
-    [HarmonyPatch(typeof(Pawn_PathFollower), "CostToMoveIntoCell", new Type[] { typeof(Pawn), typeof(IntVec3) })]
+    // This patches the static method that calculates movement costs
+    [HarmonyPatch(typeof(Pawn_PathFollower))]
+    [HarmonyPatch("CostToMoveIntoCell")]
+    [HarmonyPatch(new Type[] { typeof(Pawn), typeof(IntVec3) })]
     public static class Pawn_PathFollower_CostToMoveIntoCell_Patch
     {
-        public static bool Prepare()
-        {
-            // Only patch if the method exists (mod compatibility)
-            var method = typeof(Pawn_PathFollower).GetMethod("CostToMoveIntoCell", 
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            return method != null;
-        }
-
         public static void Postfix(Pawn pawn, IntVec3 c, ref int __result)
         {
             try
             {
                 // Null safety checks
-                if (pawn?.health?.hediffSet == null) return;
+                if (pawn?.health?.hediffSet == null || pawn.Map == null) return;
 
                 // Check if pawn has Devil Trigger or Sin Devil Trigger active
                 bool hasDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
@@ -320,14 +317,16 @@ namespace DMCAbilities
 
                 if (hasDevilTrigger || hasSinDevilTrigger)
                 {
-                    // Devil Trigger/SDT ignore terrain costs - treat all terrain as normal ground
-                    // Base movement cost for normal terrain is typically around 12-13 ticks
-                    // We set it low to bypass mud, snow, marsh, etc.
-                    __result = 12; // Standard movement cost, ignoring terrain penalties
+                    // Override the cost to ignore terrain
+                    // Normal terrain base cost is around 12-13 ticks
+                    // We set it to the minimum to bypass all terrain penalties
+                    int baseCost = 12;
                     
-                    if (Prefs.DevMode && Find.TickManager.TicksGame % 600 == 0) // Log once every 10 seconds in dev mode
+                    // If the result is higher than base cost, it means terrain added penalties
+                    // We override it to just use base cost
+                    if (__result > baseCost)
                     {
-                        Log.Message($"[DMC Abilities] {pawn.Name?.ToStringShort} ignoring terrain cost at {c} (DT/SDT active)");
+                        __result = baseCost;
                     }
                 }
             }
@@ -338,7 +337,7 @@ namespace DMCAbilities
         }
     }
 
-    // Additional patch for pathfinding cost calculation to ensure terrain immunity works properly
+    // Additional patch for building movement costs
     [HarmonyPatch(typeof(PathFinder), "GetBuildingCost")]
     public static class PathFinder_GetBuildingCost_Patch
     {
@@ -379,7 +378,7 @@ namespace DMCAbilities
         }
     }
 
-    // Patch for enhanced movement speed during transformations
+    // Patch for enhanced movement speed during transformations - ignores terrain
     [HarmonyPatch(typeof(Pawn), "TicksPerMoveCardinal", MethodType.Getter)]
     public static class Pawn_TicksPerMoveCardinal_Patch
     {
@@ -391,11 +390,17 @@ namespace DMCAbilities
                 if (__instance?.health?.hediffSet == null) return;
 
                 bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+                bool hasDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
                 
                 if (hasSinDevilTrigger)
                 {
-                    // SDT provides super fast movement regardless of terrain
-                    __result = Math.Min(__result, 10f); // Very fast movement (lower = faster)
+                    // SDT: Ultra-fast movement, completely ignores terrain
+                    __result = 7f; // Extremely fast (lower = faster)
+                }
+                else if (hasDevilTrigger)
+                {
+                    // DT: Fast movement, mostly ignores terrain
+                    __result = Math.Min(__result, 10f);
                 }
             }
             catch (Exception ex)
@@ -416,11 +421,17 @@ namespace DMCAbilities
                 if (__instance?.health?.hediffSet == null) return;
 
                 bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
+                bool hasDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
                 
                 if (hasSinDevilTrigger)
                 {
-                    // SDT provides super fast diagonal movement
-                    __result = Math.Min(__result, 14f); // Fast diagonal movement
+                    // SDT: Ultra-fast diagonal movement, completely ignores terrain
+                    __result = 10f; // Extremely fast diagonal
+                }
+                else if (hasDevilTrigger)
+                {
+                    // DT: Fast diagonal movement, mostly ignores terrain
+                    __result = Math.Min(__result, 15f);
                 }
             }
             catch (Exception ex)

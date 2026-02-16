@@ -73,8 +73,8 @@ namespace DMCAbilities
 
         private void ApplyGunStingerDamage(Pawn caster, Pawn target)
         {
-            // Null safety checks
-            if (caster == null || target == null || target.Dead || target.Map == null)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (caster == null || target == null || target.Dead || target.Destroyed || !target.Spawned || target.Map == null)
                 return;
 
             // Check if Gun Stinger is enabled in settings
@@ -158,8 +158,8 @@ namespace DMCAbilities
             // Apply reduced damage to pawns in blast area
             foreach (Pawn pawn in pawnsInRange)
             {
-                // Additional null safety for each pawn
-                if (pawn == null || pawn.Dead || pawn.Map == null)
+                // Enhanced null safety for endgame/heavy mod compatibility
+                if (pawn == null || pawn.Dead || pawn.Destroyed || !pawn.Spawned || pawn.Map == null)
                     continue;
 
                 // Calculate distance falloff (closer = more damage)
@@ -448,7 +448,8 @@ namespace DMCAbilities
 
         private void PerformGunStingerShot(Pawn target)
         {
-            if (target == null || target.Dead) return;
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Dead || target.Destroyed || !target.Spawned) return;
 
             // Show Gun Stinger callout when performing the shot
             DMCSpeechUtility.TryShowCallout(pawn, "DMC_GunStingerActivation", 0.3f);
@@ -519,6 +520,9 @@ namespace DMCAbilities
                 
                 foreach (Thing thing in thingsInCell)
                 {
+                    // Enhanced null safety for endgame/heavy mod compatibility
+                    if (thing == null || thing.Destroyed || !thing.Spawned) continue;
+                    
                     // Target pawns (animals, mechs, humanoids) and turrets, but not other buildings
                     if ((thing is Pawn targetPawn && targetPawn != pawn && !targetPawn.Dead) ||
                         (thing.def.building?.IsTurret == true))

@@ -440,7 +440,7 @@ namespace DMCAbilities
             spectralShock.Severity = 1.0f;
             target.health.AddHediff(spectralShock);
 
-            Log.Message($"Applied Spectral Shock to {target.Label}");
+            // Debug logging removed for cleaner logs
         }
     }
 }

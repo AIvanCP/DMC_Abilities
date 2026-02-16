@@ -53,7 +53,8 @@ namespace DMCAbilities
 
         private void ApplyRainBulletDamage(Pawn target)
         {
-            if (target == null || target.Dead || casterPawn == null)
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Dead || target.Destroyed || !target.Spawned || casterPawn == null)
                 return;
 
             // Apply friendly fire protection
@@ -71,7 +72,11 @@ namespace DMCAbilities
                 var gunDamage = damageInfo.Value;
 
                 // Each bullet applies full damage independently (continuous damage)
-                target.TakeDamage(gunDamage);
+                // Final safety check before damage
+                if (target.Spawned && !target.Destroyed)
+                {
+                    target.TakeDamage(gunDamage);
+                }
 
                 // 10% chance to apply stagger effect per bullet
                 if (Rand.Chance(0.1f))

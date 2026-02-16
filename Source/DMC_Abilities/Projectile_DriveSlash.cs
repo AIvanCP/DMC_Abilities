@@ -51,8 +51,9 @@ namespace DMCAbilities
 
         private void ApplyDriveImpact(Pawn target)
         {
-            if (target == null || target.Dead || target == launcher || hitPawns.Contains(target))
-                return; // Don't hit null, dead, same pawn twice or the caster
+            // Enhanced null safety for endgame/heavy mod compatibility
+            if (target == null || target.Dead || target.Destroyed || !target.Spawned || target == launcher || hitPawns.Contains(target))
+                return; // Don't hit invalid, dead, destroyed, despawned, or already hit targets
 
             // Apply friendly fire protection
             if (DMCAbilitiesMod.settings?.disableFriendlyFire == true && 
