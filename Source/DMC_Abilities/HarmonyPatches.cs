@@ -304,7 +304,7 @@ namespace DMCAbilities
     [HarmonyPatch(new Type[] { typeof(Pawn), typeof(IntVec3) })]
     public static class Pawn_PathFollower_CostToMoveIntoCell_Patch
     {
-        public static void Postfix(Pawn pawn, IntVec3 c, ref int __result)
+        public static void Postfix(Pawn pawn, IntVec3 c, ref float __result)
         {
             try
             {
@@ -317,17 +317,9 @@ namespace DMCAbilities
 
                 if (hasDevilTrigger || hasSinDevilTrigger)
                 {
-                    // Override the cost to ignore terrain
-                    // Normal terrain base cost is around 12-13 ticks
-                    // We set it to the minimum to bypass all terrain penalties
-                    int baseCost = 12;
-                    
-                    // If the result is higher than base cost, it means terrain added penalties
-                    // We override it to just use base cost
-                    if (__result > baseCost)
-                    {
-                        __result = baseCost;
-                    }
+                    // Override terrain cost completely - like flying pawns
+                    // Return the absolute minimum to ignore ALL terrain penalties (mud, water, etc.)
+                    __result = 1f; // Minimum movement cost, ignores all terrain
                 }
             }
             catch (Exception ex)

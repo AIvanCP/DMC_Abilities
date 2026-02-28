@@ -23,26 +23,16 @@ namespace DMCAbilities
     [DefOf]
     public static class DMC_HediffDefOf
     {
-        public static HediffDef DMC_StingerAbility;
-        public static HediffDef DMC_JudgementCutAbility;
-        public static HediffDef DMC_DriveAbility;
+        // Removed unused ability mastery hediffs - only keep hediffs that actually exist in XML
         public static HediffDef DMC_DriveBurn;
-        public static HediffDef DMC_VoidSlashAbility;
         public static HediffDef DMC_VoidSlashDebuff;
-        public static HediffDef DMC_GunStingerHediff;
-        public static HediffDef DMC_HeavyRainAbility;
-        public static HediffDef DMC_RainBulletAbility;
-        public static HediffDef DMC_RapidSlashAbility;
         public static HediffDef DMC_SpectralWound;
         public static HediffDef DMC_SpectralStun;
         public static HediffDef DMC_SpectralShock;
         public static HediffDef DMC_Stagger;
-        public static HediffDef DMC_RedHotNightAbility;
         public static HediffDef DMC_RedHotBurn;
         public static HediffDef DMC_DevilTrigger;
         public static HediffDef DMC_SinDevilTrigger;
-        public static HediffDef DMC_DevilTriggerAbility;
-        public static HediffDef DMC_SinDevilTriggerAbility;
 
         static DMC_HediffDefOf()
         {
