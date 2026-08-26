@@ -226,10 +226,19 @@
           <ArmorRating_Heat>0.20</ArmorRating_Heat>
           <PainShockThreshold>0.30</PainShockThreshold>
           <InjuryHealingFactor>3.0</InjuryHealingFactor>
+          <!-- Demonic blood: poison and weather stop mattering -->
+          <ToxicResistance>1.0</ToxicResistance>
+          <ToxicEnvironmentResistance>1.0</ToxicEnvironmentResistance>
+          <ComfyTemperatureMin>-60</ComfyTemperatureMin>
+          <ComfyTemperatureMax>60</ComfyTemperatureMax>
         </statOffsets>
         <statFactors>
           <MeleeDamageFactor>1.5</MeleeDamageFactor>
-          <RangedDamageFactor>1.3</RangedDamageFactor>
+          <!-- NOTE: RangedDamageFactor is NOT a vanilla StatDef. It was silently ignored
+               here, so the advertised ranged bonus never applied. It is now handled by
+               Thing_TakeDamage_DevilTriggerRanged_Patch in HarmonyPatches.cs. -->
+          <!-- <RangedDamageFactor>1.3</RangedDamageFactor> -->
+
           <AccuracyShort>1.3</AccuracyShort>
           <AccuracyMedium>1.3</AccuracyMedium>
           <AccuracyLong>1.2</AccuracyLong>
@@ -285,11 +294,21 @@
           <PainShockThreshold>0.60</PainShockThreshold>
           <InjuryHealingFactor>5.0</InjuryHealingFactor>
           <MentalBreakThreshold>-0.50</MentalBreakThreshold>
-          <PathAvoidGrid>-100</PathAvoidGrid>
+          <!-- Full demonic form: immune to poison, fallout and any temperature -->
+          <ToxicResistance>1.0</ToxicResistance>
+          <ToxicEnvironmentResistance>1.0</ToxicEnvironmentResistance>
+          <ComfyTemperatureMin>-200</ComfyTemperatureMin>
+          <ComfyTemperatureMax>200</ComfyTemperatureMax>
+          <!-- NOTE: PathAvoidGrid is NOT a vanilla StatDef - it was silently ignored.
+               Terrain immunity is handled by Pawn_PathFollower_CostToMoveIntoCell_Patch
+               in HarmonyPatches.cs. -->
+          <!-- <PathAvoidGrid>-100</PathAvoidGrid> -->
         </statOffsets>
         <statFactors>
           <MeleeDamageFactor>2.5</MeleeDamageFactor>
-          <RangedDamageFactor>2.0</RangedDamageFactor>
+          <!-- See DMC_DevilTrigger above: ranged bonus lives in HarmonyPatches.cs. -->
+          <!-- <RangedDamageFactor>2.0</RangedDamageFactor> -->
+
           <AccuracyShort>1.6</AccuracyShort>
           <AccuracyMedium>1.6</AccuracyMedium>
           <AccuracyLong>1.5</AccuracyLong>
@@ -413,6 +432,88 @@
         <disappearsAfterTicks>3600</disappearsAfterTicks>
       </li>
     </comps>
+  </HediffDef>
+
+
+  <!-- =================================================== demonic resurgence -->
+  <!--
+    The half-demon refusal to die.
+
+    preventsDeath is a stock vanilla field. Pawn_HealthTracker.ShouldBeDead() returns false
+    the moment hediffSet.HasPreventsDeath is true, which is the same lever the Deathless
+    gene pulls - so the pawn genuinely cannot die while this is on them, without anything
+    having to undo the wounds that were about to kill them.
+
+    That is exactly the DMC image: you do not get healed, you get back up still ruined.
+  -->
+  <HediffDef>
+    <defName>DMC_DemonicResurgence</defName>
+    <label>demonic resurgence</label>
+    <description>The demonic half has taken over to keep this body moving. It should not be standing.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.85, 0.15, 0.15)</defaultLabelColor>
+    <preventsDeath>true</preventsDeath>
+    <isBad>false</isBad>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>1800</disappearsAfterTicks>
+        <showRemainingTime>true</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_SeverityPerDay">
+        <severityPerDay>0</severityPerDay>
+      </li>
+    </comps>
+    <stages>
+      <li>
+        <statOffsets>
+          <IncomingDamageFactor>-0.35</IncomingDamageFactor>
+        </statOffsets>
+        <capMods>
+          <li>
+            <capacity>Consciousness</capacity>
+            <setMax>0.6</setMax>
+          </li>
+          <li>
+            <capacity>Moving</capacity>
+            <setMax>0.6</setMax>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- ================================================== resurgence exhaustion -->
+  <!--
+    The cooldown, expressed as a hediff rather than a timer field so it survives saving,
+    shows on the health tab, and cannot be triggered twice in one fight.
+  -->
+  <HediffDef>
+    <defName>DMC_ResurgenceExhaustion</defName>
+    <label>demonic exhaustion</label>
+    <description>The demonic half spent itself keeping this body alive and has nothing left for a while.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.5, 0.3, 0.3)</defaultLabelColor>
+    <isBad>true</isBad>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <maxSeverity>1.0</maxSeverity>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>120000</disappearsAfterTicks>
+        <showRemainingTime>true</showRemainingTime>
+      </li>
+    </comps>
+    <stages>
+      <li>
+        <capMods>
+          <li>
+            <capacity>Consciousness</capacity>
+            <offset>-0.15</offset>
+          </li>
+        </capMods>
+      </li>
+    </stages>
   </HediffDef>
 
 </Defs>

@@ -23,11 +23,51 @@ namespace DMCAbilities
     public static class DMCSpeechUtility
     {
         private static Dictionary<string, SpeechCategory> speechData;
-        
+
+        /// <summary>
+        /// Whether the XML categories have been folded in yet.
+        ///
+        /// The static constructor can run before DefDatabase is populated, so the defs are
+        /// overlaid lazily on first use instead. Once done, this never runs again.
+        /// </summary>
+        private static bool defsMerged;
+
         // Initialize speech data on first use
         static DMCSpeechUtility()
         {
             InitializeSpeechData();
+        }
+
+        /// <summary>
+        /// Lets DMC_SpeechDefs.xml actually win.
+        ///
+        /// The XML used to be inert: the node name was written without its namespace, so
+        /// RimWorld could not resolve the type and skipped all fourteen categories with a
+        /// "not a Def type" error. Callouts still worked, because the same phrases are also
+        /// hardcoded above - the file was a silent duplicate of the dictionary.
+        ///
+        /// Rather than delete it, the dictionary is now a BASELINE and any category def that
+        /// loads replaces it. Same phrases by default, so nothing changes in play, but the
+        /// list is editable without recompiling and other mods can add their own categories.
+        /// </summary>
+        private static void MergeSpeechDefs()
+        {
+            if (defsMerged)
+            {
+                return;
+            }
+            defsMerged = true;
+
+            List<DMC_SpeechCategoryDef> defs = DefDatabase<DMC_SpeechCategoryDef>.AllDefsListForReading;
+            for (int i = 0; i < defs.Count; i++)
+            {
+                DMC_SpeechCategoryDef def = defs[i];
+                if (def.phrases == null || def.phrases.Count == 0)
+                {
+                    continue;   // an empty category would silence a callout entirely
+                }
+                speechData[def.defName] = new SpeechCategory(def.phrases, def.color);
+            }
         }
         
         private static void InitializeSpeechData()
@@ -161,6 +201,8 @@ namespace DMCAbilities
         /// </summary>
         public static void ShowCallout(Pawn pawn, string categoryDefName)
         {
+            MergeSpeechDefs();
+
             if (!speechData.TryGetValue(categoryDefName, out SpeechCategory category))
             {
                 Log.Warning($"[DMC Abilities] Speech category '{categoryDefName}' not found");

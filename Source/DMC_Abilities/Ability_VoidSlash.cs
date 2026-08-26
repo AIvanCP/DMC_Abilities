@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -9,7 +9,7 @@ namespace DMCAbilities
 {
     public class Verb_VoidSlash : Verb_CastAbility
     {
-        private const float ConeAngleDegrees = 75f; // 75-degree cone (between 60-90°)
+        private const float ConeAngleDegrees = 75f; // 75-degree cone (between 60-90Â°)
         private const float MaxRange = 7f; // 7 cell range (between 6-8)
         private const float BaseDamage = 12f; // Increased damage for melee-only ability
 
@@ -193,6 +193,11 @@ namespace DMCAbilities
 
         public override void DrawHighlight(LocalTargetInfo target)
         {
+            // Draws the MAX CAST RANGE ring around the caster (plus the AoE ring from
+            // HighlightFieldRadiusAroundTarget and the target-cell highlight). Without this
+            // call only the custom drawing below ran, so the range circle never appeared.
+            base.DrawHighlight(target);
+
             // Draw the cone AoE preview in front of the caster
             if (CasterPawn != null && CasterPawn.Position.IsValid && target.IsValid)
             {

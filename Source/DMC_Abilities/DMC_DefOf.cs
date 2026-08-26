@@ -33,6 +33,8 @@ namespace DMCAbilities
         public static HediffDef DMC_RedHotBurn;
         public static HediffDef DMC_DevilTrigger;
         public static HediffDef DMC_SinDevilTrigger;
+        public static HediffDef DMC_DemonicResurgence;
+        public static HediffDef DMC_ResurgenceExhaustion;
 
         static DMC_HediffDefOf()
         {

@@ -297,8 +297,24 @@ namespace DMCAbilities
         }
     }
 
-    // Patch for terrain immunity - DT and SDT ignore terrain movement penalties
-    // This patches the static method that calculates movement costs
+    // Terrain immunity - DT and SDT ignore terrain movement penalties.
+    //
+    // Patches the STATIC overload Pawn_PathFollower.CostToMoveIntoCell(Pawn, IntVec3).
+    // The instance overload CostToMoveIntoCell(IntVec3) is a thin wrapper that delegates
+    // to this one, so patching the static method covers both call paths.
+    //
+    // NOTE: in RimWorld 1.6 this method returns FLOAT (it returned int in 1.4/1.5),
+    // hence "ref float __result".
+    //
+    // How the vanilla method builds its result:
+    //     cost  = pawn.TicksPerMoveCardinal / TicksPerMoveDiagonal   (pawn's own speed)
+    //           + pathGrid.CalculatedCostAt(...)                     (terrain pathCost)
+    //           + edifice.PathWalkCostFor(...)                       (doors etc.)
+    //           * moveSpeedFactorByTerrainTag                        (per-PawnKind terrain factor)
+    //
+    // MoveSpeed only shrinks the FIRST term - the terrain surcharge is added afterwards as
+    // flat ticks, which is why no amount of MoveSpeed removes it. So we subtract the
+    // surcharge instead: keep the pawn's own base move cost, drop everything stacked on top.
     [HarmonyPatch(typeof(Pawn_PathFollower))]
     [HarmonyPatch("CostToMoveIntoCell")]
     [HarmonyPatch(new Type[] { typeof(Pawn), typeof(IntVec3) })]
@@ -308,18 +324,24 @@ namespace DMCAbilities
         {
             try
             {
-                // Null safety checks
-                if (pawn?.health?.hediffSet == null || pawn.Map == null) return;
+                if (pawn?.health?.hediffSet == null || !pawn.Spawned) return;
 
-                // Check if pawn has Devil Trigger or Sin Devil Trigger active
-                bool hasDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
-                bool hasSinDevilTrigger = pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
-
-                if (hasDevilTrigger || hasSinDevilTrigger)
+                if (!pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger) &&
+                    !pawn.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger))
                 {
-                    // Override terrain cost completely - like flying pawns
-                    // Return the absolute minimum to ignore ALL terrain penalties (mud, water, etc.)
-                    __result = 1f; // Minimum movement cost, ignores all terrain
+                    return;
+                }
+
+                // Rebuild the pawn's own base cost for this step (cardinal vs diagonal),
+                // exactly the way vanilla picks it.
+                bool diagonal = c.x != pawn.Position.x && c.z != pawn.Position.z;
+                float baseCost = diagonal ? pawn.TicksPerMoveDiagonal : pawn.TicksPerMoveCardinal;
+
+                // Anything above the pawn's own move cost is terrain / edifice surcharge.
+                // Devils walk over mud, marsh and rubble as if it were clean floor.
+                if (__result > baseCost)
+                {
+                    __result = baseCost;
                 }
             }
             catch (Exception ex)
@@ -335,10 +357,12 @@ namespace DMCAbilities
     {
         public static bool Prepare()
         {
-            // Only patch if PathFinder exists and has the method
-            var method = typeof(PathFinder).GetMethod("GetBuildingCost",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return method != null;
+            // GetBuildingCost is private STATIC in current RimWorld, so the old
+            // (NonPublic | Instance) lookup always returned null and this patch was
+            // silently skipped. AccessTools searches every binding flag, so it finds
+            // the method whether it is static or instance - and still returns null
+            // (skipping the patch safely) if a future version removes it.
+            return AccessTools.Method(typeof(PathFinder), "GetBuildingCost") != null;
         }
 
         public static void Postfix(ref int __result, Pawn pawn)
@@ -370,65 +394,61 @@ namespace DMCAbilities
         }
     }
 
-    // Patch for enhanced movement speed during transformations - ignores terrain
-    [HarmonyPatch(typeof(Pawn), "TicksPerMoveCardinal", MethodType.Getter)]
-    public static class Pawn_TicksPerMoveCardinal_Patch
+    // Ranged damage bonus for Devil Trigger / Sin Devil Trigger.
+    //
+    // The hediff XML used to declare <RangedDamageFactor>, but NO SUCH STAT EXISTS in
+    // vanilla RimWorld (verified against every StatDef in Data\). RimWorld silently
+    // ignores unknown stats, so the advertised "+30% / +100% ranged damage" did nothing
+    // at all. Melee is fine - MeleeDamageFactor IS a real stat and stays in XML.
+    //
+    // This applies the ranged half in code instead, and deliberately only touches damage
+    // that came from a RANGED weapon so it can never double-dip with MeleeDamageFactor.
+    [HarmonyPatch(typeof(Thing), "TakeDamage")]
+    public static class Thing_TakeDamage_DevilTriggerRanged_Patch
     {
-        public static void Postfix(Pawn __instance, ref float __result)
-        {
-            try
-            {
-                // Check if pawn has transformations active
-                if (__instance?.health?.hediffSet == null) return;
+        // Matches the values quoted in the hediff descriptions.
+        private const float DevilTriggerRangedFactor = 1.3f;
+        private const float SinDevilTriggerRangedFactor = 2.0f;
 
-                bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
-                bool hasDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
-                
-                if (hasSinDevilTrigger)
-                {
-                    // SDT: Ultra-fast movement, completely ignores terrain
-                    __result = 7f; // Extremely fast (lower = faster)
-                }
-                else if (hasDevilTrigger)
-                {
-                    // DT: Fast movement, mostly ignores terrain
-                    __result = Math.Min(__result, 10f);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"[DMC Abilities] Non-critical error in cardinal movement: {ex.Message}");
-            }
+        public static bool Prepare()
+        {
+            return AccessTools.Method(typeof(Thing), "TakeDamage", new[] { typeof(DamageInfo) }) != null;
         }
-    }
 
-    [HarmonyPatch(typeof(Pawn), "TicksPerMoveDiagonal", MethodType.Getter)]
-    public static class Pawn_TicksPerMoveDiagonal_Patch
-    {
-        public static void Postfix(Pawn __instance, ref float __result)
+        public static void Prefix(Thing __instance, ref DamageInfo dinfo)
         {
             try
             {
-                // Check if pawn has transformations active
-                if (__instance?.health?.hediffSet == null) return;
+                if (__instance == null) return;
 
-                bool hasSinDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger);
-                bool hasDevilTrigger = __instance.health.hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger);
-                
-                if (hasSinDevilTrigger)
+                // Only ranged weapon damage. Melee (and unarmed, where Weapon is null)
+                // is already covered by the MeleeDamageFactor stat in HediffDefs.xml.
+                if (dinfo.Weapon == null || !dinfo.Weapon.IsRangedWeapon) return;
+
+                if (!(dinfo.Instigator is Pawn attacker)) return;
+                if (attacker == __instance) return; // never amplify self-damage
+                var hediffSet = attacker.health?.hediffSet;
+                if (hediffSet == null) return;
+
+                float factor;
+                if (hediffSet.HasHediff(DMC_HediffDefOf.DMC_SinDevilTrigger))
                 {
-                    // SDT: Ultra-fast diagonal movement, completely ignores terrain
-                    __result = 10f; // Extremely fast diagonal
+                    factor = SinDevilTriggerRangedFactor;
                 }
-                else if (hasDevilTrigger)
+                else if (hediffSet.HasHediff(DMC_HediffDefOf.DMC_DevilTrigger))
                 {
-                    // DT: Fast diagonal movement, mostly ignores terrain
-                    __result = Math.Min(__result, 15f);
+                    factor = DevilTriggerRangedFactor;
                 }
+                else
+                {
+                    return;
+                }
+
+                dinfo.SetAmount(dinfo.Amount * factor);
             }
             catch (Exception ex)
             {
-                Log.Warning($"[DMC Abilities] Non-critical error in diagonal movement: {ex.Message}");
+                Log.Warning($"[DMC Abilities] Non-critical error in ranged damage bonus: {ex.Message}");
             }
         }
     }

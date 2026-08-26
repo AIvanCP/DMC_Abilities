@@ -65,6 +65,13 @@ namespace DMCAbilities
                 "Transform to enhance combat abilities (long cooldown)");
             CreateAbilityToggle(listingStandard, "Sin Devil Trigger", ref settings.sinDevilTriggerEnabled,
                 "Ultimate transformation with terrain immunity (very long cooldown)");
+
+            listingStandard.GapLine();
+            listingStandard.CheckboxLabeled("Half-demon resurgence", ref settings.resurgenceEnabled,
+                "When something would kill a half-demon, roll for the demonic half to take over instead: death is cancelled, the pawn stays standing with every wound still on them, and they transform on the spot. Needs the Half-Demon mod; does nothing without it.");
+            listingStandard.Label("Resurgence chance: " + settings.resurgenceChance.ToStringPercent());
+            settings.resurgenceChance = Mathf.Round(
+                listingStandard.Slider(settings.resurgenceChance, 0f, 1f) * 100f) / 100f;
             
             // === DAMAGE MULTIPLIERS ===
             DrawSectionHeader(listingStandard, "Damage Multipliers");
@@ -278,6 +285,11 @@ namespace DMCAbilities
         public bool redHotNightEnabled = true;
         public bool devilTriggerEnabled = true;
         public bool sinDevilTriggerEnabled = true;
+
+        // Half-demon resurgence. Only ever fires on pawns carrying the DMC_DemonicBlood
+        // gene from the Half-Demon mod, so this does nothing without it.
+        public bool resurgenceEnabled = true;
+        public float resurgenceChance = 0.15f;
         
         // Performance settings
         public int maxRedHotOrbs = 20;
@@ -332,6 +344,8 @@ namespace DMCAbilities
             Scribe_Values.Look(ref redHotNightEnabled, "redHotNightEnabled", true);
             Scribe_Values.Look(ref devilTriggerEnabled, "devilTriggerEnabled", true);
             Scribe_Values.Look(ref sinDevilTriggerEnabled, "sinDevilTriggerEnabled", true);
+            Scribe_Values.Look(ref resurgenceEnabled, "resurgenceEnabled", true);
+            Scribe_Values.Look(ref resurgenceChance, "resurgenceChance", 0.15f);
             
             // Performance settings
             Scribe_Values.Look(ref maxRedHotOrbs, "maxRedHotOrbs", 20);

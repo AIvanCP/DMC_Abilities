@@ -5,9 +5,18 @@ using Verse;
 namespace DMCAbilities
 {
     /// <summary>
-    /// Minimal stub Def class to satisfy RimWorld's XML parser for DMC_SpeechDefs.xml.
-    /// This class is NOT used at runtime - all speech phrases are hardcoded in DMCSpeechUtility.
-    /// Exists only to prevent "Type DMC_SpeechCategoryDef not found" errors during mod loading.
+    /// One callout category: the lines a pawn can shout, and the colour they appear in.
+    ///
+    /// This used to be a stub that nothing read, because the XML wrote the node as
+    /// &lt;DMC_SpeechCategoryDef&gt; while the real type is DMCAbilities.DMC_SpeechCategoryDef.
+    /// RimWorld resolves def type names through Assembly.GetType, which needs the namespace
+    /// for anything outside its own built-in list, so every category was skipped with a
+    /// "not a Def type" error. Callouts kept working only because DMCSpeechUtility also
+    /// hardcodes the same phrases.
+    ///
+    /// Both halves are fixed now: the XML is namespace-qualified, and DMCSpeechUtility
+    /// treats its hardcoded table as a baseline that any loaded def overrides. Editing the
+    /// XML changes what pawns say, with no recompile.
     /// </summary>
     public class DMC_SpeechCategoryDef : Def
     {

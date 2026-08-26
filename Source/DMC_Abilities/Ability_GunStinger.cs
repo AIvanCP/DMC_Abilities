@@ -1,4 +1,4 @@
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -257,6 +257,11 @@ namespace DMCAbilities
 
         public override void DrawHighlight(LocalTargetInfo target)
         {
+            // Draws the MAX CAST RANGE ring around the caster (plus the AoE ring from
+            // HighlightFieldRadiusAroundTarget and the target-cell highlight). Without this
+            // call only the custom drawing below ran, so the range circle never appeared.
+            base.DrawHighlight(target);
+
             // Draw the blast cone area behind the target
             if (target.IsValid && target.Pawn != null && CasterPawn != null)
             {

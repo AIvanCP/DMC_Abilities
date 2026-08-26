@@ -98,6 +98,36 @@ Both transformations feature **combat-responsive cooldowns**:
 - ✅ **Harmony Integration** - Non-intrusive patches for maximum compatibility
 - ✅ **Clean Logging** - Minimal debug output to preserve log readability
 
+## Half-Demon integration
+
+If the **Half-Demon** mod (`AIvanCP.halfdemon`) is also installed, one extra feature turns
+on: **demonic resurgence**.
+
+When something would kill a pawn carrying the `DMC_DemonicBlood` gene, the mod rolls once
+(15% by default, slider in mod settings). On a hit the death is cancelled and the demonic
+half takes over - the pawn stays standing, still torn apart, and transforms on the spot
+(Sin Devil Trigger if they have it, otherwise Devil Trigger).
+
+**How the death is cancelled matters.** Not by healing. `Pawn_HealthTracker.ShouldBeDead()`
+opens with:
+
+```csharp
+if (hediffSet.HasPreventsDeath) return false;
+```
+
+That is the same lever vanilla's Deathless gene pulls, so a hediff with `preventsDeath true`
+keeps the pawn alive without touching a single wound. They get up ruined, which is the
+point.
+
+The catch, and it is a real one: the resurgence hediff lasts 30 seconds. When it expires the
+wounds are all still there. Untreated, the pawn dies anyway. This buys a second chance, not
+immortality. A 2-day exhaustion hediff stops it firing twice in one fight, and a destroyed
+brain stops it entirely - the same line Deathless draws.
+
+The two mods do **not** hard-depend on each other. The gene is resolved by name with
+`GetNamedSilentFail`, so DMC Abilities works normally with Half-Demon absent, and Half-Demon
+works normally with DMC Abilities absent (you just get the body and no transformations).
+
 ## Installation
 
 1. Download the mod

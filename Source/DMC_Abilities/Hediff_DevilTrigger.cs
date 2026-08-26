@@ -129,7 +129,9 @@ namespace DMCAbilities
                            "• Move speed: +2.0\n" +
                            "• Armor (all): +25%\n" +
                            "• Damage resistance: 25%\n" +
-                           "• Injury healing: +300%\n\n" +
+                           "• Injury healing: +300%\n" +
+                           "• Toxic immunity\n" +
+                           "• Ignores terrain movement penalties\n\n" +
                            "Duration remaining: " + remainingSeconds.ToString("F1") + "s";
                 }
                 catch (System.Exception ex)
@@ -226,16 +228,11 @@ namespace DMCAbilities
                 return;
             }
 
-            // Terrain immunity for Sin Devil Trigger - remove terrain-based movement penalties
-            if (this.pawn?.Map != null && this.ageTicks % 60 == 0) // Every second
-            {
-                var terrainDef = this.pawn.Position.GetTerrain(this.pawn.Map);
-                if (terrainDef?.passability == Traversability.Impassable || 
-                    (terrainDef?.pathCost > 0 && terrainDef.pathCost > 1))
-                {
-                    // SDT grants terrain immunity - ignore difficult terrain
-                }
-            }
+            // Terrain immunity is NOT handled here. It lives in
+            // Pawn_PathFollower_CostToMoveIntoCell_Patch (HarmonyPatches.cs), because
+            // movement cost is evaluated per cell entered - a check running once per
+            // second in Tick() could never have affected it. The old block here was an
+            // empty stub that computed the terrain and then did nothing.
 
             // Regeneration is handled by XML hediff definitions, not code
 
@@ -303,12 +300,13 @@ namespace DMCAbilities
                            "• Ranged damage: +100%\n" +
                            "• Melee hit chance: +35%\n" +
                            "• Dodge chance: +50%\n" +
-                           "• Move speed: +3.5 (+100%)\n" +
+                           "• Move speed: +6.0, then doubled\n" +
                            "• Armor (all): +40-50%\n" +
                            "• Damage resistance: 50%\n" +
                            "• Injury healing: +500%\n" +
                            "• Mental break resistance: -50%\n\n" +
-                           "Immunities: Stun, Paralysis, Toxic buildup, Temperature extremes\n" +
+                           "Immunities: toxic buildup, toxic fallout, temperature extremes\n" +
+                           "Stagger duration reduced to 20%. Ignores terrain movement penalties.\n" +
                            "Duration remaining: " + remainingSeconds.ToString("F1") + "s";
                 }
                 catch (System.Exception ex)
